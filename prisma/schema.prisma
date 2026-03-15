@@ -1,0 +1,184 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  name          String
+  serviceNumber String   @unique
+  email         String   @unique
+  passwordHash  String
+  role          String   @default("TROOPER")
+  rank          String?
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  injuriesReported    InjuryReport[]       @relation("ReportedBy")
+  injuriesResolved    InjuryReport[]       @relation("ResolvedBy")
+  healthNotes         HealthNote[]
+  dutyAssignments     DutyAssignment[]
+  injuryNotifications InjuryNotification[]
+  movesCreated        HorseMove[]          @relation("MoveCreatedBy")
+  movesUpdated        HorseMove[]          @relation("MoveUpdatedBy")
+
+  @@map("users")
+}
+
+model Horse {
+  id                String   @id @default(cuid())
+  name              String
+  regimentalNumber  String   @unique
+  breed             String
+  colour            String
+  dateOfBirth       DateTime
+  serviceEntryDate  DateTime
+  heightHands       Float
+  weightKg          Float
+  maxRiderWeightKg  Float
+  feedingNotes      String
+  dutyStation       String   @default("HYDE_PARK_BARRACKS")
+  isActive          Boolean  @default(true)
+  photoUrl          String?
+  currentLocationId String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  currentLocation Location?        @relation("CurrentLocation", fields: [currentLocationId], references: [id])
+  healthEvents    HealthEvent[]
+  healthNotes     HealthNote[]
+  injuryReports   InjuryReport[]
+  dutyAssignments DutyAssignment[]
+  moves           HorseMove[]
+
+  @@map("horses")
+}
+
+model HealthEvent {
+  id          String    @id @default(cuid())
+  horseId     String
+  type        String
+  status      String    @default("SCHEDULED")
+  scheduledAt DateTime
+  completedAt DateTime?
+  notes       String?
+  performedBy String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@map("health_events")
+}
+
+model HealthNote {
+  id        String   @id @default(cuid())
+  horseId   String
+  authorId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  horse  Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  author User  @relation(fields: [authorId], references: [id])
+
+  @@map("health_notes")
+}
+
+model InjuryReport {
+  id             String    @id @default(cuid())
+  horseId        String
+  reportedById   String
+  resolvedById   String?
+  severity       String
+  status         String    @default("OPEN")
+  description    String
+  bodyLocation   String
+  reportedAt     DateTime  @default(now())
+  resolvedAt     DateTime?
+  resolutionNote String?
+  updatedAt      DateTime  @updatedAt
+
+  horse         Horse                @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  reportedBy    User                 @relation("ReportedBy", fields: [reportedById], references: [id])
+  resolvedBy    User?                @relation("ResolvedBy", fields: [resolvedById], references: [id])
+  notifications InjuryNotification[]
+
+  @@map("injury_reports")
+}
+
+model InjuryNotification {
+  id             String    @id @default(cuid())
+  injuryReportId String
+  recipientId    String
+  sentAt         DateTime  @default(now())
+  acknowledged   Boolean   @default(false)
+  acknowledgedAt DateTime?
+
+  injuryReport InjuryReport @relation(fields: [injuryReportId], references: [id], onDelete: Cascade)
+  recipient    User         @relation(fields: [recipientId], references: [id])
+
+  @@map("injury_notifications")
+}
+
+model DutyAssignment {
+  id           String   @id @default(cuid())
+  horseId      String
+  assignedById String
+  station      String
+  assignedAt   DateTime @default(now())
+  notes        String?
+
+  horse      Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  assignedBy User  @relation(fields: [assignedById], references: [id])
+
+  @@map("duty_assignments")
+}
+
+model Location {
+  id        String   @id @default(cuid())
+  name      String
+  code      String   @unique
+  address   String?
+  notes     String?
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  horsesCurrently Horse[]     @relation("CurrentLocation")
+  movesFrom       HorseMove[] @relation("FromLocation")
+  movesTo         HorseMove[] @relation("ToLocation")
+
+  @@map("locations")
+}
+
+model HorseMove {
+  id                  String    @id @default(cuid())
+  horseId             String
+  fromLocationId      String?
+  toLocationId        String
+  departureDate       DateTime
+  arrivalDate         DateTime?
+  status              String    @default("PLANNED")
+  driverName          String?
+  driverServiceNumber String?
+  boxGroomName        String?
+  vehicleVRN          String?
+  notes               String?
+  createdById         String
+  updatedById         String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  horse        Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  fromLocation Location? @relation("FromLocation", fields: [fromLocationId], references: [id])
+  toLocation   Location  @relation("ToLocation", fields: [toLocationId], references: [id])
+  createdBy    User      @relation("MoveCreatedBy", fields: [createdById], references: [id])
+  updatedBy    User?     @relation("MoveUpdatedBy", fields: [updatedById], references: [id])
+
+  @@map("horse_moves")
+}
