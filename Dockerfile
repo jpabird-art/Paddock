@@ -1,24 +1,43 @@
-FROM node:20-alpine
+# ── Build stage ──────────────────────────────────────────────
+FROM node:20-alpine AS builder
+
+RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Install dependencies
 COPY package*.json ./
 RUN npm ci
 
-# Copy source and generate Prisma client
-COPY . .
+COPY prisma ./prisma
 RUN npx prisma generate
 
-# Build Next.js app
+COPY . .
 RUN npm run build
 
-# Create directory for persistent database
-RUN mkdir -p /app/data
+# ── Production stage ─────────────────────────────────────────
+FROM node:20-alpine AS runner
+
+RUN apk add --no-cache openssl
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Copy standalone build + static assets
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
+
+# Copy Prisma files for migrate deploy at startup
+COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+
+# Create uploads directory
+RUN mkdir -p /app/uploads
 
 EXPOSE 3000
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node server.js"]
