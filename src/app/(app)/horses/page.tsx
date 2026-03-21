@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import { DutyBadge } from "@/components/horses/DutyBadge";
+import { Download } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -51,6 +52,13 @@ export default async function HorsesPage({
     orderBy: { name: "asc" },
   });
 
+  // Build export URL preserving current filters
+  const exportParams = new URLSearchParams();
+  if (q) exportParams.set("q", q);
+  if (station && station !== "ALL") exportParams.set("station", station);
+  const exportQs = exportParams.toString();
+  const exportUrl = `/api/horses/export${exportQs ? `?${exportQs}` : ""}`;
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
@@ -60,14 +68,23 @@ export default async function HorsesPage({
             {horses.length} horse{horses.length !== 1 ? "s" : ""} listed
           </p>
         </div>
-        {canCreate && (
-          <Link
-            href="/horses/new"
-            className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#243560] transition-colors"
+        <div className="flex items-center gap-2">
+          <a
+            href={exportUrl}
+            className="flex items-center gap-1.5 bg-white border border-gray-200 text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-50 transition-colors"
           >
-            + Add Horse
-          </Link>
-        )}
+            <Download className="h-4 w-4" />
+            Export CSV
+          </a>
+          {canCreate && (
+            <Link
+              href="/horses/new"
+              className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#243560] transition-colors"
+            >
+              + Add Horse
+            </Link>
+          )}
+        </div>
       </div>
 
       <HorseSearchFilter
