@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -11,7 +11,7 @@ const createSchema = z.object({
 });
 
 export async function GET() {
-  const { error } = await requireRole();
+  const { error } = await requireAuth();
   if (error) return error;
 
   const locations = await prisma.location.findMany({
@@ -23,7 +23,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireRole("ADMIN", "OFFICER");
+  const { error } = await requirePermission("location", "create");
   if (error) return error;
 
   const body = await request.json();

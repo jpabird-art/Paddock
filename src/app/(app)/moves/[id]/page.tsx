@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { can } from "@/lib/permissions";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -16,13 +17,13 @@ export default async function MoveDetailPage({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["ADMIN", "VET", "OFFICER"].includes(session.user.role)) {
+  if (!session || !can(session.user.role, "horse_move", "view")) {
     redirect("/dashboard");
   }
 
   const { id } = await params;
   const { edit } = await searchParams;
-  const canEdit = ["ADMIN", "OFFICER"].includes(session.user.role);
+  const canEdit = can(session.user.role, "horse_move", "update");
 
   const move = await prisma.horseMove.findUnique({
     where: { id },

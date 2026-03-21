@@ -1,10 +1,29 @@
-import { PrismaClient } from "@prisma/client";
+import {
+  PrismaClient,
+  DutyStation,
+  FeedType,
+  FeedFrequency,
+  MedicationRoute,
+  InspectionResult,
+  HealthEventStatus,
+  HealthEventType,
+  InjurySeverity,
+  InjuryStatus,
+  TackType,
+  TackCondition,
+  Squadron,
+} from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { addDays, subDays, subMonths, subYears } from "date-fns";
 
 const prisma = new PrismaClient();
 
 async function main() {
+  if (process.env.NODE_ENV === "production") {
+    console.error("ERROR: Seed script cannot run in production. Set SEED_FORCE=1 to override.");
+    if (!process.env.SEED_FORCE) process.exit(1);
+  }
+
   console.log("Seeding database...");
 
   // Create users
@@ -19,6 +38,7 @@ async function main() {
       email: "j.hartley@hcmr.mod.uk",
       passwordHash,
       role: "ADMIN",
+      squadron: Squadron.THE_LIFE_GUARDS,
     },
   });
 
@@ -31,6 +51,7 @@ async function main() {
       email: "s.chen@hcmr.mod.uk",
       passwordHash,
       role: "VET",
+      squadron: null,
     },
   });
 
@@ -43,6 +64,7 @@ async function main() {
       email: "r.pemberton@hcmr.mod.uk",
       passwordHash,
       role: "OFFICER",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
     },
   });
 
@@ -55,6 +77,7 @@ async function main() {
       email: "d.walsh@hcmr.mod.uk",
       passwordHash,
       role: "TROOPER",
+      squadron: Squadron.THE_LIFE_GUARDS,
     },
   });
 
@@ -67,10 +90,31 @@ async function main() {
       email: "e.brooks@hcmr.mod.uk",
       passwordHash,
       role: "TROOPER",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
     },
   });
 
   console.log("Users created.");
+
+  // ─── LOCATIONS ──────────────────────────────────────────────────────
+  const locationsData = [
+    { name: "Hyde Park Barracks", code: "HPB" },
+    { name: "Household Cavalry Training Wing", code: "HCTW" },
+    { name: "Working Livery", code: "WORKING_LIVERY" },
+    { name: "Winter Training Troop", code: "WTT" },
+    { name: "Defence Animal Training Regiment", code: "DATR" },
+    { name: "Grass", code: "GRASS" },
+    { name: "Bell Equine Hospital", code: "BELL_EQUINE" },
+  ];
+
+  for (const loc of locationsData) {
+    await prisma.location.upsert({
+      where: { code: loc.code },
+      update: {},
+      create: loc,
+    });
+  }
+  console.log("Locations seeded.");
 
   // Horse data
   const horsesData = [
@@ -84,8 +128,8 @@ async function main() {
       heightHands: 16.2,
       weightKg: 580,
       maxRiderWeightKg: 95,
-      feedingNotes: "High-energy mix, 3x daily. Supplemented with electrolytes in summer.",
-      dutyStation: "KINGS_LIFE_GUARD",
+      squadron: Squadron.THE_LIFE_GUARDS,
+      dutyStation: DutyStation.KINGS_LIFE_GUARD,
     },
     {
       name: "Monty",
@@ -97,8 +141,8 @@ async function main() {
       heightHands: 16.1,
       weightKg: 560,
       maxRiderWeightKg: 90,
-      feedingNotes: "Standard military ration. Hay ad lib overnight.",
-      dutyStation: "KINGS_LIFE_GUARD",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
+      dutyStation: DutyStation.KINGS_LIFE_GUARD,
     },
     {
       name: "Wellington",
@@ -110,8 +154,8 @@ async function main() {
       heightHands: 16.3,
       weightKg: 595,
       maxRiderWeightKg: 100,
-      feedingNotes: "Joint supplement added daily. Reduced grain due to age.",
-      dutyStation: "KINGS_LIFE_GUARD",
+      squadron: Squadron.THE_LIFE_GUARDS,
+      dutyStation: DutyStation.KINGS_LIFE_GUARD,
     },
     {
       name: "Hercules",
@@ -123,8 +167,8 @@ async function main() {
       heightHands: 16.2,
       weightKg: 610,
       maxRiderWeightKg: 100,
-      feedingNotes: "Lucerne chaff added to slow eating. Regular mineral block.",
-      dutyStation: "TRAINING_WING",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
+      dutyStation: DutyStation.TRAINING_WING,
     },
     {
       name: "Ramrod",
@@ -136,8 +180,8 @@ async function main() {
       heightHands: 16.0,
       weightKg: 545,
       maxRiderWeightKg: 88,
-      feedingNotes: "In training programme. Increased feed during intensive work periods.",
-      dutyStation: "TRAINING_WING",
+      squadron: Squadron.THE_LIFE_GUARDS,
+      dutyStation: DutyStation.TRAINING_WING,
     },
     {
       name: "Sable",
@@ -149,8 +193,8 @@ async function main() {
       heightHands: 16.1,
       weightKg: 570,
       maxRiderWeightKg: 92,
-      feedingNotes: "Sensitive digestion. Gradual feed changes only. No sudden diet shifts.",
-      dutyStation: "TRAINING_WING",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
+      dutyStation: DutyStation.TRAINING_WING,
     },
     {
       name: "Churchill",
@@ -162,8 +206,8 @@ async function main() {
       heightHands: 16.2,
       weightKg: 600,
       maxRiderWeightKg: 98,
-      feedingNotes: "Senior horse mix. Beet pulp added for fibre. Arthritis supplement daily.",
-      dutyStation: "HYDE_PARK_BARRACKS",
+      squadron: Squadron.THE_LIFE_GUARDS,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
     },
     {
       name: "Parade",
@@ -175,8 +219,8 @@ async function main() {
       heightHands: 16.0,
       weightKg: 555,
       maxRiderWeightKg: 90,
-      feedingNotes: "Standard ration. Good doer – monitor weight carefully.",
-      dutyStation: "HYDE_PARK_BARRACKS",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
     },
     {
       name: "Templar",
@@ -188,8 +232,8 @@ async function main() {
       heightHands: 16.1,
       weightKg: 540,
       maxRiderWeightKg: 87,
-      feedingNotes: "High energy needs. Feed 4x daily during ceremonial season.",
-      dutyStation: "HYDE_PARK_BARRACKS",
+      squadron: Squadron.THE_LIFE_GUARDS,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
     },
     {
       name: "Gallant",
@@ -201,8 +245,8 @@ async function main() {
       heightHands: 15.3,
       weightKg: 520,
       maxRiderWeightKg: 85,
-      feedingNotes: "Young horse on graduated programme. Oats limited until full fitness.",
-      dutyStation: "WINTER_TRAINING",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
+      dutyStation: DutyStation.WINTER_TRAINING,
     },
     {
       name: "Ironside",
@@ -214,8 +258,8 @@ async function main() {
       heightHands: 16.3,
       weightKg: 625,
       maxRiderWeightKg: 102,
-      feedingNotes: "Large frame. Increased roughage. Daily hoof supplement.",
-      dutyStation: "WINTER_TRAINING",
+      squadron: Squadron.THE_LIFE_GUARDS,
+      dutyStation: DutyStation.WINTER_TRAINING,
     },
     {
       name: "Valiant",
@@ -227,8 +271,8 @@ async function main() {
       heightHands: 16.2,
       weightKg: 575,
       maxRiderWeightKg: 93,
-      feedingNotes: "Competition-level feed during display season. Standard otherwise.",
-      dutyStation: "WINTER_TRAINING",
+      squadron: Squadron.THE_BLUES_AND_ROYALS,
+      dutyStation: DutyStation.WINTER_TRAINING,
     },
   ];
 
@@ -270,8 +314,8 @@ async function main() {
       await prisma.healthEvent.create({
         data: {
           horseId: horse.id,
-          type: "DENTAL_CHECK",
-          status: "COMPLETED",
+          type: HealthEventType.DENTAL_CHECK,
+          status: HealthEventStatus.COMPLETED,
           scheduledAt: dentalEvents[i],
           completedAt: addDays(dentalEvents[i], 1),
           notes: "Routine dental check completed.",
@@ -286,8 +330,8 @@ async function main() {
       await prisma.healthEvent.create({
         data: {
           horseId: horse.id,
-          type: "DENTAL_CHECK",
-          status: isOverdue ? "OVERDUE" : "SCHEDULED",
+          type: HealthEventType.DENTAL_CHECK,
+          status: isOverdue ? HealthEventStatus.OVERDUE : HealthEventStatus.SCHEDULED,
           scheduledAt: lastDental,
         },
       });
@@ -304,8 +348,8 @@ async function main() {
       await prisma.healthEvent.create({
         data: {
           horseId: horse.id,
-          type: "VET_CHECKUP",
-          status: "COMPLETED",
+          type: HealthEventType.VET_CHECKUP,
+          status: HealthEventStatus.COMPLETED,
           scheduledAt: vetEvents[i],
           completedAt: addDays(vetEvents[i], 2),
           notes: "Annual veterinary examination completed.",
@@ -319,8 +363,8 @@ async function main() {
       await prisma.healthEvent.create({
         data: {
           horseId: horse.id,
-          type: "VET_CHECKUP",
-          status: isOverdue ? "OVERDUE" : "SCHEDULED",
+          type: HealthEventType.VET_CHECKUP,
+          status: isOverdue ? HealthEventStatus.OVERDUE : HealthEventStatus.SCHEDULED,
           scheduledAt: lastVet,
         },
       });
@@ -337,8 +381,8 @@ async function main() {
       await prisma.healthEvent.create({
         data: {
           horseId: horse.id,
-          type: "FARRIERY",
-          status: "COMPLETED",
+          type: HealthEventType.FARRIERY,
+          status: HealthEventStatus.COMPLETED,
           scheduledAt: farrieryEvents[i],
           completedAt: addDays(farrieryEvents[i], 1),
           notes: "Shoeing and hoof trimming completed.",
@@ -352,8 +396,8 @@ async function main() {
       await prisma.healthEvent.create({
         data: {
           horseId: horse.id,
-          type: "FARRIERY",
-          status: isOverdue ? "OVERDUE" : "SCHEDULED",
+          type: HealthEventType.FARRIERY,
+          status: isOverdue ? HealthEventStatus.OVERDUE : HealthEventStatus.SCHEDULED,
           scheduledAt: lastFarriery,
         },
       });
@@ -368,15 +412,15 @@ async function main() {
 
   if (sovereignHorse) {
     const existing = await prisma.injuryReport.findFirst({
-      where: { horseId: sovereignHorse.id, status: "OPEN" },
+      where: { horseId: sovereignHorse.id, status: InjuryStatus.OPEN },
     });
     if (!existing) {
       const injury1 = await prisma.injuryReport.create({
         data: {
           horseId: sovereignHorse.id,
           reportedById: trooper1.id,
-          severity: "MODERATE",
-          status: "OPEN",
+          severity: InjurySeverity.MODERATE,
+          status: InjuryStatus.OPEN,
           description: "Swelling observed on right foreleg, below knee. Horse showing slight lameness at trot. Possible soft tissue injury following yesterday's ceremonial duty.",
           bodyLocation: "Right Foreleg",
         },
@@ -400,15 +444,15 @@ async function main() {
 
   if (templarHorse) {
     const existing = await prisma.injuryReport.findFirst({
-      where: { horseId: templarHorse.id, status: "OPEN" },
+      where: { horseId: templarHorse.id, status: InjuryStatus.OPEN },
     });
     if (!existing) {
       const injury2 = await prisma.injuryReport.create({
         data: {
           horseId: templarHorse.id,
           reportedById: trooper2.id,
-          severity: "MINOR",
-          status: "UNDER_REVIEW",
+          severity: InjurySeverity.MINOR,
+          status: InjuryStatus.UNDER_REVIEW,
           description: "Minor abrasion to left shoulder, approximately 5cm. Caused by ill-fitting breast collar during last parade. Wound clean but requires monitoring.",
           bodyLocation: "Left Shoulder",
         },
@@ -424,6 +468,636 @@ async function main() {
   }
 
   console.log("Injury reports created.");
+
+  // ─── Reference date ──────────────────────────────────────────────────
+  const now = new Date("2026-03-15");
+
+  // Helper to find horse by name
+  const horseByName = (name: string) => {
+    const h = createdHorses.find((h) => h.name === name);
+    if (!h) throw new Error(`Horse ${name} not found`);
+    return h;
+  };
+
+  // ─── 1. DUTY ASSIGNMENTS (historical + current) ─────────────────────
+  const existingDutyAssignments = await prisma.dutyAssignment.count();
+  if (existingDutyAssignments === 0) {
+    const dutyAssignmentsData = [
+      // Sovereign: TRAINING_WING 2018-09-01 -> 2020-01-15, then KINGS_LIFE_GUARD from 2020-01-15 (current)
+      {
+        horseId: horseByName("Sovereign").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2018-09-01"),
+        endDate: new Date("2020-01-15"),
+        notes: "Initial training assignment upon entry to service",
+      },
+      {
+        horseId: horseByName("Sovereign").id,
+        assignedById: admin.id,
+        station: DutyStation.KINGS_LIFE_GUARD,
+        startDate: new Date("2020-01-15"),
+        notes: "Promoted to Kings Life Guard after completing training",
+      },
+      // Wellington: HYDE_PARK_BARRACKS 2017-06-01 -> 2019-03-01, TRAINING_WING 2019-03-01 -> 2021-06-01, KINGS_LIFE_GUARD from 2021-06-01 (current)
+      {
+        horseId: horseByName("Wellington").id,
+        assignedById: admin.id,
+        station: DutyStation.HYDE_PARK_BARRACKS,
+        startDate: new Date("2017-06-01"),
+        endDate: new Date("2019-03-01"),
+        notes: "Initial posting at Hyde Park",
+      },
+      {
+        horseId: horseByName("Wellington").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2019-03-01"),
+        endDate: new Date("2021-06-01"),
+        notes: "Returned to training wing for advanced schooling",
+      },
+      {
+        horseId: horseByName("Wellington").id,
+        assignedById: admin.id,
+        station: DutyStation.KINGS_LIFE_GUARD,
+        startDate: new Date("2021-06-01"),
+        notes: "Assigned to Kings Life Guard ceremonial duties",
+      },
+      // Hercules: KINGS_LIFE_GUARD 2020-04-10 -> 2023-01-01, then TRAINING_WING from 2023-01-01 (current)
+      {
+        horseId: horseByName("Hercules").id,
+        assignedById: admin.id,
+        station: DutyStation.KINGS_LIFE_GUARD,
+        startDate: new Date("2020-04-10"),
+        endDate: new Date("2023-01-01"),
+        notes: "Initial assignment to ceremonial duties",
+      },
+      {
+        horseId: horseByName("Hercules").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2023-01-01"),
+        notes: "Transferred to training wing for remedial schooling",
+      },
+      // Monty: TRAINING_WING 2019-03-15 -> 2020-09-01, KINGS_LIFE_GUARD from 2020-09-01 (current)
+      {
+        horseId: horseByName("Monty").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2019-03-15"),
+        endDate: new Date("2020-09-01"),
+        notes: "Initial training period",
+      },
+      {
+        horseId: horseByName("Monty").id,
+        assignedById: admin.id,
+        station: DutyStation.KINGS_LIFE_GUARD,
+        startDate: new Date("2020-09-01"),
+        notes: "Assigned to Kings Life Guard",
+      },
+      // Ramrod: HYDE_PARK_BARRACKS 2021-08-01 -> 2023-04-01, TRAINING_WING from 2023-04-01 (current)
+      {
+        horseId: horseByName("Ramrod").id,
+        assignedById: admin.id,
+        station: DutyStation.HYDE_PARK_BARRACKS,
+        startDate: new Date("2021-08-01"),
+        endDate: new Date("2023-04-01"),
+        notes: "Initial posting at Hyde Park Barracks",
+      },
+      {
+        horseId: horseByName("Ramrod").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2023-04-01"),
+        notes: "Moved to training wing for further development",
+      },
+      // Sable: TRAINING_WING from 2019-10-20 (current, single assignment)
+      {
+        horseId: horseByName("Sable").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2019-10-20"),
+        notes: "Long-term training assignment",
+      },
+      // Churchill: KINGS_LIFE_GUARD 2016-05-01 -> 2022-08-01, HYDE_PARK_BARRACKS from 2022-08-01 (current)
+      {
+        horseId: horseByName("Churchill").id,
+        assignedById: admin.id,
+        station: DutyStation.KINGS_LIFE_GUARD,
+        startDate: new Date("2016-05-01"),
+        endDate: new Date("2022-08-01"),
+        notes: "Served on ceremonial guard for 6 years",
+      },
+      {
+        horseId: horseByName("Churchill").id,
+        assignedById: admin.id,
+        station: DutyStation.HYDE_PARK_BARRACKS,
+        startDate: new Date("2022-08-01"),
+        notes: "Semi-retired to lighter duties at Hyde Park",
+      },
+      // Parade: HYDE_PARK_BARRACKS from 2018-11-15 (current)
+      {
+        horseId: horseByName("Parade").id,
+        assignedById: admin.id,
+        station: DutyStation.HYDE_PARK_BARRACKS,
+        startDate: new Date("2018-11-15"),
+        notes: "Assigned to Hyde Park Barracks",
+      },
+      // Templar: TRAINING_WING 2020-07-01 -> 2022-01-01, HYDE_PARK_BARRACKS from 2022-01-01 (current)
+      {
+        horseId: horseByName("Templar").id,
+        assignedById: admin.id,
+        station: DutyStation.TRAINING_WING,
+        startDate: new Date("2020-07-01"),
+        endDate: new Date("2022-01-01"),
+        notes: "Initial training period",
+      },
+      {
+        horseId: horseByName("Templar").id,
+        assignedById: admin.id,
+        station: DutyStation.HYDE_PARK_BARRACKS,
+        startDate: new Date("2022-01-01"),
+        notes: "Posted to Hyde Park Barracks",
+      },
+      // Gallant: WINTER_TRAINING from 2022-03-01 (current)
+      {
+        horseId: horseByName("Gallant").id,
+        assignedById: admin.id,
+        station: DutyStation.WINTER_TRAINING,
+        startDate: new Date("2022-03-01"),
+        notes: "Young horse in winter training programme",
+      },
+      // Ironside: WINTER_TRAINING from 2021-01-15 (current)
+      {
+        horseId: horseByName("Ironside").id,
+        assignedById: admin.id,
+        station: DutyStation.WINTER_TRAINING,
+        startDate: new Date("2021-01-15"),
+        notes: "Assigned to winter training",
+      },
+      // Valiant: HYDE_PARK_BARRACKS 2019-06-10 -> 2023-09-01, WINTER_TRAINING from 2023-09-01 (current)
+      {
+        horseId: horseByName("Valiant").id,
+        assignedById: admin.id,
+        station: DutyStation.HYDE_PARK_BARRACKS,
+        startDate: new Date("2019-06-10"),
+        endDate: new Date("2023-09-01"),
+        notes: "Initially posted to Hyde Park",
+      },
+      {
+        horseId: horseByName("Valiant").id,
+        assignedById: admin.id,
+        station: DutyStation.WINTER_TRAINING,
+        startDate: new Date("2023-09-01"),
+        notes: "Transferred to winter training programme",
+      },
+    ];
+
+    for (const da of dutyAssignmentsData) {
+      await prisma.dutyAssignment.create({ data: da });
+    }
+    console.log("Duty assignments seeded.");
+  } else {
+    console.log("Duty assignments already exist, skipping.");
+  }
+
+  // ─── 2. RIDER ASSIGNMENTS ───────────────────────────────────────────
+  const existingRiderAssignments = await prisma.riderAssignment.count();
+  if (existingRiderAssignments === 0) {
+    const riderAssignmentsData = [
+      // Tpr Daniel Walsh assigned to Sovereign (current)
+      {
+        horseId: horseByName("Sovereign").id,
+        riderId: trooper1.id,
+        suitabilityScore: 4,
+        startDate: new Date("2024-06-01"),
+        notes: "Primary rider for ceremonial duties",
+      },
+      // Tpr Emily Brooks assigned to Monty (current)
+      {
+        horseId: horseByName("Monty").id,
+        riderId: trooper2.id,
+        suitabilityScore: 5,
+        startDate: new Date("2024-03-15"),
+        notes: "Excellent pairing, strong bond",
+      },
+      // Tpr Daniel Walsh previously assigned to Hercules (historical)
+      {
+        horseId: horseByName("Hercules").id,
+        riderId: trooper1.id,
+        suitabilityScore: 3,
+        startDate: new Date("2023-01-01"),
+        endDate: new Date("2024-05-31"),
+        notes: "Transferred to Sovereign for ceremonial duties",
+      },
+      // Tpr Emily Brooks assigned to Templar (current)
+      {
+        horseId: horseByName("Templar").id,
+        riderId: trooper2.id,
+        suitabilityScore: 4,
+        startDate: new Date("2025-01-10"),
+        notes: "Secondary mount for Hyde Park duties",
+      },
+    ];
+
+    for (const ra of riderAssignmentsData) {
+      await prisma.riderAssignment.create({ data: ra });
+    }
+    console.log("Rider assignments seeded.");
+  } else {
+    console.log("Rider assignments already exist, skipping.");
+  }
+
+  // ─── 3. FEEDING PLANS ───────────────────────────────────────────────
+  const existingFeedingPlans = await prisma.feedingPlan.count();
+  if (existingFeedingPlans === 0) {
+    const feedingPlansData = [
+      // Sovereign
+      {
+        horseId: horseByName("Sovereign").id,
+        feedType: FeedType.HIGH_ENERGY_MIX,
+        quantityKg: 3.5,
+        frequency: FeedFrequency.THREE_TIMES_DAILY,
+        timeOfDay: "0600, 1200, 1800",
+        specialNotes: "Supplemented with electrolytes in summer",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      {
+        horseId: horseByName("Sovereign").id,
+        feedType: FeedType.HAY,
+        quantityKg: 8.0,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0800, 2000",
+        specialNotes: "Ad lib overnight",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      // Monty
+      {
+        horseId: horseByName("Monty").id,
+        feedType: FeedType.HARD_FEED,
+        quantityKg: 3.0,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0600, 1800",
+        specialNotes: null,
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      {
+        horseId: horseByName("Monty").id,
+        feedType: FeedType.HAY,
+        quantityKg: 9.0,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0800, 2000",
+        specialNotes: "Ad lib overnight",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      // Wellington
+      {
+        horseId: horseByName("Wellington").id,
+        feedType: FeedType.OTHER,
+        quantityKg: 2.5,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0600, 1800",
+        specialNotes: "Joint supplement added daily. Reduced grain due to age.",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-06-01"),
+      },
+      {
+        horseId: horseByName("Wellington").id,
+        feedType: FeedType.HAY,
+        quantityKg: 10.0,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0800, 2000",
+        specialNotes: "High fibre content. Ad lib overnight.",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-06-01"),
+      },
+      {
+        horseId: horseByName("Wellington").id,
+        feedType: FeedType.BEET_PULP,
+        quantityKg: 1.0,
+        frequency: FeedFrequency.ONCE_DAILY,
+        timeOfDay: "1200",
+        specialNotes: "Soaked before feeding. Good for fibre and hydration.",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-06-01"),
+      },
+      // Hercules
+      {
+        horseId: horseByName("Hercules").id,
+        feedType: FeedType.HARD_FEED,
+        quantityKg: 3.5,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0600, 1800",
+        specialNotes: "Lucerne chaff added to slow eating",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      {
+        horseId: horseByName("Hercules").id,
+        feedType: FeedType.HAY,
+        quantityKg: 9.0,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0800, 2000",
+        specialNotes: "Regular mineral block access",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      // Ramrod
+      {
+        horseId: horseByName("Ramrod").id,
+        feedType: FeedType.HIGH_ENERGY_MIX,
+        quantityKg: 4.0,
+        frequency: FeedFrequency.THREE_TIMES_DAILY,
+        timeOfDay: "0600, 1200, 1800",
+        specialNotes: "Increased feed during intensive work periods",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-03-01"),
+      },
+      {
+        horseId: horseByName("Ramrod").id,
+        feedType: FeedType.HAY,
+        quantityKg: 8.0,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0800, 2000",
+        specialNotes: null,
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-03-01"),
+      },
+      // Sable
+      {
+        horseId: horseByName("Sable").id,
+        feedType: FeedType.OTHER,
+        quantityKg: 2.5,
+        frequency: FeedFrequency.THREE_TIMES_DAILY,
+        timeOfDay: "0600, 1200, 1800",
+        specialNotes: "Sensitive digestion. Gradual feed changes only. No sudden diet shifts.",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+      {
+        horseId: horseByName("Sable").id,
+        feedType: FeedType.HAY,
+        quantityKg: 8.5,
+        frequency: FeedFrequency.TWICE_DAILY,
+        timeOfDay: "0800, 2000",
+        specialNotes: "High quality meadow hay only",
+        isActive: true,
+        createdById: admin.id,
+        startDate: new Date("2024-01-01"),
+      },
+    ];
+
+    for (const fp of feedingPlansData) {
+      await prisma.feedingPlan.create({ data: fp });
+    }
+    console.log("Feeding plans seeded.");
+  } else {
+    console.log("Feeding plans already exist, skipping.");
+  }
+
+  // ─── 4. MEDICATION RECORDS ──────────────────────────────────────────
+  const existingMedicationRecords = await prisma.medicationRecord.count();
+  if (existingMedicationRecords === 0) {
+    const medicationRecordsData = [
+      // Sovereign: Phenylbutazone (Bute), 5 days ago
+      {
+        horseId: horseByName("Sovereign").id,
+        administeredById: vet.id,
+        medicationName: "Phenylbutazone",
+        dosage: "2g",
+        route: MedicationRoute.ORAL,
+        batchNumber: "PB-2026-0142",
+        withdrawalDays: 7,
+        withdrawalEndDate: addDays(subDays(now, 5), 7),
+        notes: "Administered for mild lameness following ceremonial duty",
+        administeredAt: subDays(now, 5),
+      },
+      // Templar: Dexamethasone, 10 days ago
+      {
+        horseId: horseByName("Templar").id,
+        administeredById: vet.id,
+        medicationName: "Dexamethasone",
+        dosage: "20mg",
+        route: MedicationRoute.IV,
+        batchNumber: "DX-2026-0088",
+        withdrawalDays: 14,
+        withdrawalEndDate: addDays(subDays(now, 10), 14),
+        notes: "Anti-inflammatory treatment",
+        administeredAt: subDays(now, 10),
+      },
+      // Wellington: Equivac 2in1, 30 days ago
+      {
+        horseId: horseByName("Wellington").id,
+        administeredById: vet.id,
+        medicationName: "Equivac 2in1",
+        dosage: "1ml",
+        route: MedicationRoute.IM,
+        batchNumber: "EV-2026-0201",
+        withdrawalDays: 0,
+        withdrawalEndDate: subDays(now, 30),
+        notes: "Annual vaccination",
+        administeredAt: subDays(now, 30),
+      },
+    ];
+
+    for (const mr of medicationRecordsData) {
+      await prisma.medicationRecord.create({ data: mr });
+    }
+    console.log("Medication records seeded.");
+  } else {
+    console.log("Medication records already exist, skipping.");
+  }
+
+  // ─── 5. TACK ITEMS + TACK ALLOCATIONS ──────────────────────────────
+  const existingTackItems = await prisma.tackItem.count();
+  if (existingTackItems === 0) {
+    // Create saddles
+    const saddles = [];
+    for (let i = 1; i <= 6; i++) {
+      const saddle = await prisma.tackItem.create({
+        data: {
+          type: TackType.SADDLE,
+          identifier: `SDG-00${i}`,
+          brand: "George Parker",
+          condition: TackCondition.SERVICEABLE,
+          notes: `Military saddle #${i}`,
+        },
+      });
+      saddles.push(saddle);
+    }
+
+    // Create bridles (6 serviceable + 1 needing repair)
+    const bridles = [];
+    for (let i = 1; i <= 6; i++) {
+      const bridle = await prisma.tackItem.create({
+        data: {
+          type: TackType.BRIDLE,
+          identifier: `BDL-00${i}`,
+          brand: "Saddlers Row",
+          condition: TackCondition.SERVICEABLE,
+          notes: `Standard bridle #${i}`,
+        },
+      });
+      bridles.push(bridle);
+    }
+    const bridleRepair = await prisma.tackItem.create({
+      data: {
+        type: TackType.BRIDLE,
+        identifier: "BDL-007",
+        brand: "Saddlers Row",
+        condition: TackCondition.REPAIR_NEEDED,
+        notes: "Browband stitching coming loose. Sent for repair.",
+      },
+    });
+
+    // Create breastplates
+    const breastplates = [];
+    for (let i = 1; i <= 3; i++) {
+      const breastplate = await prisma.tackItem.create({
+        data: {
+          type: TackType.BREASTPLATE,
+          identifier: `BRP-00${i}`,
+          brand: "George Parker",
+          condition: TackCondition.SERVICEABLE,
+          notes: `Breastplate #${i}`,
+        },
+      });
+      breastplates.push(breastplate);
+    }
+
+    console.log("Tack items seeded.");
+
+    // Tack allocations
+    const tackAllocationsData = [
+      // Saddles
+      { tackItemId: saddles[0].id, horseId: horseByName("Sovereign").id, assignedById: admin.id, startDate: new Date("2024-01-15") },
+      { tackItemId: saddles[1].id, horseId: horseByName("Monty").id, assignedById: admin.id, startDate: new Date("2024-01-15") },
+      { tackItemId: saddles[2].id, horseId: horseByName("Wellington").id, assignedById: admin.id, startDate: new Date("2024-01-15") },
+      // Bridles
+      { tackItemId: bridles[0].id, horseId: horseByName("Sovereign").id, assignedById: admin.id, startDate: new Date("2024-01-15") },
+      { tackItemId: bridles[1].id, horseId: horseByName("Monty").id, assignedById: admin.id, startDate: new Date("2024-01-15") },
+      { tackItemId: bridles[2].id, horseId: horseByName("Wellington").id, assignedById: admin.id, startDate: new Date("2024-01-15") },
+      // Breastplate to Sovereign
+      {
+        tackItemId: breastplates[0].id,
+        horseId: horseByName("Sovereign").id,
+        assignedById: admin.id,
+        startDate: new Date("2024-01-15"),
+        fitNotes: "Adjusted for ceremonial duties",
+      },
+    ];
+
+    for (const ta of tackAllocationsData) {
+      await prisma.tackAllocation.create({ data: ta });
+    }
+    console.log("Tack allocations seeded.");
+  } else {
+    console.log("Tack items already exist, skipping.");
+  }
+
+  // ─── 6. INSPECTION SCHEDULES + INSPECTIONS ──────────────────────────
+  const existingInspectionSchedules = await prisma.inspectionSchedule.count();
+  if (existingInspectionSchedules === 0) {
+    const weeklyStable = await prisma.inspectionSchedule.create({
+      data: {
+        name: "Weekly Stable Inspection",
+        description: "Routine weekly check of stable conditions, horse welfare, and equipment",
+        frequencyDays: 7,
+        isActive: true,
+        createdById: admin.id,
+      },
+    });
+
+    const monthlyKit = await prisma.inspectionSchedule.create({
+      data: {
+        name: "Monthly Kit Inspection",
+        description: "Monthly inspection of all tack and equipment for serviceability",
+        frequencyDays: 30,
+        isActive: true,
+        createdById: admin.id,
+      },
+    });
+
+    const quarterlyFitness = await prisma.inspectionSchedule.create({
+      data: {
+        name: "Quarterly Fitness Assessment",
+        description: "Comprehensive fitness and condition assessment for all horses",
+        frequencyDays: 90,
+        isActive: true,
+        createdById: admin.id,
+      },
+    });
+
+    console.log("Inspection schedules seeded.");
+
+    // Create inspection records
+    const inspectionsData = [
+      // Weekly stable inspection for Sovereign, PASS, 3 days ago
+      {
+        inspectionScheduleId: weeklyStable.id,
+        horseId: horseByName("Sovereign").id,
+        inspectorId: officer.id,
+        result: InspectionResult.PASS,
+        findings: null,
+        scheduledDate: subDays(now, 3),
+        completedAt: subDays(now, 3),
+      },
+      // Weekly stable inspection for Monty, ADVISORY, 3 days ago
+      {
+        inspectionScheduleId: weeklyStable.id,
+        horseId: horseByName("Monty").id,
+        inspectorId: officer.id,
+        result: InspectionResult.ADVISORY,
+        findings: "Bedding requires replacement",
+        scheduledDate: subDays(now, 3),
+        completedAt: subDays(now, 3),
+      },
+      // Monthly kit inspection for Sovereign, PASS, 2 weeks ago
+      {
+        inspectionScheduleId: monthlyKit.id,
+        horseId: horseByName("Sovereign").id,
+        inspectorId: officer.id,
+        result: InspectionResult.PASS,
+        findings: null,
+        scheduledDate: subDays(now, 14),
+        completedAt: subDays(now, 14),
+      },
+      // Quarterly fitness for Wellington, PASS, 1 month ago
+      {
+        inspectionScheduleId: quarterlyFitness.id,
+        horseId: horseByName("Wellington").id,
+        inspectorId: officer.id,
+        result: InspectionResult.PASS,
+        findings: "Good condition for age. Monitor left hind",
+        scheduledDate: subMonths(now, 1),
+        completedAt: subMonths(now, 1),
+      },
+    ];
+
+    for (const insp of inspectionsData) {
+      await prisma.inspection.create({ data: insp });
+    }
+    console.log("Inspections seeded.");
+  } else {
+    console.log("Inspection schedules already exist, skipping.");
+  }
+
   console.log("Seed complete.");
 }
 

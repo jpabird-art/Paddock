@@ -13,7 +13,8 @@ export default async function InjuriesPage({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["ADMIN", "VET", "OFFICER"].includes(session.user.role)) {
+  const { can: canFn } = await import("@/lib/permissions");
+  if (!session || !canFn(session.user.role, "injury_report", "view")) {
     redirect("/dashboard");
   }
 

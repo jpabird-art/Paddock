@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -17,7 +17,7 @@ const createSchema = z.object({
 });
 
 export async function GET() {
-  const { error } = await requireRole();
+  const { error } = await requireAuth();
   if (error) return error;
 
   const moves = await prisma.horseMove.findMany({
@@ -34,7 +34,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error, session } = await requireRole("ADMIN", "OFFICER");
+  const { error, session } = await requirePermission("horse_move", "create");
   if (error) return error;
 
   const body = await request.json();

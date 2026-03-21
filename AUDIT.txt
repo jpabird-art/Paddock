@@ -1,0 +1,263 @@
+HCMR FLEET — CURRENT-STATE AUDIT
+==================================
+Date: 21 March 2026
+
+
+1. VERIFIED CURRENT-STATE AUDIT
+================================
+
+Stack
+-----
+Layer         | Technology                                  | Version
+-------------|---------------------------------------------|--------
+Framework    | Next.js (App Router, Turbopack)              | 16.1.6
+Database     | PostgreSQL on Neon                           | via Prisma 5.14
+Auth         | NextAuth.js v4, JWT strategy, credentials    | 4.24.7
+Validation   | Zod on all API routes                        | 3.23.8
+UI           | shadcn/ui + Radix + Tailwind + Lucide        | --
+Language     | TypeScript strict mode                       | 5.x
+
+Schema
+------
+- 16 models, 14 enums, PostgreSQL provider
+- Single migration: 20260320174437_postgres_with_enums
+- All enum-like fields use proper Prisma enum types (not strings)
+
+Codebase Size
+-------------
+- 26 API route files (33 HTTP handlers)
+- 16 frontend pages
+- 30 custom components + 12 shadcn/ui primitives
+- 8 utility/library modules
+- ~1060-line seed file with realistic test data
+
+
+2. WHAT IS GENUINELY COMPLETE
+==============================
+
+Defined in schema AND implemented in code AND enforced at runtime:
+
+Feature                                                          | Schema | API | UI         | Auth Enforced
+-----------------------------------------------------------------|--------|-----|------------|-------------
+Horse CRUD (create, list, detail, edit, soft-delete)             | Yes    | Yes | Yes        | Yes
+Health events (dental, vet, farriery, vaccination) w/ scheduling | Yes    | Yes | Yes (tab)  | Yes
+Health notes (free-text clinical notes)                          | Yes    | Yes | Yes (tab)  | Yes
+Injury reports with severity/status workflow                     | Yes    | Yes | Yes (page) | Yes
+Injury notifications to vets/admins (database records)           | Yes    | Yes | Auto       | Yes
+Horse moves with status progression (PLANNED -> COMPLETED)       | Yes    | Yes | Yes (page) | Yes
+Move completion updates horse's currentLocationId                | Yes    | Yes | Auto       | Yes
+Location CRUD                                                    | Yes    | Yes | Yes (admin)| Yes
+User management (create, toggle active, role change)             | Yes    | Yes | Yes (admin)| Yes
+Rider assignments with suitability scores (1-5)                  | Yes    | Yes | Yes (tab)  | Yes
+Feeding plans (structured: type, qty, frequency, time)           | Yes    | Yes | Yes (tab)  | Yes
+Medication records with server-calculated withdrawal dates       | Yes    | Yes | Yes (tab)  | Yes
+Tack inventory with condition tracking                           | Yes    | Yes | Yes (page) | Yes
+Tack-to-horse allocations                                        | Yes    | Yes | Yes (tab)  | Yes
+Inspection schedules (recurring templates)                       | Yes    | Yes | Yes (page) | Yes
+Inspection records (pass/fail/advisory)                          | Yes    | Yes | Yes (tab)  | Yes
+Duty station history (archived, not just latest)                 | Yes    | Yes | Yes (tab)  | Yes
+Formal RBAC across 4 roles x 16 resources x 4 actions           | Yes    | Yes | Yes (UI)   | Yes
+Middleware route protection on all app + API paths               | --     | Yes | Yes        | Yes
+Session augmentation (role, serviceNumber, id in JWT)            | --     | Yes | Yes        | Yes
+Health event auto-seeding on horse creation                      | --     | Yes | Auto       | Yes
+Dashboard with real data (counts, overdue, injuries, withdrawals)| --     | --  | Yes        | Yes
+Case-insensitive search for Postgres                             | --     | Yes | Yes        | --
+
+Auth enforcement is two-layer:
+  1. Middleware — redirects unauthenticated requests to /login for all protected paths
+  2. Per-handler — every API handler calls requireAuth() or requirePermission(resource, action)
+
+Both layers verified present on all 33 HTTP handlers. Zero unprotected data endpoints.
+
+
+3. REMAINING PILOT-READINESS GAPS
+===================================
+
+CRITICAL (blocks real use)
+--------------------------
+
+G1  No location seed data
+    The Location table is empty. Horse moves require locations. The moves page, move
+    creation form, and currentLocationId on horses all depend on locations existing.
+    A user hitting "New Move" gets an empty location dropdown.
+
+G2  Attachment upload is metadata-only
+    HorseAttachments.tsx has a form for manually typing file paths, MIME types, and
+    byte sizes. There is no <input type="file">, no multipart upload, no storage
+    backend (S3/R2/local). Users cannot actually attach photos or documents.
+
+G3  NEXTAUTH_SECRET is a hardcoded dev string
+    .env has "hcmr-fleet-secret-key-minimum-32-chars-long" — fine for dev,
+    unacceptable for production. No .env.production or secrets management.
+
+G4  No error boundaries
+    Zero error.tsx or global-error.tsx files. Any unhandled server error shows a
+    raw Next.js error page.
+
+G5  Neon DB credentials in .env are dev credentials
+    The connection string includes plaintext password. No environment separation
+    (dev/staging/prod).
+
+SIGNIFICANT (degrades experience)
+----------------------------------
+
+G6  Duty history is read-only
+    HorseDutyHistory.tsx displays history but has no form to reassign a horse's duty
+    station with proper start/end dating. The only way to change duty station is via
+    the horse edit form, which overwrites dutyStation but does NOT create a
+    DutyAssignment record. The history audit trail is incomplete.
+
+G7  Sidebar hides pages from troopers that they can still access
+    Troopers can't see Injury Reports or Moves in the sidebar nav, but they CAN
+    access /injuries and /moves directly by URL. The sidebar filtering is cosmetic,
+    not a security control. The actual page-level redirect on /injuries checks
+    injury_report.update which troopers lack — but troopers DO have
+    injury_report.view, so they should arguably see the page.
+
+G8  No loading/skeleton states
+    Pages do server-side data fetching with no loading.tsx files. On slow Neon
+    connections (cold starts), users see a blank screen until the full page renders.
+
+G9  .env.example still references SQLite
+    DATABASE_URL="file:./prisma/dev.db" — misleading for anyone setting up the project.
+
+G10 Dead file: src/lib/auth-helpers.ts
+    Exports requireRole() and getSession() but is imported by nothing. Potential confusion.
+
+G11 No validation on horse regimental number format
+    The schema requires uniqueness but the API only checks z.string().min(1). No regex
+    for the HCMR-XXX pattern used in seed data.
+
+G12 Tack and Inspections list pages are read-only
+    /tack and /inspections pages display data but have no create/edit forms. You can
+    only add tack items via API or within the horse detail tab. No way to create a
+    new tack item from the tack list page.
+
+G13 No pagination on any list page
+    Horse list, injuries, moves, tack, inspections — all load all records. Will
+    degrade with scale.
+
+G14 No README
+    No project documentation exists in the repo.
+
+
+4. TOP 5 HIGHEST-PRIORITY WORKSTREAMS
+=======================================
+
+WS1  Seed locations + fix duty station reassignment flow
+     Why: Without locations, horse moves are broken. Without proper duty reassignment,
+     the audit trail (the whole reason we built DutyAssignment history) has a gap —
+     editing a horse's station bypasses the assignment log.
+     Scope: Seed script + new API logic when dutyStation changes on
+     PATCH /api/horses/[id].
+
+WS2  Real file upload for attachments
+     Why: Injury photos, horse passports, and vet certificates are a core pilot
+     requirement. The current metadata-only form is unusable.
+     Scope: Storage backend (S3/R2/Neon blob), multipart upload API, file input
+     component, presigned URL flow or direct upload.
+
+WS3  Error boundaries + loading states
+     Why: Without these, the app feels broken on any error or slow query. Neon
+     free-tier cold starts can be 2-5 seconds.
+     Scope: error.tsx at (app) level, loading.tsx at key route segments, toast error
+     handling on client components.
+
+WS4  Environment separation + secret management
+     Why: Hardcoded dev secret, plaintext Neon password, no staging/prod split.
+     Blocks any deployment beyond localhost.
+     Scope: .env.example update, production env config, NEXTAUTH_SECRET rotation,
+     deployment config (Vercel/similar).
+
+WS5  Sidebar/page access alignment + trooper UX
+     Why: Troopers are the most common role. Currently they can URL-access pages the
+     sidebar hides, and some pages incorrectly block them (e.g., injuries list checks
+     update permission but troopers only have view).
+     Scope: Audit each page's redirect logic vs the RBAC matrix. Ensure sidebar
+     visibility matches actual page access.
+
+
+5. EXACT FILES EXPECTED TO CHANGE PER WORKSTREAM
+==================================================
+
+WS1 — Locations + Duty Reassignment
+------------------------------------
+prisma/seed.ts                           Add Location seed data (Hyde Park Barracks,
+                                         Knightsbridge, Combermere, Melton Mowbray, etc.)
+src/app/api/horses/[id]/route.ts         PATCH handler: when dutyStation changes, auto-create
+                                         DutyAssignment record (end previous, start new)
+.env.example                             Update DATABASE_URL to Postgres template
+
+WS2 — File Upload
+------------------
+src/app/api/attachments/route.ts         Replace metadata POST with multipart upload handler
+                                         (or presigned URL endpoint)
+src/components/horses/HorseAttachments.tsx  Replace text inputs with <input type="file">,
+                                         progress indicator, preview
+src/app/api/attachments/[id]/route.ts    Add file download/serve endpoint
+package.json                             Add storage SDK dependency (e.g., @aws-sdk/client-s3)
+.env                                     Add storage bucket config vars
+
+WS3 — Error Boundaries + Loading
+----------------------------------
+src/app/(app)/error.tsx                  New — catch-all error boundary for app routes
+src/app/global-error.tsx                 New — root error boundary
+src/app/(app)/loading.tsx                New — skeleton/spinner for app shell
+src/app/(app)/horses/loading.tsx         New — horse list skeleton
+src/app/(app)/horses/[id]/loading.tsx    New — horse detail skeleton
+
+WS4 — Environment + Deployment
+--------------------------------
+.env.example                             Rewrite with Postgres template + all required vars
+.env                                     Rotate NEXTAUTH_SECRET (dev value)
+next.config.ts                           Add image domains, headers, or output config if deploying
+
+WS5 — Sidebar/Access Alignment
+--------------------------------
+src/components/layout/Sidebar.tsx        Align nav visibility with actual page access permissions
+src/app/(app)/injuries/page.tsx          Fix redirect to check view not update for trooper access
+src/app/(app)/moves/page.tsx             Same — verify redirect uses correct permission
+
+
+6. RISKY ASSUMPTIONS IN THE CURRENT APP
+=========================================
+
+R1  Horse edit PATCH doesn't log duty changes
+    The PATCH /api/horses/[id] handler directly updates dutyStation on the horse
+    record. It does NOT create a DutyAssignment. The duty history feature shows only
+    assignments made at horse creation or via seed data. Any station change via edit
+    silently breaks the audit trail.
+
+R2  Soft delete assumes no cascading references
+    DELETE /api/horses/[id] sets isActive: false but doesn't deactivate related
+    records (feeding plans, tack allocations, rider assignments remain "active").
+    Queries filtering isActive: true on horses won't return the horse, but orphaned
+    related records may appear in other views.
+
+R3  withdrawalEndDate is calculated at record creation time only
+    If a vet updates withdrawalDays via PATCH, the withdrawalEndDate is NOT
+    recalculated. The PATCH handler on medication-records doesn't recompute it.
+
+R4  No rate limiting or CSRF protection on API routes
+    NextAuth provides CSRF on its own routes, but custom API endpoints have no
+    protection beyond JWT validation. A compromised token could be used for
+    unlimited requests.
+
+R5  All search queries are unbounded
+    prisma.horse.findMany(), prisma.healthEvent.findMany(), etc. return all matching
+    records. No take/skip limits except inspections (hardcoded take: 100). At
+    regimental scale (~120 horses, thousands of events over years), this will cause
+    slow queries.
+
+R6  Neon free-tier cold start latency
+    Neon suspends compute after inactivity. First request after idle can take 3-5
+    seconds. No connection pooling configured. No loading.tsx to cover this.
+
+R7  Suitability score is 1-5 in UI but unconstrained in schema
+    RiderAssignment.suitabilityScore is Int? in Prisma with no min/max. The UI
+    component shows 1-5 stars, but the API accepts any integer. Schema and UI
+    disagree on range.
+
+R8  currentLocationId can go stale
+    It's only updated when a move completes. If a move is cancelled after the horse
+    physically moved, the location is wrong. There's no manual override.

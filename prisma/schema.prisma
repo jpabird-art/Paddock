@@ -3,9 +3,119 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// ─── ENUMS ───────────────────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  VET
+  OFFICER
+  TROOPER
+}
+
+enum HealthEventType {
+  DENTAL_CHECK
+  VET_CHECKUP
+  VACCINATION
+  FARRIERY
+  CUSTOM
+}
+
+enum HealthEventStatus {
+  SCHEDULED
+  OVERDUE
+  COMPLETED
+}
+
+enum InjurySeverity {
+  MINOR
+  MODERATE
+  SEVERE
+}
+
+enum InjuryStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+}
+
+enum MoveStatus {
+  PLANNED
+  IN_TRANSIT
+  COMPLETED
+  CANCELLED
+}
+
+enum TackType {
+  SADDLE
+  BRIDLE
+  BREASTPLATE
+  GIRTH
+  NUMNAH
+  OTHER
+}
+
+enum TackCondition {
+  SERVICEABLE
+  UNSERVICEABLE
+  REPAIR_NEEDED
+}
+
+enum MedicationRoute {
+  ORAL
+  IV
+  IM
+  TOPICAL
+}
+
+enum InspectionResult {
+  PASS
+  FAIL
+  ADVISORY
+}
+
+enum AttachmentCategory {
+  PASSPORT
+  INJURY_PHOTO
+  VET_CERTIFICATE
+  DOCUMENT
+  OTHER
+}
+
+enum FeedType {
+  HAY
+  HARD_FEED
+  HIGH_ENERGY_MIX
+  SUPPLEMENT
+  CHAFF
+  BEET_PULP
+  OTHER
+}
+
+enum FeedFrequency {
+  ONCE_DAILY
+  TWICE_DAILY
+  THREE_TIMES_DAILY
+  FOUR_TIMES_DAILY
+  AS_NEEDED
+}
+
+enum DutyStation {
+  KINGS_LIFE_GUARD
+  TRAINING_WING
+  HYDE_PARK_BARRACKS
+  WINTER_TRAINING
+}
+
+enum Squadron {
+  THE_LIFE_GUARDS
+  THE_BLUES_AND_ROYALS
+}
+
+// ─── MODELS ──────────────────────────────────────────────────────────
 
 model User {
   id            String   @id @default(cuid())
@@ -13,9 +123,10 @@ model User {
   serviceNumber String   @unique
   email         String   @unique
   passwordHash  String
-  role          String   @default("TROOPER")
+  role          Role      @default(TROOPER)
+  squadron      Squadron?
   rank          String?
-  isActive      Boolean  @default(true)
+  isActive      Boolean   @default(true)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -26,14 +137,21 @@ model User {
   injuryNotifications InjuryNotification[]
   movesCreated        HorseMove[]          @relation("MoveCreatedBy")
   movesUpdated        HorseMove[]          @relation("MoveUpdatedBy")
+  riderAssignments    RiderAssignment[]
+  feedingPlansCreated FeedingPlan[]        @relation("FeedingPlanCreatedBy")
+  medicationsAdministered MedicationRecord[] @relation("MedicationAdministeredBy")
+  tackAllocationsAssigned TackAllocation[] @relation("TackAllocationAssignedBy")
+  inspectionsPerformed    Inspection[]     @relation("InspectionPerformedBy")
+  inspectionSchedulesCreated InspectionSchedule[] @relation("InspectionScheduleCreatedBy")
+  attachmentsUploaded     Attachment[]     @relation("AttachmentUploadedBy")
 
   @@map("users")
 }
 
 model Horse {
-  id                String   @id @default(cuid())
+  id                String       @id @default(cuid())
   name              String
-  regimentalNumber  String   @unique
+  regimentalNumber  String       @unique
   breed             String
   colour            String
   dateOfBirth       DateTime
@@ -41,35 +159,41 @@ model Horse {
   heightHands       Float
   weightKg          Float
   maxRiderWeightKg  Float
-  feedingNotes      String
-  dutyStation       String   @default("HYDE_PARK_BARRACKS")
-  isActive          Boolean  @default(true)
+  squadron          Squadron?
+  dutyStation       DutyStation  @default(HYDE_PARK_BARRACKS)
+  isActive          Boolean      @default(true)
   photoUrl          String?
   currentLocationId String?
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
 
-  currentLocation Location?        @relation("CurrentLocation", fields: [currentLocationId], references: [id])
-  healthEvents    HealthEvent[]
-  healthNotes     HealthNote[]
-  injuryReports   InjuryReport[]
-  dutyAssignments DutyAssignment[]
-  moves           HorseMove[]
+  currentLocation   Location?          @relation("CurrentLocation", fields: [currentLocationId], references: [id])
+  healthEvents      HealthEvent[]
+  healthNotes       HealthNote[]
+  injuryReports     InjuryReport[]
+  dutyAssignments   DutyAssignment[]
+  moves             HorseMove[]
+  riderAssignments  RiderAssignment[]
+  feedingPlans      FeedingPlan[]
+  medicationRecords MedicationRecord[]
+  tackAllocations   TackAllocation[]
+  inspections       Inspection[]
+  attachments       Attachment[]       @relation("HorseAttachments")
 
   @@map("horses")
 }
 
 model HealthEvent {
-  id          String    @id @default(cuid())
+  id          String            @id @default(cuid())
   horseId     String
-  type        String
-  status      String    @default("SCHEDULED")
+  type        HealthEventType
+  status      HealthEventStatus @default(SCHEDULED)
   scheduledAt DateTime
   completedAt DateTime?
   notes       String?
   performedBy String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
 
   horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
 
@@ -90,23 +214,24 @@ model HealthNote {
 }
 
 model InjuryReport {
-  id             String    @id @default(cuid())
+  id             String          @id @default(cuid())
   horseId        String
   reportedById   String
   resolvedById   String?
-  severity       String
-  status         String    @default("OPEN")
+  severity       InjurySeverity
+  status         InjuryStatus    @default(OPEN)
   description    String
   bodyLocation   String
-  reportedAt     DateTime  @default(now())
+  reportedAt     DateTime        @default(now())
   resolvedAt     DateTime?
   resolutionNote String?
-  updatedAt      DateTime  @updatedAt
+  updatedAt      DateTime        @updatedAt
 
   horse         Horse                @relation(fields: [horseId], references: [id], onDelete: Cascade)
   reportedBy    User                 @relation("ReportedBy", fields: [reportedById], references: [id])
   resolvedBy    User?                @relation("ResolvedBy", fields: [resolvedById], references: [id])
   notifications InjuryNotification[]
+  attachments   Attachment[]         @relation("InjuryAttachments")
 
   @@map("injury_reports")
 }
@@ -126,12 +251,14 @@ model InjuryNotification {
 }
 
 model DutyAssignment {
-  id           String   @id @default(cuid())
+  id           String      @id @default(cuid())
   horseId      String
   assignedById String
-  station      String
-  assignedAt   DateTime @default(now())
+  station      DutyStation
+  startDate    DateTime    @default(now())
+  endDate      DateTime?
   notes        String?
+  createdAt    DateTime    @default(now())
 
   horse      Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
   assignedBy User  @relation(fields: [assignedById], references: [id])
@@ -157,13 +284,13 @@ model Location {
 }
 
 model HorseMove {
-  id                  String    @id @default(cuid())
+  id                  String     @id @default(cuid())
   horseId             String
   fromLocationId      String?
   toLocationId        String
   departureDate       DateTime
   arrivalDate         DateTime?
-  status              String    @default("PLANNED")
+  status              MoveStatus @default(PLANNED)
   driverName          String?
   driverServiceNumber String?
   boxGroomName        String?
@@ -171,8 +298,8 @@ model HorseMove {
   notes               String?
   createdById         String
   updatedById         String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 
   horse        Horse     @relation(fields: [horseId], references: [id], onDelete: Cascade)
   fromLocation Location? @relation("FromLocation", fields: [fromLocationId], references: [id])
@@ -181,4 +308,166 @@ model HorseMove {
   updatedBy    User?     @relation("MoveUpdatedBy", fields: [updatedById], references: [id])
 
   @@map("horse_moves")
+}
+
+model RiderAssignment {
+  id              String    @id @default(cuid())
+  horseId         String
+  riderId         String
+  suitabilityScore Int?
+  startDate       DateTime  @default(now())
+  endDate         DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  rider User  @relation(fields: [riderId], references: [id])
+
+  @@map("rider_assignments")
+}
+
+model FeedingPlan {
+  id              String        @id @default(cuid())
+  horseId         String
+  feedType        FeedType
+  quantityKg      Float
+  frequency       FeedFrequency
+  timeOfDay       String?
+  specialNotes    String?
+  startDate       DateTime      @default(now())
+  endDate         DateTime?
+  isActive        Boolean       @default(true)
+  createdById     String
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  horse     Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  createdBy User  @relation("FeedingPlanCreatedBy", fields: [createdById], references: [id])
+
+  @@map("feeding_plans")
+}
+
+model MedicationRecord {
+  id                String          @id @default(cuid())
+  horseId           String
+  administeredById  String
+  medicationName    String
+  dosage            String
+  route             MedicationRoute
+  batchNumber       String?
+  withdrawalDays    Int?
+  withdrawalEndDate DateTime?
+  notes             String?
+  administeredAt    DateTime        @default(now())
+  createdAt         DateTime        @default(now())
+
+  horse          Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  administeredBy User  @relation("MedicationAdministeredBy", fields: [administeredById], references: [id])
+
+  @@map("medication_records")
+}
+
+model TackItem {
+  id           String        @id @default(cuid())
+  type         TackType
+  identifier   String        @unique
+  brand        String?
+  condition    TackCondition @default(SERVICEABLE)
+  notes        String?
+  isActive     Boolean       @default(true)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  allocations TackAllocation[]
+
+  @@map("tack_items")
+}
+
+model TackAllocation {
+  id            String    @id @default(cuid())
+  tackItemId    String
+  horseId       String
+  assignedById  String
+  fitNotes      String?
+  startDate     DateTime  @default(now())
+  endDate       DateTime?
+  createdAt     DateTime  @default(now())
+
+  tackItem   TackItem @relation(fields: [tackItemId], references: [id])
+  horse      Horse    @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  assignedBy User     @relation("TackAllocationAssignedBy", fields: [assignedById], references: [id])
+
+  @@map("tack_allocations")
+}
+
+model InspectionSchedule {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  frequencyDays Int
+  isActive      Boolean  @default(true)
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  createdBy   User         @relation("InspectionScheduleCreatedBy", fields: [createdById], references: [id])
+  inspections Inspection[]
+
+  @@map("inspection_schedules")
+}
+
+model Inspection {
+  id                   String           @id @default(cuid())
+  inspectionScheduleId String?
+  horseId              String
+  inspectorId          String
+  result               InspectionResult
+  findings             String?
+  scheduledDate        DateTime
+  completedAt          DateTime?
+  createdAt            DateTime         @default(now())
+
+  schedule  InspectionSchedule? @relation(fields: [inspectionScheduleId], references: [id])
+  horse     Horse               @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  inspector User                @relation("InspectionPerformedBy", fields: [inspectorId], references: [id])
+
+  @@map("inspections")
+}
+
+model Attachment {
+  id             String             @id @default(cuid())
+  fileName       String
+  filePath       String
+  mimeType       String
+  fileSizeBytes  Int
+  category       AttachmentCategory
+  description    String?
+  uploadedById   String
+  horseId        String?
+  injuryReportId String?
+  createdAt      DateTime           @default(now())
+
+  uploadedBy   User          @relation("AttachmentUploadedBy", fields: [uploadedById], references: [id])
+  horse        Horse?        @relation("HorseAttachments", fields: [horseId], references: [id], onDelete: Cascade)
+  injuryReport InjuryReport? @relation("InjuryAttachments", fields: [injuryReportId], references: [id], onDelete: Cascade)
+
+  @@map("attachments")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  userRole   String?
+  entityType String
+  entityId   String
+  action     String
+  before     Json?
+  after      Json?
+  metadata   Json?
+  createdAt  DateTime @default(now())
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

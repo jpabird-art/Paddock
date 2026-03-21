@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/permissions";
 import { z } from "zod";
 
 const updateSchema = z.object({
@@ -15,7 +15,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole("ADMIN", "OFFICER");
+  const { error } = await requirePermission("location", "update");
   if (error) return error;
 
   const { id } = await params;
@@ -42,7 +42,7 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole("ADMIN", "OFFICER");
+  const { error } = await requirePermission("location", "delete");
   if (error) return error;
 
   const { id } = await params;

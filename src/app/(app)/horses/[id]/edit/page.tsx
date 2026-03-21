@@ -12,7 +12,8 @@ export default async function EditHorsePage({
   const { id } = await params;
   const session = await getServerSession(authOptions);
 
-  if (!session || !["ADMIN", "VET", "OFFICER"].includes(session.user.role)) {
+  const { can: canFn } = await import("@/lib/permissions");
+  if (!session || !canFn(session.user.role, "horse", "update")) {
     redirect("/dashboard");
   }
 
@@ -50,7 +51,7 @@ export default async function EditHorsePage({
             heightHands: horse.heightHands,
             weightKg: horse.weightKg,
             maxRiderWeightKg: horse.maxRiderWeightKg,
-            feedingNotes: horse.feedingNotes,
+            squadron: horse.squadron ?? undefined,
             dutyStation: horse.dutyStation,
           }}
         />

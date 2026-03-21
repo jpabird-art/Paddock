@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/permissions";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { Squadron } from "@prisma/client";
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -10,11 +11,15 @@ const createSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
   role: z.enum(["ADMIN", "VET", "OFFICER", "TROOPER"]),
+  squadron: z.nativeEnum(Squadron).nullable().optional(),
   rank: z.string().optional(),
-});
+}).refine(
+  (data) => data.role === "VET" || data.squadron,
+  { message: "Squadron is required for non-VET roles", path: ["squadron"] }
+);
 
 export async function GET() {
-  const { error } = await requireRole("ADMIN");
+  const { error } = await requirePermission("user", "view");
   if (error) return error;
 
   const users = await prisma.user.findMany({
@@ -24,6 +29,7 @@ export async function GET() {
       serviceNumber: true,
       email: true,
       role: true,
+      squadron: true,
       isActive: true,
       createdAt: true,
     },
@@ -34,7 +40,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requireRole("ADMIN");
+  const { error } = await requirePermission("user", "create");
   if (error) return error;
 
   const body = await request.json();
@@ -67,6 +73,7 @@ export async function POST(request: Request) {
       email: parse.data.email.toLowerCase(),
       passwordHash,
       role: parse.data.role,
+      squadron: parse.data.squadron ?? null,
       rank: parse.data.rank ?? null,
     },
     select: {
@@ -75,6 +82,7 @@ export async function POST(request: Request) {
       serviceNumber: true,
       email: true,
       role: true,
+      squadron: true,
       rank: true,
       isActive: true,
       createdAt: true,

@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
+import { HealthEventType, HealthEventStatus } from "@prisma/client";
 import { addDays } from "date-fns";
 
-const INTERVALS: Record<string, number | null> = {
+const INTERVALS: Record<HealthEventType, number | null> = {
   DENTAL_CHECK: 180,
   VET_CHECKUP: 365,
   VACCINATION: 365,
@@ -11,7 +12,7 @@ const INTERVALS: Record<string, number | null> = {
 
 export async function scheduleNextEvent(
   horseId: string,
-  type: string,
+  type: HealthEventType,
   completedAt: Date
 ): Promise<void> {
   const interval = INTERVALS[type];
@@ -23,7 +24,7 @@ export async function scheduleNextEvent(
     data: {
       horseId,
       type,
-      status: "SCHEDULED",
+      status: HealthEventStatus.SCHEDULED,
       scheduledAt: nextDate,
     },
   });
@@ -33,7 +34,11 @@ export async function seedInitialEvents(
   horseId: string,
   serviceEntryDate: Date
 ): Promise<void> {
-  const types = ["DENTAL_CHECK", "VET_CHECKUP", "FARRIERY"];
+  const types: HealthEventType[] = [
+    HealthEventType.DENTAL_CHECK,
+    HealthEventType.VET_CHECKUP,
+    HealthEventType.FARRIERY,
+  ];
 
   for (const type of types) {
     const interval = INTERVALS[type];
@@ -43,7 +48,7 @@ export async function seedInitialEvents(
       data: {
         horseId,
         type,
-        status: "SCHEDULED",
+        status: HealthEventStatus.SCHEDULED,
         scheduledAt: addDays(serviceEntryDate, interval),
       },
     });
@@ -55,11 +60,11 @@ export async function markOverdueEvents(): Promise<number> {
 
   const result = await prisma.healthEvent.updateMany({
     where: {
-      status: "SCHEDULED",
+      status: HealthEventStatus.SCHEDULED,
       scheduledAt: { lt: now },
     },
     data: {
-      status: "OVERDUE",
+      status: HealthEventStatus.OVERDUE,
     },
   });
 

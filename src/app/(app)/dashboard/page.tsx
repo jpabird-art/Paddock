@@ -1,11 +1,12 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { can } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DutyBadge } from "@/components/horses/DutyBadge";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Shield, AlertTriangle, Calendar, Activity } from "lucide-react";
+import { Shield, AlertTriangle, Calendar, Activity, Pill } from "lucide-react";
 
 const DUTY_STATIONS = [
   "KINGS_LIFE_GUARD",
@@ -18,7 +19,7 @@ export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
 
-  const [totalHorses, stationCounts, overdueEvents, openInjuries] =
+  const [totalHorses, stationCounts, overdueEvents, openInjuries, activeWithdrawals] =
     await Promise.all([
       prisma.horse.count({ where: { isActive: true } }),
       Promise.all(
@@ -49,10 +50,18 @@ export default async function DashboardPage() {
         orderBy: { reportedAt: "desc" },
         take: 10,
       }),
+      prisma.medicationRecord.findMany({
+        where: { withdrawalEndDate: { gt: new Date() } },
+        include: {
+          horse: { select: { id: true, name: true, regimentalNumber: true } },
+        },
+        orderBy: { withdrawalEndDate: "asc" },
+        take: 10,
+      }),
     ]);
 
-  const canSeeFullInjuries = ["VET", "OFFICER", "ADMIN"].includes(role);
-  const canSeeOverdue = ["VET", "OFFICER", "ADMIN"].includes(role);
+  const canSeeFullInjuries = can(role, "injury_report", "update");
+  const canSeeOverdue = can(role, "health_event", "update");
 
   return (
     <div className="space-y-6">
@@ -229,6 +238,46 @@ export default async function DashboardPage() {
             )}
           </CardContent>
         </Card>
+
+        {/* Active medication withdrawals */}
+        {canSeeOverdue && activeWithdrawals.length > 0 && (
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base font-semibold flex items-center gap-2">
+                <Pill className="h-4 w-4 text-purple-500" />
+                Active Withdrawals
+                <span className="ml-auto bg-purple-100 text-purple-700 text-xs px-2 py-0.5 rounded-full font-medium">
+                  {activeWithdrawals.length}
+                </span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="divide-y">
+                {activeWithdrawals.map((med) => (
+                  <div key={med.id} className="py-3 flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="flex items-center gap-2">
+                        <Link
+                          href={`/horses/${med.horse.id}`}
+                          className="text-sm font-medium text-gray-900 hover:text-[#1a2744] hover:underline"
+                        >
+                          {med.horse.name}
+                        </Link>
+                        <span className="text-xs text-gray-400 font-mono">
+                          {med.horse.regimentalNumber}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-0.5">
+                        {med.medicationName} — withdrawal ends{" "}
+                        {format(new Date(med.withdrawalEndDate!), "dd MMM yyyy")}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Quick stats */}
         {!canSeeOverdue && (

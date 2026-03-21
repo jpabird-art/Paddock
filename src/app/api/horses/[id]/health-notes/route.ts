@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 
 const createSchema = z.object({
@@ -9,13 +9,14 @@ const createSchema = z.object({
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole();
+  const { id } = await params;
+  const { error } = await requireAuth();
   if (error) return error;
 
   const notes = await prisma.healthNote.findMany({
-    where: { horseId: params.id },
+    where: { horseId: id },
     include: {
       author: { select: { name: true, role: true } },
     },
@@ -27,12 +28,13 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error, session } = await requireRole("ADMIN", "VET");
+  const { id } = await params;
+  const { error, session } = await requirePermission("health_note", "create");
   if (error) return error;
 
-  const horse = await prisma.horse.findUnique({ where: { id: params.id } });
+  const horse = await prisma.horse.findUnique({ where: { id } });
   if (!horse) {
     return NextResponse.json({ error: "Horse not found" }, { status: 404 });
   }
@@ -45,7 +47,7 @@ export async function POST(
 
   const note = await prisma.healthNote.create({
     data: {
-      horseId: params.id,
+      horseId: id,
       authorId: session!.user.id,
       content: parse.data.content,
     },

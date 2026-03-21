@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { notifyVets } from "@/lib/notifications";
 import { z } from "zod";
 
@@ -12,12 +12,13 @@ const createSchema = z.object({
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error, session } = await requireRole();
+  const { id } = await params;
+  const { error, session } = await requirePermission("injury_report", "create");
   if (error) return error;
 
-  const horse = await prisma.horse.findUnique({ where: { id: params.id } });
+  const horse = await prisma.horse.findUnique({ where: { id } });
   if (!horse) {
     return NextResponse.json({ error: "Horse not found" }, { status: 404 });
   }
@@ -30,7 +31,7 @@ export async function POST(
 
   const injury = await prisma.injuryReport.create({
     data: {
-      horseId: params.id,
+      horseId: id,
       reportedById: session!.user.id,
       severity: parse.data.severity,
       description: parse.data.description,

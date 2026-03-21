@@ -1,23 +1,25 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
+import { HealthEventStatus, HealthEventType } from "@prisma/client";
 
 const createSchema = z.object({
-  type: z.string().min(1),
+  type: z.nativeEnum(HealthEventType),
   scheduledAt: z.string().min(1),
   notes: z.string().optional(),
 });
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole();
+  const { id } = await params;
+  const { error } = await requireAuth();
   if (error) return error;
 
   const events = await prisma.healthEvent.findMany({
-    where: { horseId: params.id },
+    where: { horseId: id },
     orderBy: { scheduledAt: "desc" },
   });
 
@@ -26,12 +28,13 @@ export async function GET(
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole("ADMIN", "VET", "OFFICER");
+  const { id } = await params;
+  const { error } = await requirePermission("health_event", "create");
   if (error) return error;
 
-  const horse = await prisma.horse.findUnique({ where: { id: params.id } });
+  const horse = await prisma.horse.findUnique({ where: { id } });
   if (!horse) {
     return NextResponse.json({ error: "Horse not found" }, { status: 404 });
   }
@@ -44,11 +47,11 @@ export async function POST(
 
   const event = await prisma.healthEvent.create({
     data: {
-      horseId: params.id,
+      horseId: id,
       type: parse.data.type,
       scheduledAt: new Date(parse.data.scheduledAt),
       notes: parse.data.notes,
-      status: "SCHEDULED",
+      status: HealthEventStatus.SCHEDULED,
     },
   });
 

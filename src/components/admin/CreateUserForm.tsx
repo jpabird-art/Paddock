@@ -31,8 +31,12 @@ const schema = z.object({
   email: z.string().email("Valid email required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   role: z.enum(["ADMIN", "VET", "OFFICER", "TROOPER"]),
+  squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"]).nullable().optional(),
   rank: z.string().optional(),
-});
+}).refine(
+  (data) => data.role === "VET" || data.squadron,
+  { message: "Squadron is required for non-VET roles", path: ["squadron"] }
+);
 
 export function CreateUserForm() {
   const router = useRouter();
@@ -47,6 +51,7 @@ export function CreateUserForm() {
     email: "",
     password: "",
     role: "TROOPER" as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+    squadron: "" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS" | "",
     rank: "",
   });
 
@@ -71,6 +76,7 @@ export function CreateUserForm() {
 
     const parse = schema.safeParse({
       ...formData,
+      squadron: formData.squadron || null,
       rank: formData.rank || undefined,
     });
     if (!parse.success) {
@@ -106,7 +112,7 @@ export function CreateUserForm() {
         description: `${user.name} added to the system.`,
       });
       setOpen(false);
-      setFormData({ name: "", serviceNumber: "", email: "", password: "", role: "TROOPER", rank: "" });
+      setFormData({ name: "", serviceNumber: "", email: "", password: "", role: "TROOPER", squadron: "", rank: "" });
       router.refresh();
     } catch {
       toast({
@@ -253,6 +259,30 @@ export function CreateUserForm() {
               )}
             </div>
           </div>
+
+          {formData.role !== "VET" && (
+            <div className="space-y-2">
+              <Label>Squadron</Label>
+              <Select
+                value={formData.squadron}
+                onValueChange={(v) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    squadron: v as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS",
+                  }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select squadron" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="THE_LIFE_GUARDS">The Life Guards</SelectItem>
+                  <SelectItem value="THE_BLUES_AND_ROYALS">The Blues and Royals</SelectItem>
+                </SelectContent>
+              </Select>
+              {errors.squadron && <p className="text-sm text-red-600">{errors.squadron}</p>}
+            </div>
+          )}
 
           <DialogFooter>
             <Button

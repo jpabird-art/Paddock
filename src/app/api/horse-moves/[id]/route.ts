@@ -1,14 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
+import { audit } from "@/lib/audit";
 
 const updateSchema = z.object({
   fromLocationId: z.string().optional().nullable(),
   toLocationId: z.string().optional(),
   departureDate: z.string().optional(),
   arrivalDate: z.string().optional().nullable(),
-  status: z.string().optional(),
+  status: z.enum(["PLANNED", "IN_TRANSIT", "COMPLETED", "CANCELLED"]).optional(),
   driverName: z.string().optional().nullable(),
   driverServiceNumber: z.string().optional().nullable(),
   boxGroomName: z.string().optional().nullable(),
@@ -20,7 +21,7 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole();
+  const { error } = await requireAuth();
   if (error) return error;
 
   const { id } = await params;
@@ -47,7 +48,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error, session } = await requireRole("ADMIN", "OFFICER");
+  const { error, session } = await requirePermission("horse_move", "update");
   if (error) return error;
 
   const { id } = await params;
@@ -82,6 +83,15 @@ export async function PATCH(
       data: { currentLocationId: move.toLocationId },
     });
   }
+
+  await audit({
+    userId: session?.user.id,
+    userRole: session?.user.role,
+    entityType: "horse_move",
+    entityId: id,
+    action: parse.data.status ? `status_${parse.data.status.toLowerCase()}` : "update",
+    after: { status: parse.data.status, horseId: move.horseId },
+  });
 
   return NextResponse.json(move);
 }

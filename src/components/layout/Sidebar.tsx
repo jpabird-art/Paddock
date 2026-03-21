@@ -13,6 +13,8 @@ import {
   LogOut,
   Truck,
   MapPin,
+  Wrench,
+  ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -64,13 +66,25 @@ export function Sidebar({ user }: SidebarProps) {
       href: "/injuries",
       label: "Injury Reports",
       icon: AlertTriangle,
-      roles: ["ADMIN", "VET", "OFFICER"],
+      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
     },
     {
       href: "/moves",
       label: "Moves",
       icon: Truck,
-      roles: ["ADMIN", "VET", "OFFICER"],
+      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
+    },
+    {
+      href: "/tack",
+      label: "Tack & Equipment",
+      icon: Wrench,
+      roles: ["ADMIN", "OFFICER", "TROOPER"],
+    },
+    {
+      href: "/inspections",
+      label: "Inspections",
+      icon: ClipboardCheck,
+      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
     },
     {
       href: "/admin",

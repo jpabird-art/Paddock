@@ -19,8 +19,9 @@ export default async function HorsesPage({
   searchParams: { q?: string; station?: string };
 }) {
   const session = await getServerSession(authOptions);
+  const { can: canFn } = await import("@/lib/permissions");
   const role = session?.user?.role ?? "TROOPER";
-  const canCreate = ["ADMIN", "VET", "OFFICER"].includes(role);
+  const canCreate = canFn(role, "horse", "create");
 
   const where: Record<string, unknown> = { isActive: true };
   if (searchParams.station && searchParams.station !== "ALL") {
@@ -28,9 +29,9 @@ export default async function HorsesPage({
   }
   if (searchParams.q) {
     where.OR = [
-      { name: { contains: searchParams.q } },
-      { regimentalNumber: { contains: searchParams.q } },
-      { breed: { contains: searchParams.q } },
+      { name: { contains: searchParams.q, mode: "insensitive" as const } },
+      { regimentalNumber: { contains: searchParams.q, mode: "insensitive" as const } },
+      { breed: { contains: searchParams.q, mode: "insensitive" as const } },
     ];
   }
 
@@ -81,6 +82,7 @@ export default async function HorsesPage({
               <TableHead className="font-semibold text-gray-700">Reg. No.</TableHead>
               <TableHead className="font-semibold text-gray-700">Breed</TableHead>
               <TableHead className="font-semibold text-gray-700">Colour</TableHead>
+              <TableHead className="font-semibold text-gray-700">Squadron</TableHead>
               <TableHead className="font-semibold text-gray-700">Station</TableHead>
               <TableHead className="font-semibold text-gray-700">Height</TableHead>
               <TableHead className="font-semibold text-gray-700">Alerts</TableHead>
@@ -89,7 +91,7 @@ export default async function HorsesPage({
           <TableBody>
             {horses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center text-gray-500 py-10">
+                <TableCell colSpan={8} className="text-center text-gray-500 py-10">
                   No horses found.
                 </TableCell>
               </TableRow>
@@ -109,6 +111,9 @@ export default async function HorsesPage({
                   </TableCell>
                   <TableCell className="text-sm text-gray-700">{horse.breed}</TableCell>
                   <TableCell className="text-sm text-gray-700">{horse.colour}</TableCell>
+                  <TableCell className="text-sm text-gray-700">
+                    {horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"}
+                  </TableCell>
                   <TableCell>
                     <DutyBadge station={horse.dutyStation} />
                   </TableCell>

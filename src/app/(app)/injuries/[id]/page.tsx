@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { can } from "@/lib/permissions";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
@@ -15,7 +16,7 @@ export default async function InjuryDetailPage({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["ADMIN", "VET", "OFFICER"].includes(session.user.role)) {
+  if (!session || !can(session.user.role, "injury_report", "view")) {
     redirect("/dashboard");
   }
 

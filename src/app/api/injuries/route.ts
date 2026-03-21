@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/permissions";
 
 export async function GET(request: Request) {
-  const { error } = await requireRole("ADMIN", "VET", "OFFICER");
+  const { error } = await requirePermission("injury_report", "view");
   if (error) return error;
 
   const { searchParams } = new URL(request.url);

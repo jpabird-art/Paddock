@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/permissions";
 import { scheduleNextEvent } from "@/lib/health-scheduler";
 import { z } from "zod";
 
@@ -13,13 +13,14 @@ const patchSchema = z.object({
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole("ADMIN", "VET");
+  const { id } = await params;
+  const { error } = await requirePermission("health_event", "update");
   if (error) return error;
 
   const event = await prisma.healthEvent.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
   if (!event) {
     return NextResponse.json({ error: "Health event not found" }, { status: 404 });
@@ -40,7 +41,7 @@ export async function PATCH(
   }
 
   const updated = await prisma.healthEvent.update({
-    where: { id: params.id },
+    where: { id },
     data,
   });
 

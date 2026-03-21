@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission } from "@/lib/permissions";
 import { z } from "zod";
+import { audit } from "@/lib/audit";
 
 const patchSchema = z.object({
   status: z.enum(["OPEN", "UNDER_REVIEW", "RESOLVED"]).optional(),
@@ -10,13 +11,14 @@ const patchSchema = z.object({
 
 export async function GET(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requireRole("ADMIN", "VET", "OFFICER");
+  const { id } = await params;
+  const { error } = await requirePermission("injury_report", "view");
   if (error) return error;
 
   const injury = await prisma.injuryReport.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       horse: { select: { id: true, name: true, regimentalNumber: true, dutyStation: true } },
       reportedBy: { select: { name: true, serviceNumber: true, role: true } },
@@ -39,13 +41,14 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error, session } = await requireRole("ADMIN", "VET");
+  const { id } = await params;
+  const { error, session } = await requirePermission("injury_report", "update");
   if (error) return error;
 
   const injury = await prisma.injuryReport.findUnique({
-    where: { id: params.id },
+    where: { id },
   });
   if (!injury) {
     return NextResponse.json({ error: "Injury report not found" }, { status: 404 });
@@ -65,13 +68,23 @@ export async function PATCH(
   }
 
   const updated = await prisma.injuryReport.update({
-    where: { id: params.id },
+    where: { id },
     data,
     include: {
       horse: { select: { id: true, name: true, regimentalNumber: true } },
       reportedBy: { select: { name: true, serviceNumber: true } },
       resolvedBy: { select: { name: true, serviceNumber: true } },
     },
+  });
+
+  await audit({
+    userId: session?.user.id,
+    userRole: session?.user.role,
+    entityType: "injury_report",
+    entityId: id,
+    action: parse.data.status === "RESOLVED" ? "resolve" : "update",
+    before: { status: injury.status },
+    after: { status: updated.status },
   });
 
   return NextResponse.json(updated);

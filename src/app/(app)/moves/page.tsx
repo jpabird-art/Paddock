@@ -44,17 +44,18 @@ export default async function MovesPage({
 }) {
   const session = await getServerSession(authOptions);
 
-  if (!session || !["ADMIN", "VET", "OFFICER"].includes(session.user.role)) {
+  const { can: canFn } = await import("@/lib/permissions");
+  if (!session || !canFn(session.user.role, "horse_move", "view")) {
     redirect("/dashboard");
   }
 
   const { status, q } = await searchParams;
-  const canEdit = ["ADMIN", "OFFICER"].includes(session.user.role);
+  const canEdit = canFn(session.user.role, "horse_move", "create");
 
   const where: Record<string, unknown> = {};
   if (status) where.status = status;
   if (q) {
-    where.horse = { name: { contains: q } };
+    where.horse = { name: { contains: q, mode: "insensitive" as const } };
   }
 
   const moves = await prisma.horseMove.findMany({

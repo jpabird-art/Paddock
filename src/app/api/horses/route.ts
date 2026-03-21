@@ -1,25 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { requireRole } from "@/lib/auth-helpers";
+import { requirePermission, requireAuth } from "@/lib/permissions";
 import { seedInitialEvents } from "@/lib/health-scheduler";
 import { z } from "zod";
+import { audit } from "@/lib/audit";
+import { Squadron, DutyStation } from "@prisma/client";
 
 const createSchema = z.object({
   name: z.string().min(1),
-  regimentalNumber: z.string().min(1),
+  regimentalNumber: z.string().regex(/^[A-Z]{2,4}\d{2,5}$/, "Format: 2-4 uppercase letters followed by 2-5 digits (e.g. HCMR001)"),
   breed: z.string().min(1),
   colour: z.string().min(1),
   dateOfBirth: z.string().min(1),
   serviceEntryDate: z.string().min(1),
-  heightHands: z.coerce.number(),
-  weightKg: z.coerce.number(),
-  maxRiderWeightKg: z.coerce.number(),
-  feedingNotes: z.string().min(1),
-  dutyStation: z.string().min(1),
+  heightHands: z.coerce.number().positive(),
+  weightKg: z.coerce.number().positive(),
+  maxRiderWeightKg: z.coerce.number().positive(),
+  squadron: z.nativeEnum(Squadron),
+  dutyStation: z.nativeEnum(DutyStation),
 });
 
 export async function GET() {
-  const { error } = await requireRole();
+  const { error } = await requireAuth();
   if (error) return error;
 
   const horses = await prisma.horse.findMany({
@@ -41,7 +43,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error, session } = await requireRole("ADMIN", "VET", "OFFICER");
+  const { error, session } = await requirePermission("horse", "create");
   if (error) return error;
 
   const body = await request.json();
@@ -73,7 +75,7 @@ export async function POST(request: Request) {
       heightHands: data.heightHands,
       weightKg: data.weightKg,
       maxRiderWeightKg: data.maxRiderWeightKg,
-      feedingNotes: data.feedingNotes,
+      squadron: data.squadron,
       dutyStation: data.dutyStation,
     },
   });
@@ -92,6 +94,15 @@ export async function POST(request: Request) {
       },
     });
   }
+
+  await audit({
+    userId: session?.user.id,
+    userRole: session?.user.role,
+    entityType: "horse",
+    entityId: horse.id,
+    action: "create",
+    after: { name: horse.name, regimentalNumber: horse.regimentalNumber, squadron: horse.squadron, dutyStation: horse.dutyStation },
+  });
 
   return NextResponse.json(horse, { status: 201 });
 }

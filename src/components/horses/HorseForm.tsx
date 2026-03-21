@@ -26,7 +26,7 @@ const horseSchema = z.object({
   heightHands: z.coerce.number().min(10).max(20),
   weightKg: z.coerce.number().min(200).max(1000),
   maxRiderWeightKg: z.coerce.number().min(50).max(150),
-  feedingNotes: z.string().min(1, "Feeding notes are required"),
+  squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"], { required_error: "Squadron is required" }),
   dutyStation: z.string().min(1, "Duty station is required"),
 });
 
@@ -58,7 +58,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     heightHands: initialData?.heightHands ?? 16.0,
     weightKg: initialData?.weightKg ?? 550,
     maxRiderWeightKg: initialData?.maxRiderWeightKg ?? 90,
-    feedingNotes: initialData?.feedingNotes ?? "",
+    squadron: initialData?.squadron ?? ("" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS"),
     dutyStation: initialData?.dutyStation ?? "HYDE_PARK_BARRACKS",
   });
 
@@ -265,6 +265,26 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           )}
         </div>
 
+        {/* Squadron */}
+        <div className="space-y-2">
+          <Label htmlFor="squadron">Squadron</Label>
+          <Select
+            value={formData.squadron}
+            onValueChange={(v) => handleSelect("squadron", v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select squadron" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="THE_LIFE_GUARDS">The Life Guards</SelectItem>
+              <SelectItem value="THE_BLUES_AND_ROYALS">The Blues and Royals</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.squadron && (
+            <p className="text-sm text-red-600">{errors.squadron}</p>
+          )}
+        </div>
+
         {/* Duty Station */}
         <div className="space-y-2">
           <Label htmlFor="dutyStation">Duty Station</Label>
@@ -296,22 +316,6 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
             <p className="text-sm text-red-600">{errors.dutyStation}</p>
           )}
         </div>
-      </div>
-
-      {/* Feeding Notes */}
-      <div className="space-y-2">
-        <Label htmlFor="feedingNotes">Feeding Notes</Label>
-        <Textarea
-          id="feedingNotes"
-          name="feedingNotes"
-          value={formData.feedingNotes}
-          onChange={handleChange}
-          placeholder="Describe feeding schedule, supplements, special requirements..."
-          rows={4}
-        />
-        {errors.feedingNotes && (
-          <p className="text-sm text-red-600">{errors.feedingNotes}</p>
-        )}
       </div>
 
       <div className="flex gap-3 pt-2">
