@@ -27,7 +27,6 @@ ENV PORT=3000
 # Copy standalone build + static assets
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
-COPY --from=builder /app/public ./public
 
 # Copy Prisma files for migrate deploy at startup
 COPY --from=builder /app/prisma ./prisma
