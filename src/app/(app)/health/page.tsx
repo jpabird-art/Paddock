@@ -18,15 +18,16 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 export default async function HealthPage({
   searchParams,
 }: {
-  searchParams: { status?: string; type?: string };
+  searchParams: Promise<{ status?: string; type?: string }>;
 }) {
+  const { status, type } = await searchParams;
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
   const canComplete = ["ADMIN", "VET"].includes(role);
 
   const where: Record<string, unknown> = {};
-  if (searchParams.status) where.status = searchParams.status;
-  if (searchParams.type) where.type = searchParams.type;
+  if (status) where.status = status;
+  if (type) where.type = type;
 
   const events = await prisma.healthEvent.findMany({
     where,
@@ -69,10 +70,10 @@ export default async function HealthPage({
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
-        <FilterLink href="/health" label="All" isActive={!searchParams.status} />
-        <FilterLink href="/health?status=OVERDUE" label="Overdue" isActive={searchParams.status === "OVERDUE"} />
-        <FilterLink href="/health?status=SCHEDULED" label="Scheduled" isActive={searchParams.status === "SCHEDULED"} />
-        <FilterLink href="/health?status=COMPLETED" label="Completed" isActive={searchParams.status === "COMPLETED"} />
+        <FilterLink href="/health" label="All" isActive={!status} />
+        <FilterLink href="/health?status=OVERDUE" label="Overdue" isActive={status === "OVERDUE"} />
+        <FilterLink href="/health?status=SCHEDULED" label="Scheduled" isActive={status === "SCHEDULED"} />
+        <FilterLink href="/health?status=COMPLETED" label="Completed" isActive={status === "COMPLETED"} />
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">

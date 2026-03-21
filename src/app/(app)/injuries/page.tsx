@@ -9,8 +9,9 @@ import { DutyBadge } from "@/components/horses/DutyBadge";
 export default async function InjuriesPage({
   searchParams,
 }: {
-  searchParams: { status?: string; severity?: string };
+  searchParams: Promise<{ status?: string; severity?: string }>;
 }) {
+  const { status, severity } = await searchParams;
   const session = await getServerSession(authOptions);
 
   const { can: canFn } = await import("@/lib/permissions");
@@ -19,8 +20,8 @@ export default async function InjuriesPage({
   }
 
   const where: Record<string, unknown> = {};
-  if (searchParams.status) where.status = searchParams.status;
-  if (searchParams.severity) where.severity = searchParams.severity;
+  if (status) where.status = status;
+  if (severity) where.severity = severity;
 
   const injuries = await prisma.injuryReport.findMany({
     where,
@@ -47,32 +48,32 @@ export default async function InjuriesPage({
       <div className="flex gap-3 flex-wrap">
         <div className="flex gap-2 items-center">
           <span className="text-sm text-gray-500">Status:</span>
-          <FilterLink href="/injuries" label="All" isActive={!searchParams.status} />
-          <FilterLink href="/injuries?status=OPEN" label="Open" isActive={searchParams.status === "OPEN"} />
-          <FilterLink href="/injuries?status=UNDER_REVIEW" label="Under Review" isActive={searchParams.status === "UNDER_REVIEW"} />
-          <FilterLink href="/injuries?status=RESOLVED" label="Resolved" isActive={searchParams.status === "RESOLVED"} />
+          <FilterLink href="/injuries" label="All" isActive={!status} />
+          <FilterLink href="/injuries?status=OPEN" label="Open" isActive={status === "OPEN"} />
+          <FilterLink href="/injuries?status=UNDER_REVIEW" label="Under Review" isActive={status === "UNDER_REVIEW"} />
+          <FilterLink href="/injuries?status=RESOLVED" label="Resolved" isActive={status === "RESOLVED"} />
         </div>
         <div className="flex gap-2 items-center">
           <span className="text-sm text-gray-500">Severity:</span>
           <FilterLink
-            href={searchParams.status ? `/injuries?status=${searchParams.status}` : "/injuries"}
+            href={status ? `/injuries?status=${status}` : "/injuries"}
             label="All"
-            isActive={!searchParams.severity}
+            isActive={!severity}
           />
           <FilterLink
-            href={`/injuries?${searchParams.status ? "status=" + searchParams.status + "&" : ""}severity=MINOR`}
+            href={`/injuries?${status ? "status=" + status + "&" : ""}severity=MINOR`}
             label="Minor"
-            isActive={searchParams.severity === "MINOR"}
+            isActive={severity === "MINOR"}
           />
           <FilterLink
-            href={`/injuries?${searchParams.status ? "status=" + searchParams.status + "&" : ""}severity=MODERATE`}
+            href={`/injuries?${status ? "status=" + status + "&" : ""}severity=MODERATE`}
             label="Moderate"
-            isActive={searchParams.severity === "MODERATE"}
+            isActive={severity === "MODERATE"}
           />
           <FilterLink
-            href={`/injuries?${searchParams.status ? "status=" + searchParams.status + "&" : ""}severity=SEVERE`}
+            href={`/injuries?${status ? "status=" + status + "&" : ""}severity=SEVERE`}
             label="Severe"
-            isActive={searchParams.severity === "SEVERE"}
+            isActive={severity === "SEVERE"}
           />
         </div>
       </div>

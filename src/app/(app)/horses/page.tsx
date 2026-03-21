@@ -16,22 +16,23 @@ import { HorseSearchFilter } from "@/components/horses/HorseSearchFilter";
 export default async function HorsesPage({
   searchParams,
 }: {
-  searchParams: { q?: string; station?: string };
+  searchParams: Promise<{ q?: string; station?: string }>;
 }) {
+  const { q, station } = await searchParams;
   const session = await getServerSession(authOptions);
   const { can: canFn } = await import("@/lib/permissions");
   const role = session?.user?.role ?? "TROOPER";
   const canCreate = canFn(role, "horse", "create");
 
   const where: Record<string, unknown> = { isActive: true };
-  if (searchParams.station && searchParams.station !== "ALL") {
-    where.dutyStation = searchParams.station;
+  if (station && station !== "ALL") {
+    where.dutyStation = station;
   }
-  if (searchParams.q) {
+  if (q) {
     where.OR = [
-      { name: { contains: searchParams.q, mode: "insensitive" as const } },
-      { regimentalNumber: { contains: searchParams.q, mode: "insensitive" as const } },
-      { breed: { contains: searchParams.q, mode: "insensitive" as const } },
+      { name: { contains: q, mode: "insensitive" as const } },
+      { regimentalNumber: { contains: q, mode: "insensitive" as const } },
+      { breed: { contains: q, mode: "insensitive" as const } },
     ];
   }
 
@@ -70,8 +71,8 @@ export default async function HorsesPage({
       </div>
 
       <HorseSearchFilter
-        currentQ={searchParams.q ?? ""}
-        currentStation={searchParams.station ?? "ALL"}
+        currentQ={q ?? ""}
+        currentStation={station ?? "ALL"}
       />
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">

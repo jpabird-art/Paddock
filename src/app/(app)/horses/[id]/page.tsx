@@ -219,6 +219,11 @@ export default async function HorseDetailPage({
         <TabsContent value="profile">
           <div className="bg-white rounded-lg border shadow-sm p-6 mt-3">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+              <InfoField label="Regimental Number" value={
+                <span className="font-mono font-semibold text-gray-900">{horse.regimentalNumber}</span>
+              } />
+              <InfoField label="Squadron" value={horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"} />
+              <InfoField label="Duty Station" value={<DutyBadge station={horse.dutyStation} />} />
               <InfoField label="Breed" value={horse.breed} />
               <InfoField label="Colour" value={horse.colour} />
               <InfoField
@@ -235,8 +240,6 @@ export default async function HorseDetailPage({
                 label="Max Rider Weight"
                 value={`${horse.maxRiderWeightKg} kg`}
               />
-              <InfoField label="Squadron" value={horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"} />
-              <InfoField label="Duty Station" value={<DutyBadge station={horse.dutyStation} />} />
               {currentRider && (
                 <InfoField
                   label="Current Rider"
