@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { format } from "date-fns";
 import { CreateUserForm } from "@/components/admin/CreateUserForm";
+import { EditUserForm } from "@/components/admin/EditUserForm";
 import { UserToggleActive } from "@/components/admin/UserToggleActive";
 import { rankAbbreviation } from "@/lib/ranks";
 
@@ -36,6 +37,7 @@ export default async function AdminPage() {
       email: true,
       role: true,
       rank: true,
+      squadron: true,
       isActive: true,
       createdAt: true,
     },
@@ -109,11 +111,23 @@ export default async function AdminPage() {
                   {format(new Date(user.createdAt), "dd MMM yyyy")}
                 </td>
                 <td className="px-4 py-3">
-                  <UserToggleActive
-                    userId={user.id}
-                    isActive={user.isActive}
-                    userName={user.name}
-                  />
+                  <div className="flex items-center gap-2">
+                    <EditUserForm
+                      user={{
+                        id: user.id,
+                        name: user.name,
+                        email: user.email,
+                        role: user.role,
+                        rank: user.rank,
+                        squadron: user.squadron,
+                      }}
+                    />
+                    <UserToggleActive
+                      userId={user.id}
+                      isActive={user.isActive}
+                      userName={user.name}
+                    />
+                  </div>
                 </td>
               </tr>
             ))}
