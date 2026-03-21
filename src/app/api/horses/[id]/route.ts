@@ -7,6 +7,7 @@ import { Squadron, DutyStation } from "@prisma/client";
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
+  squadronNumber: z.string().nullable().optional(),
   breed: z.string().min(1).optional(),
   colour: z.string().min(1).optional(),
   dateOfBirth: z.string().optional(),

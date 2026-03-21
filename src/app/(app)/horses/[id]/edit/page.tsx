@@ -44,6 +44,7 @@ export default async function EditHorsePage({
             id: horse.id,
             name: horse.name,
             regimentalNumber: horse.regimentalNumber,
+            squadronNumber: horse.squadronNumber ?? "",
             breed: horse.breed,
             colour: horse.colour,
             dateOfBirth: horse.dateOfBirth.toISOString(),

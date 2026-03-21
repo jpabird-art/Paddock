@@ -222,6 +222,11 @@ export default async function HorseDetailPage({
               <InfoField label="Regimental Number" value={
                 <span className="font-mono font-semibold text-gray-900">{horse.regimentalNumber}</span>
               } />
+              <InfoField label="Squadron Number" value={
+                horse.squadronNumber
+                  ? <span className="font-mono font-semibold text-gray-900">{horse.squadronNumber}</span>
+                  : <span className="text-gray-400">—</span>
+              } />
               <InfoField label="Squadron" value={horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"} />
               <InfoField label="Duty Station" value={<DutyBadge station={horse.dutyStation} />} />
               <InfoField label="Breed" value={horse.breed} />

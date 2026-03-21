@@ -19,6 +19,7 @@ import { useToast } from "@/components/ui/use-toast";
 const horseSchema = z.object({
   name: z.string().min(1, "Name is required"),
   regimentalNumber: z.string().min(1, "Regimental number is required"),
+  squadronNumber: z.string().optional(),
   breed: z.string().min(1, "Breed is required"),
   colour: z.string().min(1, "Colour is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
@@ -47,6 +48,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
   const [formData, setFormData] = useState<HorseFormData>({
     name: initialData?.name ?? "",
     regimentalNumber: initialData?.regimentalNumber ?? "",
+    squadronNumber: initialData?.squadronNumber ?? "",
     breed: initialData?.breed ?? "",
     colour: initialData?.colour ?? "",
     dateOfBirth: initialData?.dateOfBirth
@@ -160,6 +162,22 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           />
           {errors.regimentalNumber && (
             <p className="text-sm text-red-600">{errors.regimentalNumber}</p>
+          )}
+        </div>
+
+        {/* Squadron Number */}
+        <div className="space-y-2">
+          <Label htmlFor="squadronNumber">Squadron Number</Label>
+          <Input
+            id="squadronNumber"
+            name="squadronNumber"
+            value={formData.squadronNumber}
+            onChange={handleChange}
+            placeholder="e.g. LG-042"
+            className="font-mono"
+          />
+          {errors.squadronNumber && (
+            <p className="text-sm text-red-600">{errors.squadronNumber}</p>
           )}
         </div>
 

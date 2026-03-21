@@ -153,6 +153,7 @@ model Horse {
   id                String       @id @default(cuid())
   name              String
   regimentalNumber  String       @unique
+  squadronNumber    String?
   breed             String
   colour            String
   dateOfBirth       DateTime
