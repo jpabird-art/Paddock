@@ -257,7 +257,7 @@ export default async function HorseDetailPage({
 
         {/* Health Schedule Tab */}
         <TabsContent value="health-schedule">
-          <div className="bg-white rounded-lg border shadow-sm overflow-hidden mt-3">
+          <div className="bg-white rounded-lg border shadow-sm overflow-x-auto mt-3">
             <div className="p-4 border-b bg-gray-50 flex items-center justify-between">
               <h2 className="text-sm font-semibold text-gray-700">Health Events</h2>
             </div>
@@ -362,7 +362,7 @@ export default async function HorseDetailPage({
 
         {/* Injuries Tab */}
         <TabsContent value="injuries">
-          <div className="bg-white rounded-lg border shadow-sm overflow-hidden mt-3">
+          <div className="bg-white rounded-lg border shadow-sm overflow-x-auto mt-3">
             {horse.injuryReports.length === 0 ? (
               <p className="text-sm text-gray-500 p-6 text-center">No injury reports.</p>
             ) : (
@@ -506,7 +506,7 @@ export default async function HorseDetailPage({
 
         {/* Move History Tab */}
         <TabsContent value="moves">
-          <div className="bg-white rounded-lg border shadow-sm overflow-hidden mt-3">
+          <div className="bg-white rounded-lg border shadow-sm overflow-x-auto mt-3">
             {horse.moves.length === 0 ? (
               <p className="text-sm text-gray-500 p-6 text-center">No move history recorded.</p>
             ) : (

@@ -76,7 +76,7 @@ export default async function HealthPage({
         <FilterLink href="/health?status=COMPLETED" label="Completed" isActive={status === "COMPLETED"} />
       </div>
 
-      <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
+      <div className="bg-white rounded-lg border shadow-sm overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b bg-gray-50">
