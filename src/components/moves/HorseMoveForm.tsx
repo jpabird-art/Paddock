@@ -37,33 +37,35 @@ const crewSchema = z.array(z.object({
   role: z.string().min(1),
 }));
 
+const optStr = z.string().optional().nullable();
+
 const createSchema = z.object({
   horseIds: z.array(z.string().min(1)).min(1, "Select at least one horse"),
-  fromLocationId: z.string().optional(),
+  fromLocationId: optStr,
   toLocationId: z.string().min(1, "Destination is required"),
   departureDate: z.string().min(1, "Departure date is required"),
-  arrivalDate: z.string().optional(),
+  arrivalDate: optStr,
   status: z.enum(["PLANNED", "IN_TRANSIT", "COMPLETED", "CANCELLED"]),
-  driverName: z.string().optional(),
-  driverServiceNumber: z.string().optional(),
-  vehicleVRN: z.string().optional(),
-  boxGroomName: z.string().optional(),
-  notes: z.string().optional(),
+  driverName: optStr,
+  driverServiceNumber: optStr,
+  vehicleVRN: optStr,
+  boxGroomName: optStr,
+  notes: optStr,
   crew: crewSchema.optional().nullable(),
 });
 
 const editSchema = z.object({
   horseId: z.string().min(1, "Horse is required"),
-  fromLocationId: z.string().optional(),
+  fromLocationId: optStr,
   toLocationId: z.string().min(1, "Destination is required"),
   departureDate: z.string().min(1, "Departure date is required"),
-  arrivalDate: z.string().optional(),
+  arrivalDate: optStr,
   status: z.enum(["PLANNED", "IN_TRANSIT", "COMPLETED", "CANCELLED"]),
-  driverName: z.string().optional(),
-  driverServiceNumber: z.string().optional(),
-  vehicleVRN: z.string().optional(),
-  boxGroomName: z.string().optional(),
-  notes: z.string().optional(),
+  driverName: optStr,
+  driverServiceNumber: optStr,
+  vehicleVRN: optStr,
+  boxGroomName: optStr,
+  notes: optStr,
   crew: crewSchema.optional().nullable(),
 });
 
