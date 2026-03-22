@@ -140,16 +140,15 @@ export default async function MovesPage({
               <th className="text-left px-4 py-3 font-semibold text-gray-600">From</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">To</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Driver</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">VRN</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Box Groom</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-600">Personnel</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600"></th>
             </tr>
           </thead>
           <tbody className="divide-y">
             {moves.length === 0 ? (
               <tr>
-                <td colSpan={9} className="text-center text-gray-500 py-10">
+                <td colSpan={8} className="text-center text-gray-500 py-10">
                   No moves found.
                 </td>
               </tr>
@@ -190,9 +189,19 @@ export default async function MovesPage({
                     <td className="px-4 py-3">
                       <MoveStatusBadge status={move.status} />
                     </td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{move.driverName ?? "—"}</td>
                     <td className="px-4 py-3 font-mono text-xs text-gray-600">{move.vehicleVRN ?? "—"}</td>
-                    <td className="px-4 py-3 text-gray-600 text-xs">{move.boxGroomName ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      {(() => {
+                        const crewData = move.crew as { name: string; role: string }[] | null;
+                        if (crewData && crewData.length > 0) {
+                          return crewData.length === 1
+                            ? crewData[0].name
+                            : `${crewData.length} assigned`;
+                        }
+                        if (move.driverName) return move.driverName;
+                        return "—";
+                      })()}
+                    </td>
                     <td className="px-4 py-3">
                       <Link
                         href={`/moves/${move.id}`}

@@ -15,6 +15,11 @@ const updateSchema = z.object({
   boxGroomName: z.string().optional().nullable(),
   vehicleVRN: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  crew: z.array(z.object({
+    name: z.string().min(1),
+    serviceNumber: z.string().optional(),
+    role: z.string().min(1),
+  })).optional().nullable(),
 });
 
 export async function GET(

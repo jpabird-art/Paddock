@@ -130,6 +130,7 @@ export default async function MoveDetailPage({
               vehicleVRN: move.vehicleVRN ?? "",
               boxGroomName: move.boxGroomName ?? "",
               notes: move.notes ?? "",
+              crew: (move.crew as { name: string; serviceNumber: string; role: string }[] | null) ?? [],
             }}
           />
         </div>
@@ -146,18 +147,6 @@ export default async function MoveDetailPage({
               value={move.arrivalDate ? format(new Date(move.arrivalDate), "dd MMM yyyy") : "—"}
             />
             <InfoField
-              label="Driver"
-              value={move.driverName ?? "—"}
-            />
-            <InfoField
-              label="Driver Service No."
-              value={
-                move.driverServiceNumber ? (
-                  <span className="font-mono">{move.driverServiceNumber}</span>
-                ) : "—"
-              }
-            />
-            <InfoField
               label="Vehicle VRN"
               value={
                 move.vehicleVRN ? (
@@ -165,7 +154,6 @@ export default async function MoveDetailPage({
                 ) : "—"
               }
             />
-            <InfoField label="Box Groom" value={move.boxGroomName ?? "—"} />
             <InfoField
               label="Created By"
               value={`${move.createdBy.name} (${move.createdBy.serviceNumber})`}
@@ -189,6 +177,55 @@ export default async function MoveDetailPage({
           )}
         </div>
       )}
+
+      {/* Personnel Section */}
+      {(() => {
+        const crewData = move.crew as { name: string; serviceNumber?: string; role: string }[] | null;
+        const ROLE_LABELS: Record<string, string> = {
+          DRIVER: "Driver",
+          BOX_GROOM: "Box Groom",
+          ESCORT: "Escort",
+          VET: "Vet",
+          OTHER: "Other",
+        };
+        // Show legacy fields + crew
+        const hasLegacy = move.driverName || move.boxGroomName;
+        const hasCrew = crewData && crewData.length > 0;
+        if (!hasLegacy && !hasCrew) return null;
+        return (
+          <div className="bg-white rounded-lg border shadow-sm p-6">
+            <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">Personnel</h2>
+            <div className="divide-y">
+              {move.driverName && !hasCrew && (
+                <div className="flex items-center gap-3 py-2">
+                  <span className="text-sm font-medium text-gray-800">{move.driverName}</span>
+                  {move.driverServiceNumber && (
+                    <span className="text-xs text-gray-400 font-mono">{move.driverServiceNumber}</span>
+                  )}
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">Driver</span>
+                </div>
+              )}
+              {move.boxGroomName && !hasCrew && (
+                <div className="flex items-center gap-3 py-2">
+                  <span className="text-sm font-medium text-gray-800">{move.boxGroomName}</span>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">Box Groom</span>
+                </div>
+              )}
+              {hasCrew && crewData!.map((member, i) => (
+                <div key={i} className="flex items-center gap-3 py-2">
+                  <span className="text-sm font-medium text-gray-800">{member.name}</span>
+                  {member.serviceNumber && (
+                    <span className="text-xs text-gray-400 font-mono">{member.serviceNumber}</span>
+                  )}
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded ml-auto">
+                    {ROLE_LABELS[member.role] ?? member.role}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Group Move Section */}
       {move.groupId && siblingMoves.length > 0 && (

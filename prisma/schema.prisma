@@ -304,6 +304,7 @@ model HorseMove {
   driverServiceNumber String?
   boxGroomName        String?
   vehicleVRN          String?
+  crew                Json?
   notes               String?
   groupId             String?
   createdById         String

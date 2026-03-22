@@ -15,6 +15,11 @@ const createSchema = z.object({
   boxGroomName: z.string().optional().nullable(),
   vehicleVRN: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  crew: z.array(z.object({
+    name: z.string().min(1),
+    serviceNumber: z.string().optional(),
+    role: z.string().min(1),
+  })).optional().nullable(),
 });
 
 export async function GET() {
@@ -50,7 +55,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid data", details: parse.error.errors }, { status: 400 });
   }
 
-  const { horseIds, fromLocationId, toLocationId, departureDate, arrivalDate, driverName, driverServiceNumber, boxGroomName, vehicleVRN, notes } = parse.data;
+  const { horseIds, fromLocationId, toLocationId, departureDate, arrivalDate, driverName, driverServiceNumber, boxGroomName, vehicleVRN, notes, crew } = parse.data;
 
   const groupId = horseIds.length > 1 ? randomUUID() : null;
 
@@ -64,6 +69,7 @@ export async function POST(request: Request) {
     boxGroomName: boxGroomName ?? null,
     vehicleVRN: vehicleVRN ?? null,
     notes: notes ?? null,
+    crew: crew ?? undefined,
     groupId,
     createdById: session!.user.id,
   };

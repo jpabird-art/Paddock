@@ -15,7 +15,27 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
-import { X } from "lucide-react";
+import { X, Plus } from "lucide-react";
+
+interface CrewMember {
+  name: string;
+  serviceNumber: string;
+  role: string;
+}
+
+const CREW_ROLES = [
+  { value: "DRIVER", label: "Driver" },
+  { value: "BOX_GROOM", label: "Box Groom" },
+  { value: "ESCORT", label: "Escort" },
+  { value: "VET", label: "Vet" },
+  { value: "OTHER", label: "Other" },
+];
+
+const crewSchema = z.array(z.object({
+  name: z.string().min(1),
+  serviceNumber: z.string().optional(),
+  role: z.string().min(1),
+}));
 
 const createSchema = z.object({
   horseIds: z.array(z.string().min(1)).min(1, "Select at least one horse"),
@@ -29,6 +49,7 @@ const createSchema = z.object({
   vehicleVRN: z.string().optional(),
   boxGroomName: z.string().optional(),
   notes: z.string().optional(),
+  crew: crewSchema.optional(),
 });
 
 const editSchema = z.object({
@@ -43,6 +64,7 @@ const editSchema = z.object({
   vehicleVRN: z.string().optional(),
   boxGroomName: z.string().optional(),
   notes: z.string().optional(),
+  crew: crewSchema.optional(),
 });
 
 interface HorseMoveFormProps {
@@ -61,6 +83,7 @@ interface HorseMoveFormProps {
     vehicleVRN?: string;
     boxGroomName?: string;
     notes?: string;
+    crew?: CrewMember[];
   };
   mode: "create" | "edit";
   moveId?: string;
@@ -93,6 +116,23 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
   const [vehicleVRN, setVehicleVRN] = useState(initialData?.vehicleVRN ?? "");
   const [boxGroomName, setBoxGroomName] = useState(initialData?.boxGroomName ?? "");
   const [notes, setNotes] = useState(initialData?.notes ?? "");
+
+  // Crew state
+  const [crew, setCrew] = useState<CrewMember[]>(initialData?.crew ?? []);
+
+  function addCrewMember() {
+    setCrew((prev) => [...prev, { name: "", serviceNumber: "", role: "BOX_GROOM" }]);
+  }
+
+  function removeCrewMember(index: number) {
+    setCrew((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function updateCrewMember(index: number, field: keyof CrewMember, value: string) {
+    setCrew((prev) =>
+      prev.map((m, i) => (i === index ? { ...m, [field]: value } : m))
+    );
+  }
 
   const filteredHorses = useMemo(() => {
     if (!horseSearch) return horses;
@@ -132,6 +172,9 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
     setLoading(true);
     setErrors({});
 
+    // Filter out empty crew entries
+    const validCrew = crew.filter((m) => m.name.trim());
+
     const payload = {
       ...(mode === "create"
         ? { horseIds: selectedHorseIds }
@@ -146,6 +189,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
       vehicleVRN: vehicleVRN || null,
       boxGroomName: boxGroomName || null,
       notes: notes || null,
+      crew: validCrew.length > 0 ? validCrew : null,
     };
 
     const schema = mode === "create" ? createSchema : editSchema;
@@ -414,27 +458,6 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="driverName">Driver Name</Label>
-          <Input
-            id="driverName"
-            value={driverName}
-            onChange={(e) => setDriverName(e.target.value)}
-            placeholder="e.g. Cpl J. Smith"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="driverServiceNumber">Driver Service Number</Label>
-          <Input
-            id="driverServiceNumber"
-            value={driverServiceNumber}
-            onChange={(e) => setDriverServiceNumber(e.target.value)}
-            placeholder="e.g. CPL001"
-            className="font-mono"
-          />
-        </div>
-
-        <div className="space-y-2">
           <Label htmlFor="vehicleVRN">Vehicle VRN</Label>
           <Input
             id="vehicleVRN"
@@ -444,16 +467,72 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
             className="font-mono uppercase"
           />
         </div>
+      </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="boxGroomName">Box Groom Name</Label>
-          <Input
-            id="boxGroomName"
-            value={boxGroomName}
-            onChange={(e) => setBoxGroomName(e.target.value)}
-            placeholder="e.g. Tpr A. Jones"
-          />
+      {/* Crew / Personnel Section */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label>Personnel</Label>
+          <button
+            type="button"
+            onClick={addCrewMember}
+            className="inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            Add Person
+          </button>
         </div>
+
+        {crew.length === 0 ? (
+          <p className="text-sm text-gray-400 border rounded-md p-4 text-center">
+            No personnel added. Click &quot;Add Person&quot; to assign crew members.
+          </p>
+        ) : (
+          <div className="space-y-2">
+            {crew.map((member, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-2 border rounded-md p-3 bg-gray-50"
+              >
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 flex-1">
+                  <Input
+                    placeholder="Name"
+                    value={member.name}
+                    onChange={(e) => updateCrewMember(index, "name", e.target.value)}
+                  />
+                  <Input
+                    placeholder="Service No. (optional)"
+                    value={member.serviceNumber}
+                    onChange={(e) => updateCrewMember(index, "serviceNumber", e.target.value)}
+                    className="font-mono"
+                  />
+                  <Select
+                    value={member.role}
+                    onValueChange={(v) => updateCrewMember(index, "role", v)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {CREW_ROLES.map((r) => (
+                        <SelectItem key={r.value} value={r.value}>
+                          {r.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => removeCrewMember(index)}
+                  className="text-red-500 hover:text-red-700 p-1 mt-1 shrink-0"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
