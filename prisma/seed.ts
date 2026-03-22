@@ -130,8 +130,8 @@ async function main() {
       weightKg: 580,
       maxRiderWeightKg: 95,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.KINGS_LIFE_GUARD,
-      taskReadiness: TaskReadiness.LIMITED_ROLE, // has open MODERATE injury
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Monty",
@@ -144,7 +144,8 @@ async function main() {
       weightKg: 560,
       maxRiderWeightKg: 90,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.KINGS_LIFE_GUARD,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Wellington",
@@ -157,7 +158,8 @@ async function main() {
       weightKg: 595,
       maxRiderWeightKg: 100,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.KINGS_LIFE_GUARD,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Hercules",
@@ -170,7 +172,8 @@ async function main() {
       weightKg: 610,
       maxRiderWeightKg: 100,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.TRAINING_WING,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Ramrod",
@@ -183,7 +186,8 @@ async function main() {
       weightKg: 545,
       maxRiderWeightKg: 88,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.TRAINING_WING,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Sable",
@@ -196,7 +200,8 @@ async function main() {
       weightKg: 570,
       maxRiderWeightKg: 92,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.TRAINING_WING,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Churchill",
@@ -210,6 +215,7 @@ async function main() {
       maxRiderWeightKg: 98,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Parade",
@@ -223,6 +229,7 @@ async function main() {
       maxRiderWeightKg: 90,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Templar",
@@ -236,6 +243,7 @@ async function main() {
       maxRiderWeightKg: 87,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Gallant",
@@ -248,7 +256,8 @@ async function main() {
       weightKg: 520,
       maxRiderWeightKg: 85,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.WINTER_TRAINING,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Ironside",
@@ -261,7 +270,8 @@ async function main() {
       weightKg: 625,
       maxRiderWeightKg: 102,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.WINTER_TRAINING,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
     {
       name: "Valiant",
@@ -274,23 +284,29 @@ async function main() {
       weightKg: 575,
       maxRiderWeightKg: 93,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.WINTER_TRAINING,
+      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+      taskReadiness: TaskReadiness.FULLY_FIT,
     },
   ];
+
+  // Look up HPB location for currentLocationId
+  const hpbLocation = await prisma.location.findUnique({ where: { code: "HPB" } });
+  if (!hpbLocation) throw new Error("HPB location not found — ensure locations are seeded first");
 
   const createdHorses: { id: string; serviceEntryDate: Date; name: string }[] = [];
 
   for (const horseData of horsesData) {
-    const existing = await prisma.horse.findUnique({
+    const dataWithLocation = { ...horseData, currentLocationId: hpbLocation.id };
+    const horse = await prisma.horse.upsert({
       where: { regimentalNumber: horseData.regimentalNumber },
+      update: {
+        dutyStation: horseData.dutyStation,
+        taskReadiness: horseData.taskReadiness ?? TaskReadiness.FULLY_FIT,
+        currentLocationId: hpbLocation.id,
+      },
+      create: dataWithLocation,
     });
-
-    if (!existing) {
-      const horse = await prisma.horse.create({ data: horseData });
-      createdHorses.push({ id: horse.id, serviceEntryDate: horse.serviceEntryDate, name: horse.name });
-    } else {
-      createdHorses.push({ id: existing.id, serviceEntryDate: existing.serviceEntryDate, name: existing.name });
-    }
+    createdHorses.push({ id: horse.id, serviceEntryDate: horse.serviceEntryDate, name: horse.name });
   }
 
   console.log(`${createdHorses.length} horses ready.`);
@@ -408,69 +424,6 @@ async function main() {
 
   console.log("Health events seeded.");
 
-  // Create 2 open injury reports
-  const sovereignHorse = createdHorses.find((h) => h.name === "Sovereign");
-  const templarHorse = createdHorses.find((h) => h.name === "Templar");
-
-  if (sovereignHorse) {
-    const existing = await prisma.injuryReport.findFirst({
-      where: { horseId: sovereignHorse.id, status: InjuryStatus.OPEN },
-    });
-    if (!existing) {
-      const injury1 = await prisma.injuryReport.create({
-        data: {
-          horseId: sovereignHorse.id,
-          reportedById: trooper1.id,
-          severity: InjurySeverity.MODERATE,
-          status: InjuryStatus.OPEN,
-          description: "Swelling observed on right foreleg, below knee. Horse showing slight lameness at trot. Possible soft tissue injury following yesterday's ceremonial duty.",
-          bodyLocation: "Right Foreleg",
-        },
-      });
-
-      // Notify vets
-      await prisma.injuryNotification.create({
-        data: {
-          injuryReportId: injury1.id,
-          recipientId: vet.id,
-        },
-      });
-      await prisma.injuryNotification.create({
-        data: {
-          injuryReportId: injury1.id,
-          recipientId: admin.id,
-        },
-      });
-    }
-  }
-
-  if (templarHorse) {
-    const existing = await prisma.injuryReport.findFirst({
-      where: { horseId: templarHorse.id, status: InjuryStatus.OPEN },
-    });
-    if (!existing) {
-      const injury2 = await prisma.injuryReport.create({
-        data: {
-          horseId: templarHorse.id,
-          reportedById: trooper2.id,
-          severity: InjurySeverity.MINOR,
-          status: InjuryStatus.UNDER_REVIEW,
-          description: "Minor abrasion to left shoulder, approximately 5cm. Caused by ill-fitting breast collar during last parade. Wound clean but requires monitoring.",
-          bodyLocation: "Left Shoulder",
-        },
-      });
-
-      await prisma.injuryNotification.create({
-        data: {
-          injuryReportId: injury2.id,
-          recipientId: vet.id,
-        },
-      });
-    }
-  }
-
-  console.log("Injury reports created.");
-
   // ─── Reference date ──────────────────────────────────────────────────
   const now = new Date("2026-03-15");
 
@@ -481,187 +434,242 @@ async function main() {
     return h;
   };
 
-  // ─── 1. DUTY ASSIGNMENTS (historical + current) ─────────────────────
-  const existingDutyAssignments = await prisma.dutyAssignment.count();
-  if (existingDutyAssignments === 0) {
-    const dutyAssignmentsData = [
-      // Sovereign: TRAINING_WING 2018-09-01 -> 2020-01-15, then KINGS_LIFE_GUARD from 2020-01-15 (current)
-      {
-        horseId: horseByName("Sovereign").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2018-09-01"),
-        endDate: new Date("2020-01-15"),
-        notes: "Initial training assignment upon entry to service",
-      },
-      {
-        horseId: horseByName("Sovereign").id,
-        assignedById: admin.id,
-        station: DutyStation.KINGS_LIFE_GUARD,
-        startDate: new Date("2020-01-15"),
-        notes: "Promoted to Kings Life Guard after completing training",
-      },
-      // Wellington: HYDE_PARK_BARRACKS 2017-06-01 -> 2019-03-01, TRAINING_WING 2019-03-01 -> 2021-06-01, KINGS_LIFE_GUARD from 2021-06-01 (current)
-      {
-        horseId: horseByName("Wellington").id,
-        assignedById: admin.id,
-        station: DutyStation.HYDE_PARK_BARRACKS,
-        startDate: new Date("2017-06-01"),
-        endDate: new Date("2019-03-01"),
-        notes: "Initial posting at Hyde Park",
-      },
-      {
-        horseId: horseByName("Wellington").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2019-03-01"),
-        endDate: new Date("2021-06-01"),
-        notes: "Returned to training wing for advanced schooling",
-      },
-      {
-        horseId: horseByName("Wellington").id,
-        assignedById: admin.id,
-        station: DutyStation.KINGS_LIFE_GUARD,
-        startDate: new Date("2021-06-01"),
-        notes: "Assigned to Kings Life Guard ceremonial duties",
-      },
-      // Hercules: KINGS_LIFE_GUARD 2020-04-10 -> 2023-01-01, then TRAINING_WING from 2023-01-01 (current)
-      {
-        horseId: horseByName("Hercules").id,
-        assignedById: admin.id,
-        station: DutyStation.KINGS_LIFE_GUARD,
-        startDate: new Date("2020-04-10"),
-        endDate: new Date("2023-01-01"),
-        notes: "Initial assignment to ceremonial duties",
-      },
-      {
-        horseId: horseByName("Hercules").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2023-01-01"),
-        notes: "Transferred to training wing for remedial schooling",
-      },
-      // Monty: TRAINING_WING 2019-03-15 -> 2020-09-01, KINGS_LIFE_GUARD from 2020-09-01 (current)
-      {
-        horseId: horseByName("Monty").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2019-03-15"),
-        endDate: new Date("2020-09-01"),
-        notes: "Initial training period",
-      },
-      {
-        horseId: horseByName("Monty").id,
-        assignedById: admin.id,
-        station: DutyStation.KINGS_LIFE_GUARD,
-        startDate: new Date("2020-09-01"),
-        notes: "Assigned to Kings Life Guard",
-      },
-      // Ramrod: HYDE_PARK_BARRACKS 2021-08-01 -> 2023-04-01, TRAINING_WING from 2023-04-01 (current)
-      {
-        horseId: horseByName("Ramrod").id,
-        assignedById: admin.id,
-        station: DutyStation.HYDE_PARK_BARRACKS,
-        startDate: new Date("2021-08-01"),
-        endDate: new Date("2023-04-01"),
-        notes: "Initial posting at Hyde Park Barracks",
-      },
-      {
-        horseId: horseByName("Ramrod").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2023-04-01"),
-        notes: "Moved to training wing for further development",
-      },
-      // Sable: TRAINING_WING from 2019-10-20 (current, single assignment)
-      {
-        horseId: horseByName("Sable").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2019-10-20"),
-        notes: "Long-term training assignment",
-      },
-      // Churchill: KINGS_LIFE_GUARD 2016-05-01 -> 2022-08-01, HYDE_PARK_BARRACKS from 2022-08-01 (current)
-      {
-        horseId: horseByName("Churchill").id,
-        assignedById: admin.id,
-        station: DutyStation.KINGS_LIFE_GUARD,
-        startDate: new Date("2016-05-01"),
-        endDate: new Date("2022-08-01"),
-        notes: "Served on ceremonial guard for 6 years",
-      },
-      {
-        horseId: horseByName("Churchill").id,
-        assignedById: admin.id,
-        station: DutyStation.HYDE_PARK_BARRACKS,
-        startDate: new Date("2022-08-01"),
-        notes: "Semi-retired to lighter duties at Hyde Park",
-      },
-      // Parade: HYDE_PARK_BARRACKS from 2018-11-15 (current)
-      {
-        horseId: horseByName("Parade").id,
-        assignedById: admin.id,
-        station: DutyStation.HYDE_PARK_BARRACKS,
-        startDate: new Date("2018-11-15"),
-        notes: "Assigned to Hyde Park Barracks",
-      },
-      // Templar: TRAINING_WING 2020-07-01 -> 2022-01-01, HYDE_PARK_BARRACKS from 2022-01-01 (current)
-      {
-        horseId: horseByName("Templar").id,
-        assignedById: admin.id,
-        station: DutyStation.TRAINING_WING,
-        startDate: new Date("2020-07-01"),
-        endDate: new Date("2022-01-01"),
-        notes: "Initial training period",
-      },
-      {
-        horseId: horseByName("Templar").id,
-        assignedById: admin.id,
-        station: DutyStation.HYDE_PARK_BARRACKS,
-        startDate: new Date("2022-01-01"),
-        notes: "Posted to Hyde Park Barracks",
-      },
-      // Gallant: WINTER_TRAINING from 2022-03-01 (current)
-      {
-        horseId: horseByName("Gallant").id,
-        assignedById: admin.id,
-        station: DutyStation.WINTER_TRAINING,
-        startDate: new Date("2022-03-01"),
-        notes: "Young horse in winter training programme",
-      },
-      // Ironside: WINTER_TRAINING from 2021-01-15 (current)
-      {
-        horseId: horseByName("Ironside").id,
-        assignedById: admin.id,
-        station: DutyStation.WINTER_TRAINING,
-        startDate: new Date("2021-01-15"),
-        notes: "Assigned to winter training",
-      },
-      // Valiant: HYDE_PARK_BARRACKS 2019-06-10 -> 2023-09-01, WINTER_TRAINING from 2023-09-01 (current)
-      {
-        horseId: horseByName("Valiant").id,
-        assignedById: admin.id,
-        station: DutyStation.HYDE_PARK_BARRACKS,
-        startDate: new Date("2019-06-10"),
-        endDate: new Date("2023-09-01"),
-        notes: "Initially posted to Hyde Park",
-      },
-      {
-        horseId: horseByName("Valiant").id,
-        assignedById: admin.id,
-        station: DutyStation.WINTER_TRAINING,
-        startDate: new Date("2023-09-01"),
-        notes: "Transferred to winter training programme",
-      },
-    ];
+  // Clear any existing open injuries and create 3 resolved ones for demo
+  await prisma.injuryNotification.deleteMany({});
+  await prisma.injuryReport.deleteMany({});
 
-    for (const da of dutyAssignmentsData) {
-      await prisma.dutyAssignment.create({ data: da });
-    }
-    console.log("Duty assignments seeded.");
-  } else {
-    console.log("Duty assignments already exist, skipping.");
+  const resolvedInjuries = [
+    {
+      horseId: horseByName("Sovereign").id,
+      reportedById: trooper1.id,
+      severity: InjurySeverity.MODERATE,
+      status: InjuryStatus.RESOLVED,
+      description: "Swelling observed on right foreleg, below knee. Horse showed slight lameness at trot. Soft tissue injury following ceremonial duty.",
+      bodyLocation: "Right Foreleg",
+      reportedAt: subDays(now, 45),
+      resolvedAt: subDays(now, 20),
+      resolvedById: vet.id,
+      resolutionNote: "Swelling resolved after 3 weeks box rest and cold hosing. Full soundness confirmed at trot-up.",
+    },
+    {
+      horseId: horseByName("Templar").id,
+      reportedById: trooper2.id,
+      severity: InjurySeverity.MINOR,
+      status: InjuryStatus.RESOLVED,
+      description: "Minor abrasion to left shoulder, approximately 5cm. Caused by ill-fitting breast collar during last parade. Wound clean.",
+      bodyLocation: "Left Shoulder",
+      reportedAt: subDays(now, 30),
+      resolvedAt: subDays(now, 14),
+      resolvedById: vet.id,
+      resolutionNote: "Healed cleanly. Breast collar refitted by saddler.",
+    },
+    {
+      horseId: horseByName("Wellington").id,
+      reportedById: trooper1.id,
+      severity: InjurySeverity.MINOR,
+      status: InjuryStatus.RESOLVED,
+      description: "Small cut to right hind coronet band, likely from overreach during schooling.",
+      bodyLocation: "Right Hind",
+      reportedAt: subDays(now, 60),
+      resolvedAt: subDays(now, 42),
+      resolvedById: vet.id,
+      resolutionNote: "Healed without complication. Overreach boots now fitted for schooling sessions.",
+    },
+  ];
+
+  for (const injury of resolvedInjuries) {
+    await prisma.injuryReport.create({ data: injury });
   }
+
+  console.log("Resolved injury reports created.");
+
+  // ─── 1. DUTY ASSIGNMENTS (historical + current at HPB) ──────────────
+  // Clear and re-seed for demo consistency
+  await prisma.dutyAssignment.deleteMany({});
+
+  const dutyAssignmentsData = [
+    // Sovereign: TRAINING_WING 2018-09 -> 2020-01, then HPB from 2020-01
+    {
+      horseId: horseByName("Sovereign").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2018-09-01"),
+      endDate: new Date("2020-01-15"),
+      notes: "Initial training assignment upon entry to service",
+    },
+    {
+      horseId: horseByName("Sovereign").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2020-01-15"),
+      notes: "Posted to Hyde Park Barracks after completing training",
+    },
+    // Monty: TRAINING_WING 2019-03 -> 2020-09, then HPB from 2020-09
+    {
+      horseId: horseByName("Monty").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2019-03-15"),
+      endDate: new Date("2020-09-01"),
+      notes: "Initial training period",
+    },
+    {
+      horseId: horseByName("Monty").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2020-09-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Wellington: TRAINING_WING 2017-06 -> 2019-03, then HPB from 2019-03
+    {
+      horseId: horseByName("Wellington").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2017-06-01"),
+      endDate: new Date("2019-03-01"),
+      notes: "Initial training assignment",
+    },
+    {
+      horseId: horseByName("Wellington").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2019-03-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Hercules: TRAINING_WING 2020-04 -> 2022-06, then HPB from 2022-06
+    {
+      horseId: horseByName("Hercules").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2020-04-10"),
+      endDate: new Date("2022-06-01"),
+      notes: "Initial training period",
+    },
+    {
+      horseId: horseByName("Hercules").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2022-06-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Ramrod: TRAINING_WING 2021-08 -> 2023-04, then HPB from 2023-04
+    {
+      horseId: horseByName("Ramrod").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2021-08-01"),
+      endDate: new Date("2023-04-01"),
+      notes: "Initial training period",
+    },
+    {
+      horseId: horseByName("Ramrod").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2023-04-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Sable: TRAINING_WING 2019-10 -> 2021-06, then HPB from 2021-06
+    {
+      horseId: horseByName("Sable").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2019-10-20"),
+      endDate: new Date("2021-06-01"),
+      notes: "Training assignment",
+    },
+    {
+      horseId: horseByName("Sable").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2021-06-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Churchill: HPB from 2016-05 (long-serving)
+    {
+      horseId: horseByName("Churchill").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2016-05-01"),
+      notes: "Posted to Hyde Park Barracks on entry to service",
+    },
+    // Parade: HPB from 2018-11
+    {
+      horseId: horseByName("Parade").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2018-11-15"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Templar: TRAINING_WING 2020-07 -> 2022-01, then HPB from 2022-01
+    {
+      horseId: horseByName("Templar").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2020-07-01"),
+      endDate: new Date("2022-01-01"),
+      notes: "Initial training period",
+    },
+    {
+      horseId: horseByName("Templar").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2022-01-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Gallant: TRAINING_WING 2022-03 -> 2024-01, then HPB from 2024-01
+    {
+      horseId: horseByName("Gallant").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2022-03-01"),
+      endDate: new Date("2024-01-01"),
+      notes: "Training programme",
+    },
+    {
+      horseId: horseByName("Gallant").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2024-01-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Ironside: TRAINING_WING 2021-01 -> 2023-06, then HPB from 2023-06
+    {
+      horseId: horseByName("Ironside").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2021-01-15"),
+      endDate: new Date("2023-06-01"),
+      notes: "Training assignment",
+    },
+    {
+      horseId: horseByName("Ironside").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2023-06-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+    // Valiant: TRAINING_WING 2019-06 -> 2021-03, then HPB from 2021-03
+    {
+      horseId: horseByName("Valiant").id,
+      assignedById: admin.id,
+      station: DutyStation.TRAINING_WING,
+      startDate: new Date("2019-06-10"),
+      endDate: new Date("2021-03-01"),
+      notes: "Training period",
+    },
+    {
+      horseId: horseByName("Valiant").id,
+      assignedById: admin.id,
+      station: DutyStation.HYDE_PARK_BARRACKS,
+      startDate: new Date("2021-03-01"),
+      notes: "Posted to Hyde Park Barracks",
+    },
+  ];
+
+  for (const da of dutyAssignmentsData) {
+    await prisma.dutyAssignment.create({ data: da });
+  }
+  console.log("Duty assignments seeded.");
 
   // ─── 2. RIDER ASSIGNMENTS ───────────────────────────────────────────
   const existingRiderAssignments = await prisma.riderAssignment.count();
