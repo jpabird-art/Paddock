@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import {
-  Shield,
   LayoutDashboard,
   Stethoscope,
   Calendar,
@@ -111,9 +110,7 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Logo */}
       <div className="px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <div className="bg-amber-400 rounded-full p-1.5 shrink-0">
-            <Shield className="h-5 w-5 text-[#1a2744]" />
-          </div>
+          <img src="/hcmr-logo.webp" alt="HCMR" className="h-9 w-auto shrink-0" />
           <div>
             <div className="text-white font-bold text-sm tracking-wide">HCMR FLEET</div>
             <div className="text-blue-300 text-xs">Horse Management</div>
