@@ -314,20 +314,10 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
               <SelectValue placeholder="Select station" />
             </SelectTrigger>
             <SelectContent>
-              {locations.length > 0 ? (
-                locations.map((l) => (
-                  <SelectItem key={l.id} value={l.code}>
-                    {l.name}
-                  </SelectItem>
-                ))
-              ) : (
-                <>
-                  <SelectItem value="KINGS_LIFE_GUARD">King&apos;s Life Guard</SelectItem>
-                  <SelectItem value="TRAINING_WING">Training Wing</SelectItem>
-                  <SelectItem value="HYDE_PARK_BARRACKS">Hyde Park Barracks</SelectItem>
-                  <SelectItem value="WINTER_TRAINING">Winter Training</SelectItem>
-                </>
-              )}
+              <SelectItem value="KINGS_LIFE_GUARD">King&apos;s Life Guard</SelectItem>
+              <SelectItem value="TRAINING_WING">Training Wing</SelectItem>
+              <SelectItem value="HYDE_PARK_BARRACKS">Hyde Park Barracks</SelectItem>
+              <SelectItem value="WINTER_TRAINING">Winter Training</SelectItem>
             </SelectContent>
           </Select>
           {errors.dutyStation && (

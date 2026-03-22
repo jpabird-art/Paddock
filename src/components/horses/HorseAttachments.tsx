@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { Paperclip, Download } from "lucide-react";
+import { Paperclip, Download, Camera, X } from "lucide-react";
 
 interface AttachmentData {
   id: string;
@@ -40,6 +40,7 @@ interface HorseAttachmentsProps {
   horseId: string;
   initialAttachments: AttachmentData[];
   canUpload: boolean;
+  photoUrl: string | null;
 }
 
 type AttachmentCategory =
@@ -75,14 +76,17 @@ export function HorseAttachments({
   horseId,
   initialAttachments,
   canUpload,
+  photoUrl,
 }: HorseAttachmentsProps) {
   const { toast } = useToast();
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
   const [attachments, setAttachments] =
     useState<AttachmentData[]>(initialAttachments);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [photoLoading, setPhotoLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<AttachmentCategory>("DOCUMENT");
   const [description, setDescription] = useState("");
@@ -92,6 +96,51 @@ export function HorseAttachments({
     setCategory("DOCUMENT");
     setDescription("");
     if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  async function handlePhotoUpload(file: File) {
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Invalid file", description: "Please select an image file.", variant: "destructive" });
+      return;
+    }
+    setPhotoLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch(`/api/horses/${horseId}/profile-image`, {
+        method: "POST",
+        body: formData,
+      });
+      if (!res.ok) {
+        const err = await res.json();
+        toast({ title: "Upload failed", description: err.error ?? "Failed to upload profile picture.", variant: "destructive" });
+        return;
+      }
+      toast({ title: "Profile picture updated", description: "The horse profile picture has been set." });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setPhotoLoading(false);
+      if (photoInputRef.current) photoInputRef.current.value = "";
+    }
+  }
+
+  async function handlePhotoRemove() {
+    setPhotoLoading(true);
+    try {
+      const res = await fetch(`/api/horses/${horseId}/profile-image`, { method: "DELETE" });
+      if (!res.ok) {
+        toast({ title: "Error", description: "Failed to remove profile picture.", variant: "destructive" });
+        return;
+      }
+      toast({ title: "Profile picture removed" });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setPhotoLoading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -151,6 +200,64 @@ export function HorseAttachments({
 
   return (
     <div className="space-y-4">
+      {/* Profile Picture Section */}
+      <div className="bg-white rounded-lg border shadow-sm p-4">
+        <h3 className="text-sm font-semibold text-gray-700 mb-3">Profile Picture</h3>
+        <div className="flex items-center gap-4">
+          {photoUrl ? (
+            <img
+              src={photoUrl}
+              alt="Horse profile"
+              className="w-20 h-20 rounded-lg object-cover border border-gray-200"
+              onError={(e) => { e.currentTarget.style.display = "none"; }}
+            />
+          ) : (
+            <div className="w-20 h-20 rounded-lg bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center">
+              <Camera className="h-6 w-6 text-gray-400" />
+            </div>
+          )}
+          {canUpload && (
+            <div className="flex flex-col gap-2">
+              <input
+                ref={photoInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handlePhotoUpload(file);
+                }}
+              />
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={photoLoading}
+                onClick={() => photoInputRef.current?.click()}
+                className="text-xs"
+              >
+                <Camera className="h-3.5 w-3.5 mr-1.5" />
+                {photoLoading ? "Uploading..." : photoUrl ? "Replace profile picture" : "Upload profile picture"}
+              </Button>
+              {photoUrl && (
+                <Button
+                  size="sm"
+                  variant="outline"
+                  disabled={photoLoading}
+                  onClick={handlePhotoRemove}
+                  className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <X className="h-3.5 w-3.5 mr-1.5" />
+                  Remove
+                </Button>
+              )}
+            </div>
+          )}
+          {!canUpload && !photoUrl && (
+            <p className="text-xs text-gray-400">No profile picture set.</p>
+          )}
+        </div>
+      </div>
+
       {canUpload && (
         <div className="flex justify-end">
           <Dialog open={open} onOpenChange={setOpen}>

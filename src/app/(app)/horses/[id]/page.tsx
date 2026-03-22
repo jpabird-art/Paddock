@@ -131,6 +131,17 @@ export default async function HorseDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-4">
+          {horse.photoUrl ? (
+            <img
+              src={horse.photoUrl}
+              alt={horse.name}
+              className="w-16 h-16 lg:w-20 lg:h-20 rounded-lg object-cover border border-gray-200 shrink-0"
+            />
+          ) : (
+            <div className="w-16 h-16 lg:w-20 lg:h-20 rounded-lg bg-gray-100 border border-gray-200 flex items-center justify-center shrink-0">
+              <span className="text-2xl lg:text-3xl font-bold text-gray-300">{horse.name.charAt(0)}</span>
+            </div>
+          )}
           <div>
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl font-bold text-gray-900">{horse.name}</h1>
@@ -563,6 +574,7 @@ export default async function HorseDetailPage({
                 createdAt: a.createdAt.toISOString(),
               }))}
               canUpload={canUploadAttachments}
+              photoUrl={horse.photoUrl}
             />
           </div>
         </TabsContent>

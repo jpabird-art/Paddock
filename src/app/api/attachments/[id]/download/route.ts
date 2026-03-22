@@ -22,10 +22,11 @@ export async function GET(
     const filePath = path.join(process.cwd(), attachment.filePath);
     const buffer = await readFile(filePath);
 
+    const isImage = attachment.mimeType.startsWith("image/");
     return new NextResponse(buffer, {
       headers: {
         "Content-Type": attachment.mimeType,
-        "Content-Disposition": `attachment; filename="${attachment.fileName}"`,
+        "Content-Disposition": `${isImage ? "inline" : "attachment"}; filename="${attachment.fileName}"`,
         "Content-Length": String(buffer.length),
       },
     });
