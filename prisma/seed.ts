@@ -131,7 +131,7 @@ async function main() {
       maxRiderWeightKg: 95,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Monty",
@@ -145,7 +145,7 @@ async function main() {
       maxRiderWeightKg: 90,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Wellington",
@@ -159,7 +159,7 @@ async function main() {
       maxRiderWeightKg: 100,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Hercules",
@@ -173,7 +173,7 @@ async function main() {
       maxRiderWeightKg: 100,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Ramrod",
@@ -187,7 +187,7 @@ async function main() {
       maxRiderWeightKg: 88,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Sable",
@@ -201,7 +201,7 @@ async function main() {
       maxRiderWeightKg: 92,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Churchill",
@@ -215,7 +215,7 @@ async function main() {
       maxRiderWeightKg: 98,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Parade",
@@ -229,7 +229,7 @@ async function main() {
       maxRiderWeightKg: 90,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Templar",
@@ -243,7 +243,7 @@ async function main() {
       maxRiderWeightKg: 87,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Gallant",
@@ -257,7 +257,7 @@ async function main() {
       maxRiderWeightKg: 85,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Ironside",
@@ -271,7 +271,7 @@ async function main() {
       maxRiderWeightKg: 102,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
     {
       name: "Valiant",
@@ -285,7 +285,7 @@ async function main() {
       maxRiderWeightKg: 93,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
-      taskReadiness: TaskReadiness.FULLY_FIT,
+      taskReadiness: TaskReadiness.FULL_EXERCISE,
     },
   ];
 
@@ -301,7 +301,7 @@ async function main() {
       where: { regimentalNumber: horseData.regimentalNumber },
       update: {
         dutyStation: horseData.dutyStation,
-        taskReadiness: horseData.taskReadiness ?? TaskReadiness.FULLY_FIT,
+        taskReadiness: horseData.taskReadiness ?? TaskReadiness.FULL_EXERCISE,
         currentLocationId: hpbLocation.id,
       },
       create: dataWithLocation,
