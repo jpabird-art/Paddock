@@ -49,7 +49,7 @@ const createSchema = z.object({
   vehicleVRN: z.string().optional(),
   boxGroomName: z.string().optional(),
   notes: z.string().optional(),
-  crew: crewSchema.optional(),
+  crew: crewSchema.optional().nullable(),
 });
 
 const editSchema = z.object({
@@ -64,7 +64,7 @@ const editSchema = z.object({
   vehicleVRN: z.string().optional(),
   boxGroomName: z.string().optional(),
   notes: z.string().optional(),
-  crew: crewSchema.optional(),
+  crew: crewSchema.optional().nullable(),
 });
 
 interface HorseMoveFormProps {
