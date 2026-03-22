@@ -305,6 +305,7 @@ model HorseMove {
   boxGroomName        String?
   vehicleVRN          String?
   notes               String?
+  groupId             String?
   createdById         String
   updatedById         String?
   createdAt           DateTime   @default(now())
@@ -316,6 +317,7 @@ model HorseMove {
   createdBy    User      @relation("MoveCreatedBy", fields: [createdById], references: [id])
   updatedBy    User?     @relation("MoveUpdatedBy", fields: [updatedById], references: [id])
 
+  @@index([groupId])
   @@map("horse_moves")
 }
 

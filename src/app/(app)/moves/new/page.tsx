@@ -14,7 +14,7 @@ export default async function NewMovePage() {
   const [horses, locations] = await Promise.all([
     prisma.horse.findMany({
       where: { isActive: true },
-      select: { id: true, name: true, regimentalNumber: true },
+      select: { id: true, name: true, regimentalNumber: true, squadron: true },
       orderBy: { name: "asc" },
     }),
     prisma.location.findMany({

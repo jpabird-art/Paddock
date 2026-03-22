@@ -2,9 +2,10 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
+import { randomUUID } from "crypto";
 
 const createSchema = z.object({
-  horseId: z.string().min(1),
+  horseIds: z.array(z.string().min(1)).min(1, "Select at least one horse"),
   fromLocationId: z.string().optional().nullable(),
   toLocationId: z.string().min(1),
   departureDate: z.string().min(1),
@@ -38,28 +39,42 @@ export async function POST(request: Request) {
   if (error) return error;
 
   const body = await request.json();
+
+  // Backward compat: accept single horseId
+  if (body.horseId && !body.horseIds) {
+    body.horseIds = [body.horseId];
+  }
+
   const parse = createSchema.safeParse(body);
   if (!parse.success) {
     return NextResponse.json({ error: "Invalid data", details: parse.error.errors }, { status: 400 });
   }
 
-  const { horseId, fromLocationId, toLocationId, departureDate, arrivalDate, driverName, driverServiceNumber, boxGroomName, vehicleVRN, notes } = parse.data;
+  const { horseIds, fromLocationId, toLocationId, departureDate, arrivalDate, driverName, driverServiceNumber, boxGroomName, vehicleVRN, notes } = parse.data;
 
-  const move = await prisma.horseMove.create({
-    data: {
-      horseId,
-      fromLocationId: fromLocationId ?? null,
-      toLocationId,
-      departureDate: new Date(departureDate),
-      arrivalDate: arrivalDate ? new Date(arrivalDate) : null,
-      driverName: driverName ?? null,
-      driverServiceNumber: driverServiceNumber ?? null,
-      boxGroomName: boxGroomName ?? null,
-      vehicleVRN: vehicleVRN ?? null,
-      notes: notes ?? null,
-      createdById: session!.user.id,
-    },
-  });
+  const groupId = horseIds.length > 1 ? randomUUID() : null;
 
-  return NextResponse.json(move, { status: 201 });
+  const sharedData = {
+    fromLocationId: fromLocationId ?? null,
+    toLocationId,
+    departureDate: new Date(departureDate),
+    arrivalDate: arrivalDate ? new Date(arrivalDate) : null,
+    driverName: driverName ?? null,
+    driverServiceNumber: driverServiceNumber ?? null,
+    boxGroomName: boxGroomName ?? null,
+    vehicleVRN: vehicleVRN ?? null,
+    notes: notes ?? null,
+    groupId,
+    createdById: session!.user.id,
+  };
+
+  const moves = await prisma.$transaction(
+    horseIds.map((horseId) =>
+      prisma.horseMove.create({
+        data: { horseId, ...sharedData },
+      })
+    )
+  );
+
+  return NextResponse.json(moves.length === 1 ? moves[0] : moves, { status: 201 });
 }

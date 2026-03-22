@@ -7,6 +7,7 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { MoveStatusBadge } from "@/components/moves/MoveStatusBadge";
 import { HorseMoveForm } from "@/components/moves/HorseMoveForm";
+import { GroupStatusUpdate } from "@/components/moves/GroupStatusUpdate";
 
 export default async function MoveDetailPage({
   params,
@@ -38,11 +39,22 @@ export default async function MoveDetailPage({
 
   if (!move) notFound();
 
+  // Fetch sibling moves if this is a group move
+  const siblingMoves = move.groupId
+    ? await prisma.horseMove.findMany({
+        where: { groupId: move.groupId, id: { not: move.id } },
+        include: {
+          horse: { select: { id: true, name: true, regimentalNumber: true } },
+        },
+        orderBy: { horse: { name: "asc" } },
+      })
+    : [];
+
   const [horses, locations] = canEdit && edit === "1"
     ? await Promise.all([
         prisma.horse.findMany({
           where: { isActive: true },
-          select: { id: true, name: true, regimentalNumber: true },
+          select: { id: true, name: true, regimentalNumber: true, squadron: true },
           orderBy: { name: "asc" },
         }),
         prisma.location.findMany({
@@ -81,6 +93,11 @@ export default async function MoveDetailPage({
               {move.toLocation.name}
             </span>
             <MoveStatusBadge status={move.status} />
+            {move.groupId && siblingMoves.length > 0 && (
+              <span className="inline-flex items-center text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full font-medium">
+                Group of {siblingMoves.length + 1}
+              </span>
+            )}
           </div>
         </div>
         {canEdit && edit !== "1" && (
@@ -168,6 +185,45 @@ export default async function MoveDetailPage({
               <p className="text-sm text-gray-700 leading-relaxed bg-gray-50 p-3 rounded-md border">
                 {move.notes}
               </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Group Move Section */}
+      {move.groupId && siblingMoves.length > 0 && (
+        <div className="bg-white rounded-lg border shadow-sm p-6">
+          <h2 className="text-sm font-semibold text-gray-700 mb-4 uppercase tracking-wide">
+            Group Move — {siblingMoves.length + 1} Horses
+          </h2>
+          <div className="divide-y">
+            {/* Current horse */}
+            <div className="flex items-center gap-3 py-2">
+              <span className="font-medium text-gray-800 text-sm">{move.horse.name}</span>
+              <span className="text-xs text-gray-400 font-mono">{move.horse.regimentalNumber}</span>
+              <span className="text-xs text-gray-400 ml-auto">(this move)</span>
+            </div>
+            {/* Siblings */}
+            {siblingMoves.map((s) => (
+              <div key={s.id} className="flex items-center gap-3 py-2">
+                <Link
+                  href={`/moves/${s.id}`}
+                  className="font-medium text-[#1a2744] hover:underline text-sm"
+                >
+                  {s.horse.name}
+                </Link>
+                <span className="text-xs text-gray-400 font-mono">{s.horse.regimentalNumber}</span>
+                <MoveStatusBadge status={s.status} />
+              </div>
+            ))}
+          </div>
+          {canEdit && edit !== "1" && (
+            <div className="mt-4 pt-4 border-t">
+              <GroupStatusUpdate
+                groupId={move.groupId}
+                currentStatus={move.status}
+                horseCount={siblingMoves.length + 1}
+              />
             </div>
           )}
         </div>

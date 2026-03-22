@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -15,8 +15,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import { X } from "lucide-react";
 
-const moveSchema = z.object({
+const createSchema = z.object({
+  horseIds: z.array(z.string().min(1)).min(1, "Select at least one horse"),
+  fromLocationId: z.string().optional(),
+  toLocationId: z.string().min(1, "Destination is required"),
+  departureDate: z.string().min(1, "Departure date is required"),
+  arrivalDate: z.string().optional(),
+  status: z.enum(["PLANNED", "IN_TRANSIT", "COMPLETED", "CANCELLED"]),
+  driverName: z.string().optional(),
+  driverServiceNumber: z.string().optional(),
+  vehicleVRN: z.string().optional(),
+  boxGroomName: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+const editSchema = z.object({
   horseId: z.string().min(1, "Horse is required"),
   fromLocationId: z.string().optional(),
   toLocationId: z.string().min(1, "Destination is required"),
@@ -30,12 +45,23 @@ const moveSchema = z.object({
   notes: z.string().optional(),
 });
 
-type MoveFormData = z.infer<typeof moveSchema>;
-
 interface HorseMoveFormProps {
-  horses: { id: string; name: string; regimentalNumber: string }[];
+  horses: { id: string; name: string; regimentalNumber: string; squadron?: string | null }[];
   locations: { id: string; name: string; code: string }[];
-  initialData?: Partial<MoveFormData> & { id?: string };
+  initialData?: {
+    id?: string;
+    horseId?: string;
+    fromLocationId?: string;
+    toLocationId?: string;
+    departureDate?: string;
+    arrivalDate?: string;
+    status?: "PLANNED" | "IN_TRANSIT" | "COMPLETED" | "CANCELLED";
+    driverName?: string;
+    driverServiceNumber?: string;
+    vehicleVRN?: string;
+    boxGroomName?: string;
+    notes?: string;
+  };
   mode: "create" | "edit";
   moveId?: string;
 }
@@ -44,36 +70,61 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
   const router = useRouter();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Partial<Record<keyof MoveFormData, string>>>({});
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const [formData, setFormData] = useState<MoveFormData>({
-    horseId: initialData?.horseId ?? "",
-    fromLocationId: initialData?.fromLocationId ?? "",
-    toLocationId: initialData?.toLocationId ?? "",
-    departureDate: initialData?.departureDate
-      ? initialData.departureDate.substring(0, 10)
-      : "",
-    arrivalDate: initialData?.arrivalDate
-      ? initialData.arrivalDate.substring(0, 10)
-      : "",
-    status: initialData?.status ?? "PLANNED",
-    driverName: initialData?.driverName ?? "",
-    driverServiceNumber: initialData?.driverServiceNumber ?? "",
-    vehicleVRN: initialData?.vehicleVRN ?? "",
-    boxGroomName: initialData?.boxGroomName ?? "",
-    notes: initialData?.notes ?? "",
-  });
+  // Multi-select state (create mode)
+  const [selectedHorseIds, setSelectedHorseIds] = useState<string[]>(
+    initialData?.horseId ? [initialData.horseId] : []
+  );
+  const [horseSearch, setHorseSearch] = useState("");
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
-    const { name, value } = e.target;
-    const finalValue = name === "vehicleVRN" ? value.toUpperCase() : value;
-    setFormData((prev) => ({ ...prev, [name]: finalValue }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+  // Form fields
+  const [fromLocationId, setFromLocationId] = useState(initialData?.fromLocationId ?? "");
+  const [toLocationId, setToLocationId] = useState(initialData?.toLocationId ?? "");
+  const [departureDate, setDepartureDate] = useState(
+    initialData?.departureDate ? initialData.departureDate.substring(0, 10) : ""
+  );
+  const [arrivalDate, setArrivalDate] = useState(
+    initialData?.arrivalDate ? initialData.arrivalDate.substring(0, 10) : ""
+  );
+  const [status, setStatus] = useState(initialData?.status ?? "PLANNED");
+  const [driverName, setDriverName] = useState(initialData?.driverName ?? "");
+  const [driverServiceNumber, setDriverServiceNumber] = useState(initialData?.driverServiceNumber ?? "");
+  const [vehicleVRN, setVehicleVRN] = useState(initialData?.vehicleVRN ?? "");
+  const [boxGroomName, setBoxGroomName] = useState(initialData?.boxGroomName ?? "");
+  const [notes, setNotes] = useState(initialData?.notes ?? "");
+
+  const filteredHorses = useMemo(() => {
+    if (!horseSearch) return horses;
+    const q = horseSearch.toLowerCase();
+    return horses.filter(
+      (h) =>
+        h.name.toLowerCase().includes(q) ||
+        h.regimentalNumber.toLowerCase().includes(q)
+    );
+  }, [horses, horseSearch]);
+
+  const lifeGuards = horses.filter((h) => h.squadron === "THE_LIFE_GUARDS");
+  const bluesAndRoyals = horses.filter((h) => h.squadron === "THE_BLUES_AND_ROYALS");
+
+  function toggleHorse(id: string) {
+    setSelectedHorseIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+    setErrors((prev) => ({ ...prev, horseIds: "" }));
   }
 
-  function handleSelect(name: string, value: string) {
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    setErrors((prev) => ({ ...prev, [name]: undefined }));
+  function selectSquadron(squadronHorses: { id: string }[]) {
+    const ids = squadronHorses.map((h) => h.id);
+    setSelectedHorseIds((prev) => {
+      const combined = new Set([...prev, ...ids]);
+      return Array.from(combined);
+    });
+    setErrors((prev) => ({ ...prev, horseIds: "" }));
+  }
+
+  function clearAll() {
+    setSelectedHorseIds([]);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -82,21 +133,32 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
     setErrors({});
 
     const payload = {
-      ...formData,
-      fromLocationId: formData.fromLocationId || null,
-      arrivalDate: formData.arrivalDate || null,
-      driverName: formData.driverName || null,
-      driverServiceNumber: formData.driverServiceNumber || null,
-      vehicleVRN: formData.vehicleVRN || null,
-      boxGroomName: formData.boxGroomName || null,
-      notes: formData.notes || null,
+      ...(mode === "create"
+        ? { horseIds: selectedHorseIds }
+        : { horseId: selectedHorseIds[0] }),
+      fromLocationId: fromLocationId || null,
+      toLocationId,
+      departureDate,
+      arrivalDate: arrivalDate || null,
+      status,
+      driverName: driverName || null,
+      driverServiceNumber: driverServiceNumber || null,
+      vehicleVRN: vehicleVRN || null,
+      boxGroomName: boxGroomName || null,
+      notes: notes || null,
     };
 
-    const parse = moveSchema.safeParse(formData);
+    const schema = mode === "create" ? createSchema : editSchema;
+    const parse = schema.safeParse(
+      mode === "create"
+        ? { ...payload, horseIds: selectedHorseIds }
+        : { ...payload, horseId: selectedHorseIds[0] }
+    );
+
     if (!parse.success) {
-      const fieldErrors: typeof errors = {};
+      const fieldErrors: Record<string, string> = {};
       parse.error.errors.forEach((err) => {
-        const field = err.path[0] as keyof MoveFormData;
+        const field = String(err.path[0]);
         fieldErrors[field] = err.message;
       });
       setErrors(fieldErrors);
@@ -124,15 +186,21 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
         return;
       }
 
-      const move = await res.json();
-      toast({
-        title: mode === "create" ? "Move created" : "Move updated",
-        description: mode === "create" ? "Horse move has been logged." : "Move record updated.",
-      });
+      const result = await res.json();
 
       if (mode === "create") {
-        router.push(`/moves/${move.id}`);
+        const count = Array.isArray(result) ? result.length : 1;
+        toast({
+          title: "Move created",
+          description:
+            count > 1
+              ? `Group move logged for ${count} horses.`
+              : "Horse move has been logged.",
+        });
+        const firstId = Array.isArray(result) ? result[0].id : result.id;
+        router.push(`/moves/${firstId}`);
       } else {
+        toast({ title: "Move updated", description: "Move record updated." });
         router.refresh();
       }
     } catch {
@@ -146,14 +214,115 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
     }
   }
 
+  const selectedHorses = horses.filter((h) => selectedHorseIds.includes(h.id));
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Horse Selection */}
+      {mode === "create" ? (
+        <div className="space-y-3">
+          <Label>
+            Horses{" "}
+            <span className="text-gray-400 font-normal">
+              ({selectedHorseIds.length} selected)
+            </span>
+          </Label>
+
+          {/* Quick select buttons */}
+          <div className="flex gap-2 flex-wrap">
+            <button
+              type="button"
+              onClick={() => selectSquadron(lifeGuards)}
+              className="text-xs px-2.5 py-1 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              + Life Guards ({lifeGuards.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => selectSquadron(bluesAndRoyals)}
+              className="text-xs px-2.5 py-1 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              + Blues & Royals ({bluesAndRoyals.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => selectSquadron(horses)}
+              className="text-xs px-2.5 py-1 rounded-md border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 transition-colors"
+            >
+              + Select All ({horses.length})
+            </button>
+            {selectedHorseIds.length > 0 && (
+              <button
+                type="button"
+                onClick={clearAll}
+                className="text-xs px-2.5 py-1 rounded-md border border-red-200 bg-white text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Clear All
+              </button>
+            )}
+          </div>
+
+          {/* Selected chips */}
+          {selectedHorses.length > 0 && (
+            <div className="flex flex-wrap gap-1.5">
+              {selectedHorses.map((h) => (
+                <span
+                  key={h.id}
+                  className="inline-flex items-center gap-1 bg-[#1a2744] text-white text-xs px-2 py-1 rounded-md"
+                >
+                  {h.name}
+                  <button
+                    type="button"
+                    onClick={() => toggleHorse(h.id)}
+                    className="hover:text-red-300"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Search + checkbox list */}
+          <Input
+            placeholder="Search horses..."
+            value={horseSearch}
+            onChange={(e) => setHorseSearch(e.target.value)}
+          />
+          <div className="border rounded-md max-h-48 overflow-y-auto divide-y">
+            {filteredHorses.length === 0 ? (
+              <p className="text-sm text-gray-400 p-3 text-center">No horses match.</p>
+            ) : (
+              filteredHorses.map((h) => (
+                <label
+                  key={h.id}
+                  className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer text-sm"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedHorseIds.includes(h.id)}
+                    onChange={() => toggleHorse(h.id)}
+                    className="rounded border-gray-300"
+                  />
+                  <span className="font-medium text-gray-800">{h.name}</span>
+                  <span className="text-gray-400 font-mono text-xs">{h.regimentalNumber}</span>
+                  {h.squadron && (
+                    <span className="text-gray-400 text-xs ml-auto">
+                      {h.squadron === "THE_LIFE_GUARDS" ? "LG" : "B&R"}
+                    </span>
+                  )}
+                </label>
+              ))
+            )}
+          </div>
+          {errors.horseIds && <p className="text-sm text-red-600">{errors.horseIds}</p>}
+        </div>
+      ) : (
         <div className="space-y-2">
           <Label>Horse</Label>
           <Select
-            value={formData.horseId}
-            onValueChange={(v) => handleSelect("horseId", v)}
+            value={selectedHorseIds[0] ?? ""}
+            onValueChange={(v) => setSelectedHorseIds([v])}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select horse" />
@@ -168,13 +337,12 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           </Select>
           {errors.horseId && <p className="text-sm text-red-600">{errors.horseId}</p>}
         </div>
+      )}
 
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label>Status</Label>
-          <Select
-            value={formData.status}
-            onValueChange={(v) => handleSelect("status", v)}
-          >
+          <Select value={status} onValueChange={(v) => setStatus(v as typeof status)}>
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
@@ -190,8 +358,8 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
         <div className="space-y-2">
           <Label>From Location</Label>
           <Select
-            value={formData.fromLocationId ?? ""}
-            onValueChange={(v) => handleSelect("fromLocationId", v === "none" ? "" : v)}
+            value={fromLocationId || "none"}
+            onValueChange={(v) => setFromLocationId(v === "none" ? "" : v)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Unknown / First move" />
@@ -209,10 +377,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
 
         <div className="space-y-2">
           <Label>To Location</Label>
-          <Select
-            value={formData.toLocationId}
-            onValueChange={(v) => handleSelect("toLocationId", v)}
-          >
+          <Select value={toLocationId} onValueChange={setToLocationId}>
             <SelectTrigger>
               <SelectValue placeholder="Select destination" />
             </SelectTrigger>
@@ -231,10 +396,9 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           <Label htmlFor="departureDate">Departure Date</Label>
           <Input
             id="departureDate"
-            name="departureDate"
             type="date"
-            value={formData.departureDate}
-            onChange={handleChange}
+            value={departureDate}
+            onChange={(e) => setDepartureDate(e.target.value)}
           />
           {errors.departureDate && <p className="text-sm text-red-600">{errors.departureDate}</p>}
         </div>
@@ -243,10 +407,9 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           <Label htmlFor="arrivalDate">Arrival Date</Label>
           <Input
             id="arrivalDate"
-            name="arrivalDate"
             type="date"
-            value={formData.arrivalDate ?? ""}
-            onChange={handleChange}
+            value={arrivalDate}
+            onChange={(e) => setArrivalDate(e.target.value)}
           />
         </div>
 
@@ -254,9 +417,8 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           <Label htmlFor="driverName">Driver Name</Label>
           <Input
             id="driverName"
-            name="driverName"
-            value={formData.driverName ?? ""}
-            onChange={handleChange}
+            value={driverName}
+            onChange={(e) => setDriverName(e.target.value)}
             placeholder="e.g. Cpl J. Smith"
           />
         </div>
@@ -265,9 +427,8 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           <Label htmlFor="driverServiceNumber">Driver Service Number</Label>
           <Input
             id="driverServiceNumber"
-            name="driverServiceNumber"
-            value={formData.driverServiceNumber ?? ""}
-            onChange={handleChange}
+            value={driverServiceNumber}
+            onChange={(e) => setDriverServiceNumber(e.target.value)}
             placeholder="e.g. CPL001"
             className="font-mono"
           />
@@ -277,9 +438,8 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           <Label htmlFor="vehicleVRN">Vehicle VRN</Label>
           <Input
             id="vehicleVRN"
-            name="vehicleVRN"
-            value={formData.vehicleVRN ?? ""}
-            onChange={handleChange}
+            value={vehicleVRN}
+            onChange={(e) => setVehicleVRN(e.target.value.toUpperCase())}
             placeholder="e.g. AB12 CDE"
             className="font-mono uppercase"
           />
@@ -289,9 +449,8 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           <Label htmlFor="boxGroomName">Box Groom Name</Label>
           <Input
             id="boxGroomName"
-            name="boxGroomName"
-            value={formData.boxGroomName ?? ""}
-            onChange={handleChange}
+            value={boxGroomName}
+            onChange={(e) => setBoxGroomName(e.target.value)}
             placeholder="e.g. Tpr A. Jones"
           />
         </div>
@@ -301,9 +460,8 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
         <Label htmlFor="notes">Notes</Label>
         <Textarea
           id="notes"
-          name="notes"
-          value={formData.notes ?? ""}
-          onChange={handleChange}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
           placeholder="Any special instructions or notes..."
           rows={3}
         />
@@ -316,7 +474,9 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
               ? "Creating..."
               : "Saving..."
             : mode === "create"
-            ? "Create Move"
+            ? selectedHorseIds.length > 1
+              ? `Create Group Move (${selectedHorseIds.length} horses)`
+              : "Create Move"
             : "Save Changes"}
         </Button>
         <Button

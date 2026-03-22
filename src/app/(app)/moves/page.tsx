@@ -66,8 +66,19 @@ export default async function MovesPage({
       toLocation: { select: { id: true, name: true, code: true } },
       createdBy: { select: { name: true } },
     },
-    orderBy: { departureDate: "desc" },
+    orderBy: [{ departureDate: "desc" }, { groupId: "asc" }],
   });
+
+  // Build group size map
+  const groupCounts: Record<string, number> = {};
+  for (const m of moves) {
+    if (m.groupId) {
+      groupCounts[m.groupId] = (groupCounts[m.groupId] ?? 0) + 1;
+    }
+  }
+
+  // Track which groups we've already shown the header for
+  const groupSeen = new Set<string>();
 
   const buildFilterHref = (statusVal: string) => {
     const params = new URLSearchParams();
@@ -143,42 +154,56 @@ export default async function MovesPage({
                 </td>
               </tr>
             ) : (
-              moves.map((move) => (
-                <tr key={move.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-3 text-gray-600">
-                    {format(new Date(move.departureDate), "dd MMM yyyy")}
-                  </td>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/horses/${move.horse.id}`}
-                      className="font-medium text-[#1a2744] hover:underline"
-                    >
-                      {move.horse.name}
-                    </Link>
-                    <div className="text-xs text-gray-400 font-mono">{move.horse.regimentalNumber}</div>
-                  </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">
-                    {move.fromLocation ? move.fromLocation.name : <span className="italic text-gray-400">Unknown</span>}
-                  </td>
-                  <td className="px-4 py-3 text-gray-700 text-xs font-medium">
-                    {move.toLocation.name}
-                  </td>
-                  <td className="px-4 py-3">
-                    <MoveStatusBadge status={move.status} />
-                  </td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{move.driverName ?? "—"}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-gray-600">{move.vehicleVRN ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-600 text-xs">{move.boxGroomName ?? "—"}</td>
-                  <td className="px-4 py-3">
-                    <Link
-                      href={`/moves/${move.id}`}
-                      className="text-[#1a2744] hover:underline text-xs font-medium"
-                    >
-                      View →
-                    </Link>
-                  </td>
-                </tr>
-              ))
+              moves.map((move) => {
+                const isGrouped = move.groupId && groupCounts[move.groupId] > 1;
+                const isFirstInGroup = isGrouped && !groupSeen.has(move.groupId!);
+                if (isGrouped) groupSeen.add(move.groupId!);
+
+                return (
+                  <tr
+                    key={move.id}
+                    className={`hover:bg-gray-50 ${isGrouped && !isFirstInGroup ? "border-l-2 border-l-blue-300" : ""}`}
+                  >
+                    <td className="px-4 py-3 text-gray-600">
+                      <div>{format(new Date(move.departureDate), "dd MMM yyyy")}</div>
+                      {isFirstInGroup && (
+                        <span className="inline-flex items-center text-xs bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded mt-0.5 font-medium">
+                          Group of {groupCounts[move.groupId!]}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/horses/${move.horse.id}`}
+                        className="font-medium text-[#1a2744] hover:underline"
+                      >
+                        {move.horse.name}
+                      </Link>
+                      <div className="text-xs text-gray-400 font-mono">{move.horse.regimentalNumber}</div>
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">
+                      {move.fromLocation ? move.fromLocation.name : <span className="italic text-gray-400">Unknown</span>}
+                    </td>
+                    <td className="px-4 py-3 text-gray-700 text-xs font-medium">
+                      {move.toLocation.name}
+                    </td>
+                    <td className="px-4 py-3">
+                      <MoveStatusBadge status={move.status} />
+                    </td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{move.driverName ?? "—"}</td>
+                    <td className="px-4 py-3 font-mono text-xs text-gray-600">{move.vehicleVRN ?? "—"}</td>
+                    <td className="px-4 py-3 text-gray-600 text-xs">{move.boxGroomName ?? "—"}</td>
+                    <td className="px-4 py-3">
+                      <Link
+                        href={`/moves/${move.id}`}
+                        className="text-[#1a2744] hover:underline text-xs font-medium"
+                      >
+                        View →
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
