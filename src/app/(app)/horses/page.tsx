@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
 import { DutyBadge } from "@/components/horses/DutyBadge";
+import { TaskReadinessBadge } from "@/components/horses/TaskReadinessBadge";
 import { Download } from "lucide-react";
 import {
   Table,
@@ -17,17 +18,29 @@ import { HorseSearchFilter } from "@/components/horses/HorseSearchFilter";
 export default async function HorsesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; station?: string }>;
+  searchParams: Promise<{ q?: string; station?: string; squadron?: string; readiness?: string }>;
 }) {
-  const { q, station } = await searchParams;
+  const { q, station, squadron, readiness } = await searchParams;
   const session = await getServerSession(authOptions);
   const { can: canFn } = await import("@/lib/permissions");
   const role = session?.user?.role ?? "TROOPER";
   const canCreate = canFn(role, "horse", "create");
 
+  // Default non-vet users to their own squadron
+  const userSquadron = session?.user?.squadron ?? null;
+  const effectiveSquadron = squadron !== undefined
+    ? squadron
+    : (role !== "VET" && userSquadron ? userSquadron : "ALL");
+
   const where: Record<string, unknown> = { isActive: true };
   if (station && station !== "ALL") {
     where.dutyStation = station;
+  }
+  if (effectiveSquadron && effectiveSquadron !== "ALL") {
+    where.squadron = effectiveSquadron;
+  }
+  if (readiness && readiness !== "ALL") {
+    where.taskReadiness = readiness;
   }
   if (q) {
     where.OR = [
@@ -56,6 +69,8 @@ export default async function HorsesPage({
   const exportParams = new URLSearchParams();
   if (q) exportParams.set("q", q);
   if (station && station !== "ALL") exportParams.set("station", station);
+  if (effectiveSquadron && effectiveSquadron !== "ALL") exportParams.set("squadron", effectiveSquadron);
+  if (readiness && readiness !== "ALL") exportParams.set("readiness", readiness);
   const exportQs = exportParams.toString();
   const exportUrl = `/api/horses/export${exportQs ? `?${exportQs}` : ""}`;
 
@@ -90,6 +105,8 @@ export default async function HorsesPage({
       <HorseSearchFilter
         currentQ={q ?? ""}
         currentStation={station ?? "ALL"}
+        currentSquadron={effectiveSquadron}
+        currentReadiness={readiness ?? "ALL"}
       />
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -98,18 +115,16 @@ export default async function HorsesPage({
             <TableRow className="bg-gray-50">
               <TableHead className="font-semibold text-gray-700">Name</TableHead>
               <TableHead className="font-semibold text-gray-700">Reg. No.</TableHead>
-              <TableHead className="font-semibold text-gray-700">Breed</TableHead>
-              <TableHead className="font-semibold text-gray-700">Colour</TableHead>
               <TableHead className="font-semibold text-gray-700">Squadron</TableHead>
               <TableHead className="font-semibold text-gray-700">Station</TableHead>
-              <TableHead className="font-semibold text-gray-700">Height</TableHead>
+              <TableHead className="font-semibold text-gray-700">Readiness</TableHead>
               <TableHead className="font-semibold text-gray-700">Alerts</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {horses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-gray-500 py-10">
+                <TableCell colSpan={6} className="text-center text-gray-500 py-10">
                   No horses found.
                 </TableCell>
               </TableRow>
@@ -127,16 +142,14 @@ export default async function HorsesPage({
                   <TableCell className="font-mono text-sm text-gray-600">
                     {horse.regimentalNumber}
                   </TableCell>
-                  <TableCell className="text-sm text-gray-700">{horse.breed}</TableCell>
-                  <TableCell className="text-sm text-gray-700">{horse.colour}</TableCell>
                   <TableCell className="text-sm text-gray-700">
-                    {horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"}
+                    {horse.squadron === "THE_LIFE_GUARDS" ? "Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "Blues & Royals" : "—"}
                   </TableCell>
                   <TableCell>
                     <DutyBadge station={horse.dutyStation} />
                   </TableCell>
-                  <TableCell className="text-sm text-gray-700">
-                    {horse.heightHands}hh
+                  <TableCell>
+                    <TaskReadinessBadge readiness={horse.taskReadiness} />
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-2">

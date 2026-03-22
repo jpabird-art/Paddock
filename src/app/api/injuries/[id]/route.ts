@@ -71,11 +71,27 @@ export async function PATCH(
     where: { id },
     data,
     include: {
-      horse: { select: { id: true, name: true, regimentalNumber: true } },
+      horse: { select: { id: true, name: true, regimentalNumber: true, taskReadiness: true } },
       reportedBy: { select: { name: true, serviceNumber: true } },
       resolvedBy: { select: { name: true, serviceNumber: true } },
     },
   });
+
+  // Auto-downgrade task readiness when injury is reopened (not RESOLVED)
+  if (parse.data.status && parse.data.status !== "RESOLVED" && updated.horse) {
+    const horse = updated.horse;
+    if (injury.severity === "SEVERE" && horse.taskReadiness !== "NON_TASKWORTHY") {
+      await prisma.horse.update({
+        where: { id: injury.horseId },
+        data: { taskReadiness: "NON_TASKWORTHY" },
+      });
+    } else if (injury.severity === "MODERATE" && horse.taskReadiness === "FULL_EXERCISE") {
+      await prisma.horse.update({
+        where: { id: injury.horseId },
+        data: { taskReadiness: "LIMITED_ROLE" },
+      });
+    }
+  }
 
   await audit({
     userId: session?.user.id,

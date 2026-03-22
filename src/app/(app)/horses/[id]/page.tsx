@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format, differenceInYears } from "date-fns";
 import { DutyBadge } from "@/components/horses/DutyBadge";
+import { TaskReadinessBadge } from "@/components/horses/TaskReadinessBadge";
 import { MoveStatusBadge } from "@/components/moves/MoveStatusBadge";
 import { HealthEventBadge } from "@/components/health/HealthEventBadge";
 import { InjuryReportForm } from "@/components/injuries/InjuryReportForm";
@@ -156,6 +157,7 @@ export default async function HorseDetailPage({
                 </span>
               )}
               <DutyBadge station={horse.dutyStation} />
+              <TaskReadinessBadge readiness={horse.taskReadiness} />
               {currentRider && (
                 <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-200 font-medium">
                   Rider: {currentRider.rider.name}
@@ -240,6 +242,7 @@ export default async function HorseDetailPage({
               } />
               <InfoField label="Squadron" value={horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"} />
               <InfoField label="Duty Station" value={<DutyBadge station={horse.dutyStation} />} />
+              <InfoField label="Task Readiness" value={<TaskReadinessBadge readiness={horse.taskReadiness} />} />
               <InfoField label="Breed" value={horse.breed} />
               <InfoField label="Colour" value={horse.colour} />
               <InfoField

@@ -13,21 +13,43 @@ const STATIONS = [
   { value: "WINTER_TRAINING", label: "Winter Training" },
 ];
 
+const SQUADRONS = [
+  { value: "ALL", label: "All Squadrons" },
+  { value: "THE_LIFE_GUARDS", label: "The Life Guards" },
+  { value: "THE_BLUES_AND_ROYALS", label: "The Blues and Royals" },
+];
+
+const READINESS = [
+  { value: "ALL", label: "All Readiness" },
+  { value: "FULL_EXERCISE", label: "Full Exercise" },
+  { value: "LIMITED_ROLE", label: "Limited Role" },
+  { value: "NON_TASKWORTHY", label: "Non-taskworthy" },
+];
+
 interface HorseSearchFilterProps {
   currentQ: string;
   currentStation: string;
+  currentSquadron: string;
+  currentReadiness: string;
 }
 
-export function HorseSearchFilter({ currentQ, currentStation }: HorseSearchFilterProps) {
+export function HorseSearchFilter({
+  currentQ,
+  currentStation,
+  currentSquadron,
+  currentReadiness,
+}: HorseSearchFilterProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [q, setQ] = useState(currentQ);
 
   const navigate = useCallback(
-    (newQ: string, newStation: string) => {
+    (newQ: string, newStation: string, newSquadron: string, newReadiness: string) => {
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
       if (newStation && newStation !== "ALL") params.set("station", newStation);
+      if (newSquadron && newSquadron !== "ALL") params.set("squadron", newSquadron);
+      if (newReadiness && newReadiness !== "ALL") params.set("readiness", newReadiness);
       const qs = params.toString();
       router.push(`${pathname}${qs ? "?" + qs : ""}`);
     },
@@ -36,12 +58,22 @@ export function HorseSearchFilter({ currentQ, currentStation }: HorseSearchFilte
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    navigate(q, currentStation);
+    navigate(q, currentStation, currentSquadron, currentReadiness);
   }
 
   function handleStation(e: React.ChangeEvent<HTMLSelectElement>) {
-    navigate(q, e.target.value);
+    navigate(q, e.target.value, currentSquadron, currentReadiness);
   }
+
+  function handleSquadron(e: React.ChangeEvent<HTMLSelectElement>) {
+    navigate(q, currentStation, e.target.value, currentReadiness);
+  }
+
+  function handleReadiness(e: React.ChangeEvent<HTMLSelectElement>) {
+    navigate(q, currentStation, currentSquadron, e.target.value);
+  }
+
+  const selectClass = "border border-input bg-background rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring";
 
   return (
     <div className="flex gap-3 flex-wrap">
@@ -54,15 +86,19 @@ export function HorseSearchFilter({ currentQ, currentStation }: HorseSearchFilte
           className="pl-9"
         />
       </form>
-      <select
-        value={currentStation}
-        onChange={handleStation}
-        className="border border-input bg-background rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-      >
+      <select value={currentSquadron} onChange={handleSquadron} className={selectClass}>
+        {SQUADRONS.map((s) => (
+          <option key={s.value} value={s.value}>{s.label}</option>
+        ))}
+      </select>
+      <select value={currentStation} onChange={handleStation} className={selectClass}>
         {STATIONS.map((s) => (
-          <option key={s.value} value={s.value}>
-            {s.label}
-          </option>
+          <option key={s.value} value={s.value}>{s.label}</option>
+        ))}
+      </select>
+      <select value={currentReadiness} onChange={handleReadiness} className={selectClass}>
+        {READINESS.map((r) => (
+          <option key={r.value} value={r.value}>{r.label}</option>
         ))}
       </select>
     </div>

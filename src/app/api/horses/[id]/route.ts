@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation } from "@prisma/client";
+import { Squadron, DutyStation, TaskReadiness } from "@prisma/client";
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -17,6 +17,7 @@ const updateSchema = z.object({
   maxRiderWeightKg: z.coerce.number().positive().optional(),
   squadron: z.nativeEnum(Squadron).optional(),
   dutyStation: z.nativeEnum(DutyStation).optional(),
+  taskReadiness: z.nativeEnum(TaskReadiness).optional(),
   isActive: z.boolean().optional(),
 });
 

@@ -116,6 +116,12 @@ enum Squadron {
   THE_BLUES_AND_ROYALS
 }
 
+enum TaskReadiness {
+  NON_TASKWORTHY
+  LIMITED_ROLE
+  FULL_EXERCISE
+}
+
 // ─── MODELS ──────────────────────────────────────────────────────────
 
 model User {
@@ -163,6 +169,7 @@ model Horse {
   maxRiderWeightKg  Float
   squadron          Squadron?
   dutyStation       DutyStation  @default(HYDE_PARK_BARRACKS)
+  taskReadiness     TaskReadiness @default(FULL_EXERCISE)
   isActive          Boolean      @default(true)
   photoUrl          String?
   currentLocationId String?

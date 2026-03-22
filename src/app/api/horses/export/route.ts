@@ -16,6 +16,12 @@ const SQUADRON_LABELS: Record<string, string> = {
   THE_BLUES_AND_ROYALS: "The Blues and Royals",
 };
 
+const READINESS_LABELS: Record<string, string> = {
+  FULL_EXERCISE: "Full Exercise",
+  LIMITED_ROLE: "Limited Role",
+  NON_TASKWORTHY: "Non-taskworthy",
+};
+
 const STATION_LABELS: Record<string, string> = {
   KINGS_LIFE_GUARD: "King's Life Guard",
   TRAINING_WING: "Training Wing",
@@ -29,11 +35,19 @@ export async function GET(request: Request) {
 
   const { searchParams } = new URL(request.url);
   const station = searchParams.get("station");
+  const squadron = searchParams.get("squadron");
+  const readiness = searchParams.get("readiness");
   const q = searchParams.get("q");
 
   const where: Record<string, unknown> = { isActive: true };
   if (station && station !== "ALL") {
     where.dutyStation = station;
+  }
+  if (squadron && squadron !== "ALL") {
+    where.squadron = squadron;
+  }
+  if (readiness && readiness !== "ALL") {
+    where.taskReadiness = readiness;
   }
   if (q) {
     where.OR = [
@@ -76,6 +90,7 @@ export async function GET(request: Request) {
     "Height (hh)",
     "Weight (kg)",
     "Max Rider Weight (kg)",
+    "Task Readiness",
     "Current Rider",
     "Open Injuries",
     "Overdue Health Events",
@@ -96,6 +111,7 @@ export async function GET(request: Request) {
       String(h.heightHands),
       String(h.weightKg),
       String(h.maxRiderWeightKg),
+      escapeCSV(READINESS_LABELS[h.taskReadiness] ?? h.taskReadiness),
       escapeCSV(rider ? `${rider.name} (${rider.serviceNumber})` : ""),
       String(h.injuryReports.length),
       String(h.healthEvents.length),

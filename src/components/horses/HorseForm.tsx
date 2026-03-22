@@ -29,6 +29,7 @@ const horseSchema = z.object({
   maxRiderWeightKg: z.coerce.number().min(50).max(150),
   squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"], { required_error: "Squadron is required" }),
   dutyStation: z.string().min(1, "Duty station is required"),
+  taskReadiness: z.enum(["FULL_EXERCISE", "LIMITED_ROLE", "NON_TASKWORTHY"]),
 });
 
 type HorseFormData = z.infer<typeof horseSchema>;
@@ -62,6 +63,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     maxRiderWeightKg: initialData?.maxRiderWeightKg ?? 90,
     squadron: initialData?.squadron ?? ("" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS"),
     dutyStation: initialData?.dutyStation ?? "HYDE_PARK_BARRACKS",
+    taskReadiness: initialData?.taskReadiness ?? "FULL_EXERCISE",
   });
 
   function handleChange(
@@ -322,6 +324,27 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           </Select>
           {errors.dutyStation && (
             <p className="text-sm text-red-600">{errors.dutyStation}</p>
+          )}
+        </div>
+
+        {/* Task Readiness */}
+        <div className="space-y-2">
+          <Label htmlFor="taskReadiness">Task Readiness</Label>
+          <Select
+            value={formData.taskReadiness}
+            onValueChange={(v) => handleSelect("taskReadiness", v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select readiness" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FULL_EXERCISE">Full Exercise</SelectItem>
+              <SelectItem value="LIMITED_ROLE">Limited Role</SelectItem>
+              <SelectItem value="NON_TASKWORTHY">Non-taskworthy</SelectItem>
+            </SelectContent>
+          </Select>
+          {errors.taskReadiness && (
+            <p className="text-sm text-red-600">{errors.taskReadiness}</p>
           )}
         </div>
       </div>

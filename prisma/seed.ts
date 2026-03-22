@@ -12,6 +12,7 @@ import {
   TackType,
   TackCondition,
   Squadron,
+  TaskReadiness,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { addDays, subDays, subMonths, subYears } from "date-fns";
@@ -130,6 +131,7 @@ async function main() {
       maxRiderWeightKg: 95,
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.KINGS_LIFE_GUARD,
+      taskReadiness: TaskReadiness.LIMITED_ROLE, // has open MODERATE injury
     },
     {
       name: "Monty",

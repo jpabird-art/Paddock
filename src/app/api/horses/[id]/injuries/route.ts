@@ -40,6 +40,19 @@ export async function POST(
     },
   });
 
+  // Auto-update task readiness based on severity
+  if (parse.data.severity === "SEVERE") {
+    await prisma.horse.update({
+      where: { id },
+      data: { taskReadiness: "NON_TASKWORTHY" },
+    });
+  } else if (parse.data.severity === "MODERATE" && horse.taskReadiness === "FULL_EXERCISE") {
+    await prisma.horse.update({
+      where: { id },
+      data: { taskReadiness: "LIMITED_ROLE" },
+    });
+  }
+
   // Notify all vets and admins
   await notifyVets(injury.id);
 
