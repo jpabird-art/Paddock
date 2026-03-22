@@ -18,7 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 const horseSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  regimentalNumber: z.string().min(1, "Regimental number is required"),
+  regimentalNumber: z.string().regex(/^[A-Z]{2,4}-?\d{2,5}$/, "Format: e.g. HCMR-013"),
   squadronNumber: z.string().optional(),
   breed: z.string().min(1, "Breed is required"),
   colour: z.string().min(1, "Colour is required"),

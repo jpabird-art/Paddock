@@ -8,7 +8,7 @@ import { Squadron, DutyStation, TaskReadiness } from "@prisma/client";
 
 const createSchema = z.object({
   name: z.string().min(1),
-  regimentalNumber: z.string().regex(/^[A-Z]{2,4}\d{2,5}$/, "Format: 2-4 uppercase letters followed by 2-5 digits (e.g. HCMR001)"),
+  regimentalNumber: z.string().regex(/^[A-Z]{2,4}-?\d{2,5}$/, "Format: 2-4 uppercase letters, optional hyphen, then 2-5 digits (e.g. HCMR-013)"),
   squadronNumber: z.string().optional(),
   breed: z.string().min(1),
   colour: z.string().min(1),
