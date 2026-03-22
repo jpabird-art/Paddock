@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
+import { locationToDutyStation } from "@/lib/location-mapping";
 
 export async function GET(
   _request: Request,
@@ -57,20 +58,60 @@ export async function PATCH(
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
-  await prisma.$transaction([
-    prisma.horseMove.updateMany({
+  if (parse.data.status === "COMPLETED") {
+    // Fetch destination locations for duty station mapping
+    const toLocationIds = [...new Set(moves.map((m) => m.toLocationId))];
+    const locations = await prisma.location.findMany({
+      where: { id: { in: toLocationIds } },
+      select: { id: true, code: true },
+    });
+    const locationMap = new Map(locations.map((l) => [l.id, l.code]));
+    const now = new Date();
+
+    await prisma.$transaction(async (tx) => {
+      await tx.horseMove.updateMany({
+        where: { groupId },
+        data: { status: "COMPLETED", updatedById: session!.user.id },
+      });
+
+      for (const m of moves) {
+        const code = locationMap.get(m.toLocationId);
+        const mappedStation = code ? locationToDutyStation(code) : null;
+
+        const horseUpdate: Record<string, unknown> = { currentLocationId: m.toLocationId };
+        if (mappedStation) {
+          horseUpdate.dutyStation = mappedStation;
+        }
+
+        await tx.horse.update({
+          where: { id: m.horseId },
+          data: horseUpdate,
+        });
+
+        if (mappedStation) {
+          await tx.dutyAssignment.updateMany({
+            where: { horseId: m.horseId, endDate: null },
+            data: { endDate: now },
+          });
+
+          await tx.dutyAssignment.create({
+            data: {
+              horseId: m.horseId,
+              assignedById: session!.user.id,
+              station: mappedStation,
+              startDate: now,
+              notes: `Assigned via group move completion to ${code}.`,
+            },
+          });
+        }
+      }
+    });
+  } else {
+    await prisma.horseMove.updateMany({
       where: { groupId },
       data: { status: parse.data.status, updatedById: session!.user.id },
-    }),
-    ...(parse.data.status === "COMPLETED"
-      ? moves.map((m) =>
-          prisma.horse.update({
-            where: { id: m.horseId },
-            data: { currentLocationId: m.toLocationId },
-          })
-        )
-      : []),
-  ]);
+    });
+  }
 
   for (const m of moves) {
     await audit({
