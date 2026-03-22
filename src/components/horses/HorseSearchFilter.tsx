@@ -48,7 +48,7 @@ export function HorseSearchFilter({
       const params = new URLSearchParams();
       if (newQ) params.set("q", newQ);
       if (newStation && newStation !== "ALL") params.set("station", newStation);
-      if (newSquadron && newSquadron !== "ALL") params.set("squadron", newSquadron);
+      if (newSquadron) params.set("squadron", newSquadron);
       if (newReadiness && newReadiness !== "ALL") params.set("readiness", newReadiness);
       const qs = params.toString();
       router.push(`${pathname}${qs ? "?" + qs : ""}`);
