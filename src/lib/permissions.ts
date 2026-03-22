@@ -69,7 +69,7 @@ const PERMISSIONS: PermissionMatrix = {
     tack_allocation:     ["view", "create", "update"],
     inspection_schedule: ["view", "create", "update"],
     inspection:          ["view", "create", "update"],
-    attachment:          ["view", "create"],
+    attachment:          ["view", "create", "delete"],
   },
 
   VET: {

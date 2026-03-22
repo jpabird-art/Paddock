@@ -42,6 +42,7 @@ export default async function HorseDetailPage({
   const canManageTack = can(role, "tack_allocation", "create");
   const canManageInspections = can(role, "inspection", "create");
   const canUploadAttachments = can(role, "attachment", "create");
+  const canDeleteAttachments = can(role, "attachment", "delete");
   const canReportInjury = can(role, "injury_report", "create");
   const canViewInjuryDetail = can(role, "injury_report", "update");
 
@@ -577,6 +578,7 @@ export default async function HorseDetailPage({
                 createdAt: a.createdAt.toISOString(),
               }))}
               canUpload={canUploadAttachments}
+              canDelete={canDeleteAttachments}
               photoUrl={horse.photoUrl}
             />
           </div>

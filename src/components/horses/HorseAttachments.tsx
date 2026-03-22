@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
-import { Paperclip, Download, Camera, X } from "lucide-react";
+import { Paperclip, Download, Camera, X, Trash2 } from "lucide-react";
 
 interface AttachmentData {
   id: string;
@@ -40,6 +40,7 @@ interface HorseAttachmentsProps {
   horseId: string;
   initialAttachments: AttachmentData[];
   canUpload: boolean;
+  canDelete: boolean;
   photoUrl: string | null;
 }
 
@@ -76,6 +77,7 @@ export function HorseAttachments({
   horseId,
   initialAttachments,
   canUpload,
+  canDelete,
   photoUrl,
 }: HorseAttachmentsProps) {
   const { toast } = useToast();
@@ -87,6 +89,7 @@ export function HorseAttachments({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [photoLoading, setPhotoLoading] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [category, setCategory] = useState<AttachmentCategory>("DOCUMENT");
   const [description, setDescription] = useState("");
@@ -195,6 +198,26 @@ export function HorseAttachments({
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(attachmentId: string, fileName: string) {
+    if (!confirm(`Delete "${fileName}"? This cannot be undone.`)) return;
+    setDeletingId(attachmentId);
+    try {
+      const res = await fetch(`/api/attachments/${attachmentId}`, { method: "DELETE" });
+      if (!res.ok) {
+        const err = await res.json();
+        toast({ title: "Delete failed", description: err.error ?? "Failed to delete file.", variant: "destructive" });
+        return;
+      }
+      setAttachments((prev) => prev.filter((a) => a.id !== attachmentId));
+      toast({ title: "File deleted", description: `${fileName} has been deleted.` });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -386,13 +409,25 @@ export function HorseAttachments({
                     <span>{formatFileSize(attachment.fileSizeBytes)}</span>
                   </div>
                 </div>
-                <a
-                  href={`/api/attachments/${attachment.id}/download`}
-                  className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 shrink-0"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Download
-                </a>
+                <div className="flex items-center gap-3 shrink-0">
+                  <a
+                    href={`/api/attachments/${attachment.id}/download`}
+                    className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download
+                  </a>
+                  {canDelete && (
+                    <button
+                      onClick={() => handleDelete(attachment.id, attachment.fileName)}
+                      disabled={deletingId === attachment.id}
+                      className="flex items-center gap-1 text-xs text-red-600 hover:text-red-800 disabled:opacity-50"
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                      {deletingId === attachment.id ? "Deleting..." : "Delete"}
+                    </button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
