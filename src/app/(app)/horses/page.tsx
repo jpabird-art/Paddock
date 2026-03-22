@@ -53,6 +53,7 @@ export default async function HorsesPage({
   const horses = await prisma.horse.findMany({
     where,
     include: {
+      currentLocation: { select: { name: true } },
       injuryReports: {
         where: { status: { in: ["OPEN", "UNDER_REVIEW"] } },
         select: { id: true },
@@ -117,6 +118,7 @@ export default async function HorsesPage({
               <TableHead className="font-semibold text-gray-700">Reg. No.</TableHead>
               <TableHead className="font-semibold text-gray-700">Squadron</TableHead>
               <TableHead className="font-semibold text-gray-700">Station</TableHead>
+              <TableHead className="font-semibold text-gray-700">Location</TableHead>
               <TableHead className="font-semibold text-gray-700">Readiness</TableHead>
               <TableHead className="font-semibold text-gray-700">Alerts</TableHead>
             </TableRow>
@@ -124,7 +126,7 @@ export default async function HorsesPage({
           <TableBody>
             {horses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="text-center text-gray-500 py-10">
+                <TableCell colSpan={7} className="text-center text-gray-500 py-10">
                   No horses found.
                 </TableCell>
               </TableRow>
@@ -147,6 +149,9 @@ export default async function HorsesPage({
                   </TableCell>
                   <TableCell>
                     <DutyBadge station={horse.dutyStation} />
+                  </TableCell>
+                  <TableCell className="text-sm text-gray-600">
+                    {horse.currentLocation?.name ?? <span className="text-gray-400">—</span>}
                   </TableCell>
                   <TableCell>
                     <TaskReadinessBadge readiness={horse.taskReadiness} />

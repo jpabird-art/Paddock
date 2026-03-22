@@ -49,6 +49,7 @@ export default async function HorseDetailPage({
   const horse = await prisma.horse.findUnique({
     where: { id },
     include: {
+      currentLocation: { select: { id: true, name: true, code: true } },
       healthEvents: {
         orderBy: { scheduledAt: "desc" },
       },
@@ -243,6 +244,11 @@ export default async function HorseDetailPage({
               } />
               <InfoField label="Squadron" value={horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"} />
               <InfoField label="Duty Station" value={<DutyBadge station={horse.dutyStation} />} />
+              <InfoField label="Current Location" value={
+                horse.currentLocation
+                  ? <span className="text-sm font-medium">{horse.currentLocation.name}</span>
+                  : <span className="text-gray-400">—</span>
+              } />
               <InfoField label="Task Readiness" value={<TaskReadinessBadge readiness={horse.taskReadiness} />} />
               <InfoField label="Breed" value={horse.breed} />
               <InfoField label="Colour" value={horse.colour} />
