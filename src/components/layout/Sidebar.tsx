@@ -35,8 +35,8 @@ const ROLE_BADGE_COLOURS: Record<string, string> = {
 interface SidebarProps {
   user: {
     name?: string | null;
-    role: string;
-    serviceNumber: string;
+    role?: string | null;
+    serviceNumber?: string | null;
   };
 }
 
@@ -100,8 +100,10 @@ export function Sidebar({ user }: SidebarProps) {
     },
   ];
 
+  const role = user.role ?? "TROOPER";
+
   const visibleItems = navItems.filter((item) =>
-    item.roles.includes(user.role)
+    item.roles.includes(role)
   );
 
   return (
@@ -161,17 +163,17 @@ export function Sidebar({ user }: SidebarProps) {
             <div className="text-white text-sm font-medium truncate">
               {user.name}
             </div>
-            <div className="text-blue-300 text-xs font-mono">{user.serviceNumber}</div>
+            <div className="text-blue-300 text-xs font-mono">{user.serviceNumber ?? ""}</div>
           </div>
         </div>
         <div className="flex items-center justify-between">
           <span
             className={cn(
               "text-xs px-2 py-0.5 rounded-full font-medium",
-              ROLE_BADGE_COLOURS[user.role] ?? "bg-gray-500 text-white"
+              ROLE_BADGE_COLOURS[role] ?? "bg-gray-500 text-white"
             )}
           >
-            {ROLE_LABELS[user.role] ?? user.role}
+            {ROLE_LABELS[role] ?? role}
           </span>
           <button
             onClick={() => signOut({ callbackUrl: "/login" })}
