@@ -13,8 +13,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "HCMR Fleet Management",
-  description: "Household Cavalry Mounted Regiment — Horse Fleet Management System",
+  title: "Paddock — HCMR",
+  description: "HCMR's Paddock — Horse Management System",
 };
 
 export default function RootLayout({

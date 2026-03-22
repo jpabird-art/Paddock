@@ -76,8 +76,8 @@ export function MobileNav({ user }: MobileNavProps) {
             <div className="flex items-center gap-3">
               <img src="/hcmr-logo.webp" alt="HCMR" className="h-9 w-auto shrink-0" />
               <div>
-                <div className="text-white font-bold text-sm tracking-wide">HCMR FLEET</div>
-                <div className="text-blue-300 text-xs">Horse Management</div>
+                <div className="text-white font-bold text-sm tracking-wide">Paddock</div>
+                <div className="text-blue-300 text-xs">HCMR&apos;s Paddock</div>
               </div>
             </div>
           </div>
@@ -149,7 +149,7 @@ export function MobileNav({ user }: MobileNavProps) {
       {/* Centre title */}
       <div className="flex items-center gap-2">
         <img src="/hcmr-logo.webp" alt="HCMR" className="h-7 w-auto shrink-0" />
-        <span className="text-white font-bold text-sm tracking-wide">HCMR FLEET</span>
+        <span className="text-white font-bold text-sm tracking-wide">Paddock</span>
       </div>
 
       {/* Spacer to balance hamburger */}

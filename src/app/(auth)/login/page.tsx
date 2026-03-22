@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Shield } from "lucide-react";
+import Image from "next/image";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -44,15 +44,13 @@ export default function LoginPage() {
           {/* Header */}
           <div className="bg-[#1a2744] px-8 py-8 text-center">
             <div className="flex justify-center mb-4">
-              <div className="bg-amber-400 rounded-full p-3">
-                <Shield className="h-8 w-8 text-[#1a2744]" />
-              </div>
+              <Image src="/hcmr-logo.webp" alt="HCMR" width={64} height={80} className="h-20 w-auto" />
             </div>
-            <h1 className="text-white text-2xl font-bold tracking-wide">HCMR FLEET</h1>
+            <h1 className="text-white text-2xl font-bold tracking-wide">Paddock</h1>
             <p className="text-blue-200 text-sm mt-1 tracking-wider">
-              HOUSEHOLD CAVALRY MOUNTED REGIMENT
+              HCMR&apos;S PADDOCK
             </p>
-            <p className="text-blue-300 text-xs mt-1">Horse Fleet Management System</p>
+            <p className="text-blue-300 text-xs mt-1">Horse Management System</p>
           </div>
 
           {/* Form */}

@@ -1,5 +1,5 @@
 /**
- * HCMR Fleet — Formal Role-Based Access Control
+ * Paddock — Formal Role-Based Access Control
  *
  * Defines exactly what each role can do across every resource and action.
  *
