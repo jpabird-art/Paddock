@@ -3,9 +3,9 @@
  *
  * Defines exactly what each role can do across every resource and action.
  *
- * TROOPER  — view most records, create injury reports only
- * VET      — manage clinical records (health events, notes, medications, feeding plans), resolve injuries
- * OFFICER  — assign duties, approve moves, manage locations, create horses, manage tack/inspections
+ * TROOPER  — view most records, create injury reports + health notes, update own injury reports
+ * VET      — manage clinical records (health events, notes, medications, feeding plans), resolve injuries, create moves
+ * OFFICER  — assign duties, approve moves, manage locations, create horses, manage tack/inspections/feeding/health events
  * ADMIN    — full access: users, locations, system config, plus everything above
  */
 
@@ -55,15 +55,15 @@ const PERMISSIONS: PermissionMatrix = {
 
   OFFICER: {
     horse:               ["view", "create", "update"],
-    health_event:        ["view", "create"],
-    health_note:         ["view"],
+    health_event:        ["view", "create", "update"],
+    health_note:         ["view", "create"],
     injury_report:       ["view", "create", "update"],
     horse_move:          ["view", "create", "update"],
     location:            ["view", "create", "update"],
     user:                ["view"],
     duty_assignment:     ["view", "create", "update"],
     rider_assignment:    ["view", "create", "update"],
-    feeding_plan:        ["view"],
+    feeding_plan:        ["view", "create", "update"],
     medication_record:   ["view"],
     tack_item:           ["view", "create", "update"],
     tack_allocation:     ["view", "create", "update"],
@@ -77,7 +77,7 @@ const PERMISSIONS: PermissionMatrix = {
     health_event:        ["view", "create", "update"],
     health_note:         ["view", "create"],
     injury_report:       ["view", "create", "update"],
-    horse_move:          ["view"],
+    horse_move:          ["view", "create"],
     location:            ["view"],
     user:                [],
     duty_assignment:     ["view"],
@@ -94,8 +94,8 @@ const PERMISSIONS: PermissionMatrix = {
   TROOPER: {
     horse:               ["view"],
     health_event:        ["view"],
-    health_note:         ["view"],
-    injury_report:       ["view", "create"],
+    health_note:         ["view", "create"],
+    injury_report:       ["view", "create", "update"],
     horse_move:          ["view"],
     location:            ["view"],
     user:                [],
