@@ -27,7 +27,8 @@ export type Resource =
   | "tack_allocation"
   | "inspection_schedule"
   | "inspection"
-  | "attachment";
+  | "attachment"
+  | "audit_log";
 
 export type Action = "view" | "create" | "update" | "delete";
 
@@ -51,6 +52,7 @@ const PERMISSIONS: PermissionMatrix = {
     inspection_schedule: ["view", "create", "update", "delete"],
     inspection:          ["view", "create", "update", "delete"],
     attachment:          ["view", "create", "update", "delete"],
+    audit_log:           ["view"],
   },
 
   OFFICER: {
@@ -70,6 +72,7 @@ const PERMISSIONS: PermissionMatrix = {
     inspection_schedule: ["view", "create", "update"],
     inspection:          ["view", "create", "update"],
     attachment:          ["view", "create", "delete"],
+    audit_log:           [],
   },
 
   VET: {
@@ -89,6 +92,7 @@ const PERMISSIONS: PermissionMatrix = {
     inspection_schedule: ["view"],
     inspection:          ["view", "create", "update"],
     attachment:          ["view", "create"],
+    audit_log:           [],
   },
 
   TROOPER: {
@@ -108,6 +112,7 @@ const PERMISSIONS: PermissionMatrix = {
     inspection_schedule: ["view"],
     inspection:          ["view"],
     attachment:          ["view", "create"],
+    audit_log:           [],
   },
 };
 

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/permissions";
 
 export async function GET(request: Request) {
-  const { error } = await requirePermission("user", "view");
+  const { error } = await requirePermission("audit_log", "view");
   if (error) return error;
 
   const { searchParams } = new URL(request.url);
