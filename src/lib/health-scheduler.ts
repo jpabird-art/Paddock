@@ -20,6 +20,16 @@ export async function scheduleNextEvent(
 
   const nextDate = addDays(completedAt, interval);
 
+  // Idempotency: don't create if a SCHEDULED event of this type already exists
+  const existing = await prisma.healthEvent.findFirst({
+    where: {
+      horseId,
+      type,
+      status: HealthEventStatus.SCHEDULED,
+    },
+  });
+  if (existing) return;
+
   await prisma.healthEvent.create({
     data: {
       horseId,

@@ -189,6 +189,9 @@ model Horse {
   inspections       Inspection[]
   attachments       Attachment[]       @relation("HorseAttachments")
 
+  @@index([isActive, squadron])    // horse list filtered by active + squadron
+  @@index([isActive, dutyStation])  // dashboard groups by station
+  @@index([currentLocationId])     // moves update location FK
   @@map("horses")
 }
 
@@ -206,6 +209,8 @@ model HealthEvent {
 
   horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
 
+  @@index([horseId, status])       // horse profile health tab, overdue queries
+  @@index([status, scheduledAt])   // health schedule page sorted by date
   @@map("health_events")
 }
 
@@ -242,6 +247,8 @@ model InjuryReport {
   notifications InjuryNotification[]
   attachments   Attachment[]         @relation("InjuryAttachments")
 
+  @@index([horseId, status])       // horse profile injury tab
+  @@index([status, reportedAt])    // injury list page filtered by status
   @@map("injury_reports")
 }
 
@@ -272,6 +279,7 @@ model DutyAssignment {
   horse      Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
   assignedBy User  @relation(fields: [assignedById], references: [id])
 
+  @@index([horseId, endDate])      // find current assignment (endDate IS NULL)
   @@map("duty_assignments")
 }
 
@@ -319,6 +327,8 @@ model HorseMove {
   updatedBy    User?     @relation("MoveUpdatedBy", fields: [updatedById], references: [id])
 
   @@index([groupId])
+  @@index([horseId, departureDate]) // horse profile moves tab
+  @@index([status, departureDate])  // moves list page filtered by status
   @@map("horse_moves")
 }
 
@@ -463,6 +473,8 @@ model Attachment {
   horse        Horse?        @relation("HorseAttachments", fields: [horseId], references: [id], onDelete: Cascade)
   injuryReport InjuryReport? @relation("InjuryAttachments", fields: [injuryReportId], references: [id], onDelete: Cascade)
 
+  @@index([horseId, createdAt])     // horse profile documents tab
+  @@index([injuryReportId])        // injury detail attachments
   @@map("attachments")
 }
 

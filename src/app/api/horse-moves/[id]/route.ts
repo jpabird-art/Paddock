@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
+import { isValidTransition } from "@/lib/move-transitions";
+import { MoveStatus } from "@prisma/client";
 
 const updateSchema = z.object({
   fromLocationId: z.string().optional().nullable(),
@@ -63,6 +65,23 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid data", details: parse.error.errors }, { status: 400 });
   }
 
+  // Fetch current move to validate state transition
+  const existing = await prisma.horseMove.findUnique({
+    where: { id },
+    select: { status: true },
+  });
+  if (!existing) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const newStatus = parse.data.status as MoveStatus | undefined;
+  if (newStatus && !isValidTransition(existing.status, newStatus)) {
+    return NextResponse.json(
+      { error: `Cannot transition from ${existing.status} to ${newStatus}` },
+      { status: 409 }
+    );
+  }
+
   const { departureDate, arrivalDate, ...rest } = parse.data;
 
   const updateData: Record<string, unknown> = {
@@ -82,7 +101,11 @@ export async function PATCH(
     },
   });
 
-  if (parse.data.status === "COMPLETED") {
+  // Only run side effects on the first transition INTO COMPLETED
+  const transitionedToCompleted =
+    newStatus === "COMPLETED" && existing.status !== "COMPLETED";
+
+  if (transitionedToCompleted) {
     await prisma.horse.update({
       where: { id: move.horseId },
       data: { currentLocationId: move.toLocationId },
@@ -94,8 +117,8 @@ export async function PATCH(
     userRole: session?.user.role,
     entityType: "horse_move",
     entityId: id,
-    action: parse.data.status ? `status_${parse.data.status.toLowerCase()}` : "update",
-    after: { status: parse.data.status, horseId: move.horseId },
+    action: newStatus ? `status_${newStatus.toLowerCase()}` : "update",
+    after: { status: newStatus, horseId: move.horseId },
   });
 
   return NextResponse.json(move);

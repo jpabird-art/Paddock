@@ -3,6 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
+import { isValidTransition } from "@/lib/move-transitions";
+import { MoveStatus } from "@prisma/client";
 
 export async function GET(
   _request: Request,
@@ -50,26 +52,41 @@ export async function PATCH(
 
   const moves = await prisma.horseMove.findMany({
     where: { groupId },
-    select: { id: true, horseId: true, toLocationId: true },
+    select: { id: true, horseId: true, toLocationId: true, status: true },
   });
 
   if (moves.length === 0) {
     return NextResponse.json({ error: "Group not found" }, { status: 404 });
   }
 
+  const newStatus = parse.data.status as MoveStatus;
+
+  // Validate transition for every move in the group
+  const invalid = moves.find((m) => !isValidTransition(m.status, newStatus));
+  if (invalid) {
+    return NextResponse.json(
+      { error: `Cannot transition from ${invalid.status} to ${newStatus}` },
+      { status: 409 }
+    );
+  }
+
+  // Only update location for moves that are newly transitioning to COMPLETED
+  const newlyCompleted =
+    newStatus === "COMPLETED"
+      ? moves.filter((m) => m.status !== "COMPLETED")
+      : [];
+
   await prisma.$transaction([
     prisma.horseMove.updateMany({
       where: { groupId },
-      data: { status: parse.data.status, updatedById: session!.user.id },
+      data: { status: newStatus, updatedById: session!.user.id },
     }),
-    ...(parse.data.status === "COMPLETED"
-      ? moves.map((m) =>
-          prisma.horse.update({
-            where: { id: m.horseId },
-            data: { currentLocationId: m.toLocationId },
-          })
-        )
-      : []),
+    ...newlyCompleted.map((m) =>
+      prisma.horse.update({
+        where: { id: m.horseId },
+        data: { currentLocationId: m.toLocationId },
+      })
+    ),
   ]);
 
   for (const m of moves) {
@@ -78,10 +95,10 @@ export async function PATCH(
       userRole: session?.user.role,
       entityType: "horse_move",
       entityId: m.id,
-      action: `group_status_${parse.data.status.toLowerCase()}`,
-      after: { status: parse.data.status, groupId, horseId: m.horseId },
+      action: `group_status_${newStatus.toLowerCase()}`,
+      after: { status: newStatus, groupId, horseId: m.horseId },
     });
   }
 
-  return NextResponse.json({ message: `Updated ${moves.length} moves to ${parse.data.status}` });
+  return NextResponse.json({ message: `Updated ${moves.length} moves to ${newStatus}` });
 }

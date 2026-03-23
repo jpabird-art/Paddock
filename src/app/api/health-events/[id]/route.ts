@@ -45,8 +45,11 @@ export async function PATCH(
     data,
   });
 
-  // Schedule next occurrence if completing
-  if (parse.data.status === "COMPLETED") {
+  // Schedule next occurrence only on the first transition into COMPLETED
+  const transitionedToCompleted =
+    parse.data.status === "COMPLETED" && event.status !== "COMPLETED";
+
+  if (transitionedToCompleted) {
     const completedAt = (data.completedAt as Date) ?? new Date();
     await scheduleNextEvent(event.horseId, event.type, completedAt);
   }

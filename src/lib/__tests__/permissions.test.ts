@@ -17,10 +17,11 @@ describe("can()", () => {
     expect(can("TROOPER", "horse", "delete")).toBe(false);
   });
 
-  it("TROOPER can create injury reports", () => {
+  it("TROOPER can create and update injury reports", () => {
     expect(can("TROOPER", "injury_report", "view")).toBe(true);
     expect(can("TROOPER", "injury_report", "create")).toBe(true);
-    expect(can("TROOPER", "injury_report", "update")).toBe(false);
+    expect(can("TROOPER", "injury_report", "update")).toBe(true);
+    expect(can("TROOPER", "injury_report", "delete")).toBe(false);
   });
 
   it("VET can manage health events and medications", () => {
