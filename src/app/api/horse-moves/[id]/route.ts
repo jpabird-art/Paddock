@@ -4,6 +4,7 @@ import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
 import { isValidTransition } from "@/lib/move-transitions";
+import { completeMoveForHorse } from "@/lib/horse-services";
 import { MoveStatus } from "@prisma/client";
 
 const updateSchema = z.object({
@@ -106,10 +107,7 @@ export async function PATCH(
     newStatus === "COMPLETED" && existing.status !== "COMPLETED";
 
   if (transitionedToCompleted) {
-    await prisma.horse.update({
-      where: { id: move.horseId },
-      data: { currentLocationId: move.toLocationId },
-    });
+    await completeMoveForHorse(move.horseId, move.toLocationId);
   }
 
   await audit({

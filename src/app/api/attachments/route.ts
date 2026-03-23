@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
+import { storage } from "@/lib/storage";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 const ALLOWED_MIME_PREFIXES = ["image/", "application/pdf", "application/msword", "application/vnd.openxmlformats"];
 
@@ -61,15 +58,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "File type not allowed" }, { status: 400 });
   }
 
-  // Generate safe filename
-  const ext = path.extname(file.name) || "";
-  const safeFileName = `${randomUUID()}${ext}`;
-  const relativePath = `uploads/${safeFileName}`;
-
-  // Write file to disk
-  await mkdir(UPLOAD_DIR, { recursive: true });
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, safeFileName), buffer);
+  const relativePath = await storage.write(file.name, buffer);
 
   const attachment = await prisma.attachment.create({
     data: {

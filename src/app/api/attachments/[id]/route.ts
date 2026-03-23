@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
+import { storage } from "@/lib/storage";
 
 export async function GET(
   _request: Request,
@@ -42,6 +43,7 @@ export async function DELETE(
   }
 
   await prisma.attachment.delete({ where: { id } });
+  await storage.remove(attachment.filePath);
 
   return NextResponse.json({ message: "Attachment deleted" });
 }

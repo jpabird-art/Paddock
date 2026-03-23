@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/permissions";
-import { readFile } from "fs/promises";
-import path from "path";
+import { storage } from "@/lib/storage";
 
 export async function GET(
   _request: Request,
@@ -18,19 +17,17 @@ export async function GET(
     return NextResponse.json({ error: "Attachment not found" }, { status: 404 });
   }
 
-  try {
-    const filePath = path.join(process.cwd(), attachment.filePath);
-    const buffer = await readFile(filePath);
-
-    const isImage = attachment.mimeType.startsWith("image/");
-    return new NextResponse(buffer, {
-      headers: {
-        "Content-Type": attachment.mimeType,
-        "Content-Disposition": `${isImage ? "inline" : "attachment"}; filename="${attachment.fileName}"`,
-        "Content-Length": String(buffer.length),
-      },
-    });
-  } catch {
+  const buffer = await storage.read(attachment.filePath);
+  if (!buffer) {
     return NextResponse.json({ error: "File not found on disk" }, { status: 404 });
   }
+
+  const isImage = attachment.mimeType.startsWith("image/");
+  return new NextResponse(new Uint8Array(buffer), {
+    headers: {
+      "Content-Type": attachment.mimeType,
+      "Content-Disposition": `${isImage ? "inline" : "attachment"}; filename="${attachment.fileName}"`,
+      "Content-Length": String(buffer.length),
+    },
+  });
 }

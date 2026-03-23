@@ -85,7 +85,7 @@ export async function PATCH(
       prisma.horse.update({
         where: { id: m.horseId },
         data: { currentLocationId: m.toLocationId },
-      })
+      }),
     ),
   ]);
 

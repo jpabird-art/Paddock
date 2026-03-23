@@ -1,11 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/permissions";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
-import { randomUUID } from "crypto";
+import { storage } from "@/lib/storage";
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
 
 export async function POST(
@@ -37,14 +34,8 @@ export async function POST(
     return NextResponse.json({ error: "File too large (max 10 MB)" }, { status: 400 });
   }
 
-  // Store via existing attachment infrastructure
-  const ext = path.extname(file.name) || "";
-  const safeFileName = `${randomUUID()}${ext}`;
-  const relativePath = `uploads/${safeFileName}`;
-
-  await mkdir(UPLOAD_DIR, { recursive: true });
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(UPLOAD_DIR, safeFileName), buffer);
+  const relativePath = await storage.write(file.name, buffer);
 
   // Create attachment record and update horse.photoUrl in a transaction
   const attachment = await prisma.$transaction(async (tx) => {

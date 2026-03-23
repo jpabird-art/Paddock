@@ -3,7 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation, TaskReadiness, MoveStatus } from "@prisma/client";
+import { Squadron, DutyStation, TaskReadiness } from "@prisma/client";
+import { deactivateHorse, reassignDutyStation } from "@/lib/horse-services";
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -80,24 +81,8 @@ export async function PATCH(
   const now = new Date();
 
   const updated = await prisma.$transaction(async (tx) => {
-    // If duty station changed, maintain DutyAssignment history
     if (dutyStationChanged && session) {
-      // End current active assignment
-      await tx.dutyAssignment.updateMany({
-        where: { horseId: id, endDate: null },
-        data: { endDate: now },
-      });
-
-      // Create new assignment
-      await tx.dutyAssignment.create({
-        data: {
-          horseId: id,
-          assignedById: session.user.id,
-          station: data.dutyStation!,
-          startDate: now,
-          notes: `Reassigned from ${horse.dutyStation} to ${data.dutyStation}.`,
-        },
-      });
+      await reassignDutyStation(tx, id, horse.dutyStation, data.dutyStation!, session.user.id);
     }
 
     return tx.horse.update({
@@ -138,41 +123,7 @@ export async function DELETE(
     return NextResponse.json({ error: "Horse not found" }, { status: 404 });
   }
 
-  const now = new Date();
-
-  // Soft delete with cascade to related active records
-  await prisma.$transaction([
-    // Deactivate the horse
-    prisma.horse.update({
-      where: { id },
-      data: { isActive: false },
-    }),
-    // Close open duty assignments
-    prisma.dutyAssignment.updateMany({
-      where: { horseId: id, endDate: null },
-      data: { endDate: now },
-    }),
-    // End active rider assignments
-    prisma.riderAssignment.updateMany({
-      where: { horseId: id, endDate: null },
-      data: { endDate: now },
-    }),
-    // Deactivate feeding plans
-    prisma.feedingPlan.updateMany({
-      where: { horseId: id, isActive: true },
-      data: { isActive: false, endDate: now },
-    }),
-    // Return tack allocations
-    prisma.tackAllocation.updateMany({
-      where: { horseId: id, endDate: null },
-      data: { endDate: now },
-    }),
-    // Cancel planned moves
-    prisma.horseMove.updateMany({
-      where: { horseId: id, status: MoveStatus.PLANNED },
-      data: { status: MoveStatus.CANCELLED },
-    }),
-  ]);
+  await deactivateHorse(id);
 
   await audit({
     userId: session?.user.id,

@@ -308,6 +308,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
         {/* Duty Station */}
         <div className="space-y-2">
           <Label htmlFor="dutyStation">Duty Station</Label>
+          <p className="text-xs text-gray-500">Operational assignment. Current physical location is updated via Moves.</p>
           <Select
             value={formData.dutyStation}
             onValueChange={(v) => handleSelect("dutyStation", v)}
