@@ -5,13 +5,16 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { DutyBadge } from "@/components/horses/DutyBadge";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 export default async function InjuriesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; severity?: string }>;
+  searchParams: Promise<{ status?: string; severity?: string; page?: string; pageSize?: string }>;
 }) {
-  const { status, severity } = await searchParams;
+  const { status, severity, ...paginationRaw } = await searchParams;
+  const pagination = parsePagination(paginationRaw);
   const session = await getServerSession(authOptions);
 
   const { can: canFn } = await import("@/lib/permissions");
@@ -23,24 +26,30 @@ export default async function InjuriesPage({
   if (status) where.status = status;
   if (severity) where.severity = severity;
 
-  const injuries = await prisma.injuryReport.findMany({
-    where,
-    include: {
-      horse: {
-        select: { id: true, name: true, regimentalNumber: true, dutyStation: true },
+  const [injuries, totalItems] = await Promise.all([
+    prisma.injuryReport.findMany({
+      where,
+      include: {
+        horse: {
+          select: { id: true, name: true, regimentalNumber: true, dutyStation: true },
+        },
+        reportedBy: { select: { name: true, serviceNumber: true } },
+        resolvedBy: { select: { name: true } },
       },
-      reportedBy: { select: { name: true, serviceNumber: true } },
-      resolvedBy: { select: { name: true } },
-    },
-    orderBy: { reportedAt: "desc" },
-  });
+      orderBy: { reportedAt: "desc" },
+      skip: pagination.skip,
+      take: pagination.take,
+    }),
+    prisma.injuryReport.count({ where }),
+  ]);
+  const meta = paginationMeta(pagination, totalItems);
 
   return (
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Injury Reports</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          {injuries.length} report{injuries.length !== 1 ? "s" : ""}
+          {totalItems} report{totalItems !== 1 ? "s" : ""}
         </p>
       </div>
 
@@ -150,6 +159,11 @@ export default async function InjuriesPage({
             )}
           </tbody>
         </table>
+        <Pagination
+          meta={meta}
+          basePath="/injuries"
+          searchParams={{ status, severity }}
+        />
       </div>
     </div>
   );

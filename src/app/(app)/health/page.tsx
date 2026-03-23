@@ -6,6 +6,8 @@ import { HealthEventBadge } from "@/components/health/HealthEventBadge";
 import { HealthCompleteButton } from "@/components/health/HealthCompleteButton";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 const EVENT_TYPE_LABELS: Record<string, string> = {
   DENTAL_CHECK: "Dental Check",
@@ -18,9 +20,10 @@ const EVENT_TYPE_LABELS: Record<string, string> = {
 export default async function HealthPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; type?: string }>;
+  searchParams: Promise<{ status?: string; type?: string; page?: string; pageSize?: string }>;
 }) {
-  const { status, type } = await searchParams;
+  const { status, type, ...paginationRaw } = await searchParams;
+  const pagination = parsePagination(paginationRaw);
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
   const canComplete = ["ADMIN", "VET"].includes(role);
@@ -29,23 +32,28 @@ export default async function HealthPage({
   if (status) where.status = status;
   if (type) where.type = type;
 
-  const events = await prisma.healthEvent.findMany({
-    where,
-    include: {
-      horse: {
-        select: {
-          id: true,
-          name: true,
-          regimentalNumber: true,
-          dutyStation: true,
+  const [events, totalItems, overdueCount, scheduledCount] = await Promise.all([
+    prisma.healthEvent.findMany({
+      where,
+      include: {
+        horse: {
+          select: {
+            id: true,
+            name: true,
+            regimentalNumber: true,
+            dutyStation: true,
+          },
         },
       },
-    },
-    orderBy: { scheduledAt: "asc" },
-  });
-
-  const overdueCount = events.filter((e) => e.status === "OVERDUE").length;
-  const scheduledCount = events.filter((e) => e.status === "SCHEDULED").length;
+      orderBy: { scheduledAt: "asc" },
+      skip: pagination.skip,
+      take: pagination.take,
+    }),
+    prisma.healthEvent.count({ where }),
+    prisma.healthEvent.count({ where: { status: "OVERDUE" } }),
+    prisma.healthEvent.count({ where: { status: "SCHEDULED" } }),
+  ]);
+  const meta = paginationMeta(pagination, totalItems);
 
   return (
     <div className="space-y-5">
@@ -154,6 +162,11 @@ export default async function HealthPage({
             )}
           </tbody>
         </table>
+        <Pagination
+          meta={meta}
+          basePath="/health"
+          searchParams={{ status, type }}
+        />
       </div>
     </div>
   );

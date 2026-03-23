@@ -7,6 +7,8 @@ import { CreateUserForm } from "@/components/admin/CreateUserForm";
 import { EditUserForm } from "@/components/admin/EditUserForm";
 import { UserToggleActive } from "@/components/admin/UserToggleActive";
 import { rankAbbreviation } from "@/lib/ranks";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
@@ -22,27 +24,40 @@ const ROLE_COLOURS: Record<string, string> = {
   TROOPER: "bg-gray-100 text-gray-700 border-gray-200",
 };
 
-export default async function AdminPage() {
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
+}) {
   const session = await getServerSession(authOptions);
 
   if (!session || session.user.role !== "ADMIN") {
     redirect("/dashboard");
   }
 
-  const users = await prisma.user.findMany({
-    select: {
-      id: true,
-      name: true,
-      serviceNumber: true,
-      email: true,
-      role: true,
-      rank: true,
-      squadron: true,
-      isActive: true,
-      createdAt: true,
-    },
-    orderBy: { name: "asc" },
-  });
+  const paginationRaw = await searchParams;
+  const pagination = parsePagination(paginationRaw, 50);
+
+  const [users, totalItems] = await Promise.all([
+    prisma.user.findMany({
+      select: {
+        id: true,
+        name: true,
+        serviceNumber: true,
+        email: true,
+        role: true,
+        rank: true,
+        squadron: true,
+        isActive: true,
+        createdAt: true,
+      },
+      orderBy: { name: "asc" },
+      skip: pagination.skip,
+      take: pagination.take,
+    }),
+    prisma.user.count(),
+  ]);
+  const meta = paginationMeta(pagination, totalItems);
 
   return (
     <div className="space-y-6">
@@ -50,7 +65,7 @@ export default async function AdminPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Administration</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            User management — {users.length} user{users.length !== 1 ? "s" : ""}
+            User management — {totalItems} user{totalItems !== 1 ? "s" : ""}
           </p>
         </div>
         <CreateUserForm />
@@ -133,6 +148,7 @@ export default async function AdminPage() {
             ))}
           </tbody>
         </table>
+        <Pagination meta={meta} basePath="/admin" />
       </div>
     </div>
   );

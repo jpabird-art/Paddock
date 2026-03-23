@@ -5,6 +5,8 @@ import { can } from "@/lib/permissions";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 const RESULT_CLASSES: Record<string, string> = {
   PASS: "bg-green-100 text-green-700 border-green-200",
@@ -12,13 +14,20 @@ const RESULT_CLASSES: Record<string, string> = {
   ADVISORY: "bg-amber-100 text-amber-700 border-amber-200",
 };
 
-export default async function InspectionsPage() {
+export default async function InspectionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ page?: string; pageSize?: string }>;
+}) {
   const session = await getServerSession(authOptions);
   if (!session || !can(session.user.role, "inspection", "view")) {
     redirect("/dashboard");
   }
 
-  const [inspections, schedules] = await Promise.all([
+  const paginationRaw = await searchParams;
+  const pagination = parsePagination(paginationRaw);
+
+  const [inspections, totalItems, schedules] = await Promise.all([
     prisma.inspection.findMany({
       include: {
         horse: { select: { id: true, name: true, regimentalNumber: true } },
@@ -26,13 +35,16 @@ export default async function InspectionsPage() {
         schedule: { select: { name: true } },
       },
       orderBy: { scheduledDate: "desc" },
-      take: 100,
+      skip: pagination.skip,
+      take: pagination.take,
     }),
+    prisma.inspection.count(),
     prisma.inspectionSchedule.findMany({
       where: { isActive: true },
       orderBy: { name: "asc" },
     }),
   ]);
+  const meta = paginationMeta(pagination, totalItems);
 
   return (
     <div className="space-y-5">
@@ -40,7 +52,7 @@ export default async function InspectionsPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Inspections</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {inspections.length} inspection record{inspections.length !== 1 ? "s" : ""}
+            {totalItems} inspection record{totalItems !== 1 ? "s" : ""}
           </p>
         </div>
       </div>
@@ -134,6 +146,7 @@ export default async function InspectionsPage() {
             )}
           </tbody>
         </table>
+        <Pagination meta={meta} basePath="/inspections" />
       </div>
     </div>
   );

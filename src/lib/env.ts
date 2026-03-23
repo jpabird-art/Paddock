@@ -1,14 +1,19 @@
 /**
  * Runtime environment validation.
  * Imported early to fail fast if required vars are missing.
+ * Skipped during Next.js build phase (page data collection) where
+ * runtime secrets like DATABASE_URL are not yet available.
  */
+
+const isBuildPhase =
+  process.env.NEXT_PHASE === "phase-production-build";
 
 function required(name: string): string {
   const value = process.env[name];
-  if (!value) {
+  if (!value && !isBuildPhase) {
     throw new Error(`Missing required environment variable: ${name}`);
   }
-  return value;
+  return value ?? "";
 }
 
 export const env = {

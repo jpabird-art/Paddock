@@ -14,13 +14,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { HorseSearchFilter } from "@/components/horses/HorseSearchFilter";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 export default async function HorsesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; station?: string; squadron?: string; readiness?: string }>;
+  searchParams: Promise<{ q?: string; station?: string; squadron?: string; readiness?: string; page?: string; pageSize?: string }>;
 }) {
-  const { q, station, squadron, readiness } = await searchParams;
+  const { q, station, squadron, readiness, ...paginationRaw } = await searchParams;
+  const pagination = parsePagination(paginationRaw);
   const session = await getServerSession(authOptions);
   const { can: canFn } = await import("@/lib/permissions");
   const role = session?.user?.role ?? "TROOPER";
@@ -50,21 +53,27 @@ export default async function HorsesPage({
     ];
   }
 
-  const horses = await prisma.horse.findMany({
-    where,
-    include: {
-      currentLocation: { select: { name: true } },
-      injuryReports: {
-        where: { status: { in: ["OPEN", "UNDER_REVIEW"] } },
-        select: { id: true },
+  const [horses, totalItems] = await Promise.all([
+    prisma.horse.findMany({
+      where,
+      include: {
+        currentLocation: { select: { name: true } },
+        injuryReports: {
+          where: { status: { in: ["OPEN", "UNDER_REVIEW"] } },
+          select: { id: true },
+        },
+        healthEvents: {
+          where: { status: "OVERDUE" },
+          select: { id: true },
+        },
       },
-      healthEvents: {
-        where: { status: "OVERDUE" },
-        select: { id: true },
-      },
-    },
-    orderBy: { name: "asc" },
-  });
+      orderBy: { name: "asc" },
+      skip: pagination.skip,
+      take: pagination.take,
+    }),
+    prisma.horse.count({ where }),
+  ]);
+  const meta = paginationMeta(pagination, totalItems);
 
   // Build export URL preserving current filters
   const exportParams = new URLSearchParams();
@@ -81,7 +90,7 @@ export default async function HorsesPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Horse Roster</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {horses.length} horse{horses.length !== 1 ? "s" : ""} listed
+            {totalItems} horse{totalItems !== 1 ? "s" : ""} listed
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -112,6 +121,7 @@ export default async function HorsesPage({
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
         <Table>
+
           <TableHeader>
             <TableRow className="bg-gray-50">
               <TableHead className="font-semibold text-gray-700">Name</TableHead>
@@ -178,6 +188,16 @@ export default async function HorsesPage({
             )}
           </TableBody>
         </Table>
+        <Pagination
+          meta={meta}
+          basePath="/horses"
+          searchParams={{
+            q,
+            station: station !== "ALL" ? station : undefined,
+            squadron: effectiveSquadron !== "ALL" ? effectiveSquadron : undefined,
+            readiness: readiness !== "ALL" ? readiness : undefined,
+          }}
+        />
       </div>
     </div>
   );

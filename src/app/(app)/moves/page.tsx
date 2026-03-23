@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { MoveStatusBadge } from "@/components/moves/MoveStatusBadge";
+import { parsePagination, paginationMeta } from "@/lib/pagination";
+import { Pagination } from "@/components/ui/pagination";
 
 const STATUS_FILTERS = [
   { label: "All", value: "" },
@@ -40,7 +42,7 @@ function FilterLink({
 export default async function MovesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ status?: string; q?: string }>;
+  searchParams: Promise<{ status?: string; q?: string; page?: string; pageSize?: string }>;
 }) {
   const session = await getServerSession(authOptions);
 
@@ -49,7 +51,8 @@ export default async function MovesPage({
     redirect("/dashboard");
   }
 
-  const { status, q } = await searchParams;
+  const { status, q, ...paginationRaw } = await searchParams;
+  const pagination = parsePagination(paginationRaw);
   const canEdit = canFn(session.user.role, "horse_move", "create");
 
   const where: Record<string, unknown> = {};
@@ -58,16 +61,22 @@ export default async function MovesPage({
     where.horse = { name: { contains: q, mode: "insensitive" as const } };
   }
 
-  const moves = await prisma.horseMove.findMany({
-    where,
-    include: {
-      horse: { select: { id: true, name: true, regimentalNumber: true } },
-      fromLocation: { select: { id: true, name: true, code: true } },
-      toLocation: { select: { id: true, name: true, code: true } },
-      createdBy: { select: { name: true } },
-    },
-    orderBy: [{ departureDate: "desc" }, { groupId: "asc" }],
-  });
+  const [moves, totalItems] = await Promise.all([
+    prisma.horseMove.findMany({
+      where,
+      include: {
+        horse: { select: { id: true, name: true, regimentalNumber: true } },
+        fromLocation: { select: { id: true, name: true, code: true } },
+        toLocation: { select: { id: true, name: true, code: true } },
+        createdBy: { select: { name: true } },
+      },
+      orderBy: [{ departureDate: "desc" }, { groupId: "asc" }],
+      skip: pagination.skip,
+      take: pagination.take,
+    }),
+    prisma.horseMove.count({ where }),
+  ]);
+  const meta = paginationMeta(pagination, totalItems);
 
   // Build group size map
   const groupCounts: Record<string, number> = {};
@@ -94,7 +103,7 @@ export default async function MovesPage({
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Horse Moves</h1>
           <p className="text-sm text-gray-500 mt-0.5">
-            {moves.length} move{moves.length !== 1 ? "s" : ""}
+            {totalItems} move{totalItems !== 1 ? "s" : ""}
           </p>
         </div>
         {canEdit && (
@@ -216,6 +225,11 @@ export default async function MovesPage({
             )}
           </tbody>
         </table>
+        <Pagination
+          meta={meta}
+          basePath="/moves"
+          searchParams={{ status, q }}
+        />
       </div>
     </div>
   );

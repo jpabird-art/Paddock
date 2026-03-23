@@ -3,33 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
-import {
-  LayoutDashboard,
-  Stethoscope,
-  Calendar,
-  AlertTriangle,
-  Users,
-  LogOut,
-  Truck,
-  MapPin,
-  Wrench,
-  ClipboardCheck,
-} from "lucide-react";
+import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-const ROLE_LABELS: Record<string, string> = {
-  ADMIN: "Admin",
-  VET: "Veterinary",
-  OFFICER: "Officer",
-  TROOPER: "Trooper",
-};
-
-const ROLE_BADGE_COLOURS: Record<string, string> = {
-  ADMIN: "bg-red-500 text-white",
-  VET: "bg-emerald-500 text-white",
-  OFFICER: "bg-blue-500 text-white",
-  TROOPER: "bg-gray-500 text-white",
-};
+import { navItems, ROLE_LABELS, ROLE_BADGE_COLOURS } from "@/lib/nav-config";
 
 interface SidebarProps {
   user: {
@@ -41,69 +17,8 @@ interface SidebarProps {
 
 export function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
-
-  const navItems = [
-    {
-      href: "/dashboard",
-      label: "Dashboard",
-      icon: LayoutDashboard,
-      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/horses",
-      label: "Horses",
-      icon: Stethoscope,
-      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/health",
-      label: "Health Schedule",
-      icon: Calendar,
-      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/injuries",
-      label: "Injury Reports",
-      icon: AlertTriangle,
-      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/moves",
-      label: "Moves",
-      icon: Truck,
-      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/tack",
-      label: "Tack & Equipment",
-      icon: Wrench,
-      roles: ["ADMIN", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/inspections",
-      label: "Inspections",
-      icon: ClipboardCheck,
-      roles: ["ADMIN", "VET", "OFFICER", "TROOPER"],
-    },
-    {
-      href: "/admin",
-      label: "Administration",
-      icon: Users,
-      roles: ["ADMIN"],
-    },
-    {
-      href: "/admin/locations",
-      label: "Locations",
-      icon: MapPin,
-      roles: ["ADMIN", "OFFICER"],
-    },
-  ];
-
   const role = user.role ?? "TROOPER";
-
-  const visibleItems = navItems.filter((item) =>
-    item.roles.includes(role)
-  );
+  const visibleItems = navItems.filter((item) => item.roles.includes(role));
 
   return (
     <aside className="hidden lg:flex w-64 bg-[#1a2744] flex-col shrink-0 h-full">

@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation, TaskReadiness } from "@prisma/client";
+import { Squadron, DutyStation, TaskReadiness, MoveStatus } from "@prisma/client";
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -138,11 +138,41 @@ export async function DELETE(
     return NextResponse.json({ error: "Horse not found" }, { status: 404 });
   }
 
-  // Soft delete
-  await prisma.horse.update({
-    where: { id },
-    data: { isActive: false },
-  });
+  const now = new Date();
+
+  // Soft delete with cascade to related active records
+  await prisma.$transaction([
+    // Deactivate the horse
+    prisma.horse.update({
+      where: { id },
+      data: { isActive: false },
+    }),
+    // Close open duty assignments
+    prisma.dutyAssignment.updateMany({
+      where: { horseId: id, endDate: null },
+      data: { endDate: now },
+    }),
+    // End active rider assignments
+    prisma.riderAssignment.updateMany({
+      where: { horseId: id, endDate: null },
+      data: { endDate: now },
+    }),
+    // Deactivate feeding plans
+    prisma.feedingPlan.updateMany({
+      where: { horseId: id, isActive: true },
+      data: { isActive: false, endDate: now },
+    }),
+    // Return tack allocations
+    prisma.tackAllocation.updateMany({
+      where: { horseId: id, endDate: null },
+      data: { endDate: now },
+    }),
+    // Cancel planned moves
+    prisma.horseMove.updateMany({
+      where: { horseId: id, status: MoveStatus.PLANNED },
+      data: { status: MoveStatus.CANCELLED },
+    }),
+  ]);
 
   await audit({
     userId: session?.user.id,
