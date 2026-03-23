@@ -172,6 +172,7 @@ model Horse {
   taskReadiness     TaskReadiness @default(FULL_EXERCISE)
   isActive          Boolean      @default(true)
   photoUrl          String?
+  ancillaries       String?
   currentLocationId String?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt

@@ -43,12 +43,14 @@ interface AvailableTackItem {
 
 interface HorseTackAllocationsProps {
   horseId: string;
+  ancillaries?: string | null;
   initialAllocations: TackAllocationData[];
   canManage: boolean;
 }
 
 export function HorseTackAllocations({
   horseId,
+  ancillaries,
   initialAllocations,
   canManage,
 }: HorseTackAllocationsProps) {
@@ -57,6 +59,7 @@ export function HorseTackAllocations({
   const [allocations, setAllocations] = useState<TackAllocationData[]>(initialAllocations);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [returningId, setReturningId] = useState<string | null>(null);
 
   const [availableItems, setAvailableItems] = useState<AvailableTackItem[]>([]);
   const [loadingItems, setLoadingItems] = useState(false);
@@ -132,8 +135,40 @@ export function HorseTackAllocations({
     }
   }
 
+  async function handleReturn(allocationId: string) {
+    setReturningId(allocationId);
+    try {
+      const res = await fetch(`/api/tack/allocations/${allocationId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ endDate: new Date().toISOString() }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        toast({ title: "Error", description: err.error ?? "Failed to return tack.", variant: "destructive" });
+        return;
+      }
+
+      toast({ title: "Tack returned", description: "Allocation ended." });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setReturningId(null);
+    }
+  }
+
   return (
     <div className="space-y-4">
+      {/* Ancillaries */}
+      {ancillaries && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+          <p className="text-xs font-semibold text-amber-800 uppercase tracking-wide mb-1">Ancillaries</p>
+          <p className="text-sm text-amber-900">{ancillaries}</p>
+        </div>
+      )}
+
       {canManage && (
         <div className="flex justify-end">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -230,6 +265,9 @@ export function HorseTackAllocations({
                   <th className="px-4 py-3 font-semibold text-gray-700">Fit Notes</th>
                   <th className="px-4 py-3 font-semibold text-gray-700">Start Date</th>
                   <th className="px-4 py-3 font-semibold text-gray-700">End Date</th>
+                  {canManage && (
+                    <th className="px-4 py-3 font-semibold text-gray-700"></th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -260,6 +298,19 @@ export function HorseTackAllocations({
                           ? format(new Date(alloc.endDate), "dd MMM yyyy")
                           : "—"}
                       </td>
+                      {canManage && (
+                        <td className="px-4 py-3">
+                          {isCurrent && (
+                            <button
+                              onClick={() => handleReturn(alloc.id)}
+                              disabled={returningId === alloc.id}
+                              className="text-xs text-red-600 hover:underline font-medium disabled:opacity-50"
+                            >
+                              {returningId === alloc.id ? "Returning..." : "Return"}
+                            </button>
+                          )}
+                        </td>
+                      )}
                     </tr>
                   );
                 })}

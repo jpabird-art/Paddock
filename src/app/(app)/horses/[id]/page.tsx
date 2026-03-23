@@ -478,6 +478,7 @@ export default async function HorseDetailPage({
           <div className="mt-3">
             <HorseTackAllocations
               horseId={horse.id}
+              ancillaries={horse.ancillaries}
               initialAllocations={horse.tackAllocations.map((a) => ({
                 id: a.id,
                 fitNotes: a.fitNotes,

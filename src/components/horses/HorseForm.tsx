@@ -35,7 +35,7 @@ const horseSchema = z.object({
 type HorseFormData = z.infer<typeof horseSchema>;
 
 interface HorseFormProps {
-  initialData?: Partial<HorseFormData> & { id?: string };
+  initialData?: Partial<HorseFormData> & { id?: string; ancillaries?: string };
   mode: "create" | "edit";
   locations?: { id: string; name: string; code: string }[];
 }
@@ -45,6 +45,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<keyof HorseFormData, string>>>({});
+  const [ancillaries, setAncillaries] = useState(initialData?.ancillaries ?? "");
 
   const [formData, setFormData] = useState<HorseFormData>({
     name: initialData?.name ?? "",
@@ -104,7 +105,10 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
       const res = await fetch(url, {
         method,
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parse.data),
+        body: JSON.stringify({
+          ...parse.data,
+          ancillaries: ancillaries.trim() || null,
+        }),
       });
 
       if (!res.ok) {
@@ -348,6 +352,19 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
             <p className="text-sm text-red-600">{errors.taskReadiness}</p>
           )}
         </div>
+      </div>
+
+      {/* Ancillaries */}
+      <div className="space-y-2">
+        <Label htmlFor="ancillaries">Ancillaries</Label>
+        <p className="text-xs text-gray-500">Unique extras for this horse — shims, fluffy girths, risers, etc.</p>
+        <Textarea
+          id="ancillaries"
+          value={ancillaries}
+          onChange={(e) => setAncillaries(e.target.value)}
+          placeholder="e.g. Prolite shim (thin), fluffy girth, riser nearside, fluffy reins"
+          rows={2}
+        />
       </div>
 
       <div className="flex gap-3 pt-2">

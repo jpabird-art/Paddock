@@ -20,6 +20,7 @@ const updateSchema = z.object({
   dutyStation: z.nativeEnum(DutyStation).optional(),
   taskReadiness: z.nativeEnum(TaskReadiness).optional(),
   isActive: z.boolean().optional(),
+  ancillaries: z.string().nullable().optional(),
 });
 
 export async function GET(

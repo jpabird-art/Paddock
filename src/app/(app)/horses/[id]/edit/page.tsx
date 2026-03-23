@@ -55,6 +55,7 @@ export default async function EditHorsePage({
             squadron: horse.squadron ?? undefined,
             dutyStation: horse.dutyStation,
             taskReadiness: horse.taskReadiness,
+            ancillaries: horse.ancillaries ?? "",
           }}
         />
       </div>

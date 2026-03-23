@@ -4,8 +4,11 @@ import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 
 const patchSchema = z.object({
+  type: z.enum(["SADDLE", "BRIDLE", "BREASTPLATE", "GIRTH", "NUMNAH", "OTHER"]).optional(),
+  identifier: z.string().min(1).optional(),
+  brand: z.string().nullable().optional(),
   condition: z.enum(["SERVICEABLE", "UNSERVICEABLE", "REPAIR_NEEDED"]).optional(),
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
 });
 
