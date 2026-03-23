@@ -1,6 +1,6 @@
 import {
   LayoutDashboard,
-  Stethoscope,
+  Swords,
   Calendar,
   AlertTriangle,
   Users,
@@ -20,7 +20,7 @@ export interface NavItem {
 
 export const navItems: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
-  { href: "/horses", label: "Horses", icon: Stethoscope, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
+  { href: "/horses", label: "Horses", icon: Swords, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/health", label: "Health Schedule", icon: Calendar, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/injuries", label: "Injury Reports", icon: AlertTriangle, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/moves", label: "Moves", icon: Truck, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
