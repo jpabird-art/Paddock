@@ -30,12 +30,15 @@ const horseSchema = z.object({
   squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"], { required_error: "Squadron is required" }),
   dutyStation: z.string().min(1, "Duty station is required"),
   taskReadiness: z.enum(["FULL_EXERCISE", "LIMITED_ROLE", "NON_TASKWORTHY"]),
+  sex: z.enum(["GELDING", "MARE"]).optional(),
+  role: z.enum(["CHARGER", "CAV_BLACK", "GREY", "STANDARD", "COMP", "RMT"]).optional(),
+  division: z.coerce.number().min(1).max(2).optional(),
 });
 
 type HorseFormData = z.infer<typeof horseSchema>;
 
 interface HorseFormProps {
-  initialData?: Partial<HorseFormData> & { id?: string; ancillaries?: string };
+  initialData?: Partial<HorseFormData> & { id?: string; ancillaries?: string; sex?: string; role?: string; division?: number };
   mode: "create" | "edit";
   locations?: { id: string; name: string; code: string }[];
 }
@@ -65,6 +68,9 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     squadron: initialData?.squadron ?? ("" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS"),
     dutyStation: initialData?.dutyStation ?? "HYDE_PARK_BARRACKS",
     taskReadiness: initialData?.taskReadiness ?? "FULL_EXERCISE",
+    sex: initialData?.sex as "GELDING" | "MARE" | undefined,
+    role: initialData?.role as "CHARGER" | "CAV_BLACK" | "GREY" | "STANDARD" | "COMP" | "RMT" | undefined,
+    division: initialData?.division,
   });
 
   function handleChange(
@@ -75,7 +81,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   }
 
-  function handleSelect(name: string, value: string) {
+  function handleSelect(name: string, value: string | number) {
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
   }
@@ -351,6 +357,61 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           {errors.taskReadiness && (
             <p className="text-sm text-red-600">{errors.taskReadiness}</p>
           )}
+        </div>
+
+        {/* Sex */}
+        <div className="space-y-2">
+          <Label htmlFor="sex">Sex</Label>
+          <Select
+            value={formData.sex ?? ""}
+            onValueChange={(v) => handleSelect("sex", v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select sex" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="GELDING">Gelding</SelectItem>
+              <SelectItem value="MARE">Mare</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Role */}
+        <div className="space-y-2">
+          <Label htmlFor="role">Role</Label>
+          <Select
+            value={formData.role ?? ""}
+            onValueChange={(v) => handleSelect("role", v)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="CHARGER">Charger</SelectItem>
+              <SelectItem value="CAV_BLACK">Cav Black</SelectItem>
+              <SelectItem value="GREY">Grey</SelectItem>
+              <SelectItem value="STANDARD">Standard</SelectItem>
+              <SelectItem value="COMP">Comp</SelectItem>
+              <SelectItem value="RMT">RMT</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Division */}
+        <div className="space-y-2">
+          <Label htmlFor="division">Division</Label>
+          <Select
+            value={formData.division?.toString() ?? ""}
+            onValueChange={(v) => handleSelect("division", parseInt(v))}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select division" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="1">1</SelectItem>
+              <SelectItem value="2">2</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

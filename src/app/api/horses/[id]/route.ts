@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation, TaskReadiness } from "@prisma/client";
+import { Squadron, DutyStation, TaskReadiness, Sex, HorseRole } from "@prisma/client";
 import { deactivateHorse, reassignDutyStation } from "@/lib/horse-services";
 
 const updateSchema = z.object({
@@ -21,6 +21,9 @@ const updateSchema = z.object({
   taskReadiness: z.nativeEnum(TaskReadiness).optional(),
   isActive: z.boolean().optional(),
   ancillaries: z.string().nullable().optional(),
+  sex: z.nativeEnum(Sex).nullable().optional(),
+  role: z.nativeEnum(HorseRole).nullable().optional(),
+  division: z.coerce.number().min(1).max(2).nullable().optional(),
 });
 
 export async function GET(

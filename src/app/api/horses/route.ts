@@ -4,7 +4,7 @@ import { requirePermission, requireAuth } from "@/lib/permissions";
 import { seedInitialEvents } from "@/lib/health-scheduler";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation, TaskReadiness } from "@prisma/client";
+import { Squadron, DutyStation, TaskReadiness, Sex, HorseRole } from "@prisma/client";
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -20,6 +20,9 @@ const createSchema = z.object({
   squadron: z.nativeEnum(Squadron),
   dutyStation: z.nativeEnum(DutyStation),
   taskReadiness: z.nativeEnum(TaskReadiness).optional(),
+  sex: z.nativeEnum(Sex).optional(),
+  role: z.nativeEnum(HorseRole).optional(),
+  division: z.coerce.number().min(1).max(2).optional(),
 });
 
 export async function GET() {
@@ -81,6 +84,9 @@ export async function POST(request: Request) {
       squadron: data.squadron,
       dutyStation: data.dutyStation,
       taskReadiness: data.taskReadiness,
+      sex: data.sex,
+      role: data.role,
+      division: data.division,
     },
   });
 

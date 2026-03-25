@@ -250,6 +250,21 @@ export default async function HorseDetailPage({
                   : <span className="text-gray-400">—</span>
               } />
               <InfoField label="Task Readiness" value={<TaskReadinessBadge readiness={horse.taskReadiness} />} />
+              <InfoField label="Sex" value={
+                horse.sex
+                  ? horse.sex === "GELDING" ? "Gelding" : "Mare"
+                  : <span className="text-gray-400">—</span>
+              } />
+              <InfoField label="Role" value={
+                horse.role
+                  ? { CHARGER: "Charger", CAV_BLACK: "Cav Black", GREY: "Grey", STANDARD: "Standard", COMP: "Comp", RMT: "RMT" }[horse.role]
+                  : <span className="text-gray-400">—</span>
+              } />
+              <InfoField label="Division" value={
+                horse.division
+                  ? String(horse.division)
+                  : <span className="text-gray-400">—</span>
+              } />
               <InfoField label="Breed" value={horse.breed} />
               <InfoField label="Colour" value={horse.colour} />
               <InfoField

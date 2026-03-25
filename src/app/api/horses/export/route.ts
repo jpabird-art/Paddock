@@ -16,6 +16,20 @@ const SQUADRON_LABELS: Record<string, string> = {
   THE_BLUES_AND_ROYALS: "The Blues and Royals",
 };
 
+const ROLE_LABELS: Record<string, string> = {
+  CHARGER: "Charger",
+  CAV_BLACK: "Cav Black",
+  GREY: "Grey",
+  STANDARD: "Standard",
+  COMP: "Comp",
+  RMT: "RMT",
+};
+
+const SEX_LABELS: Record<string, string> = {
+  GELDING: "Gelding",
+  MARE: "Mare",
+};
+
 const READINESS_LABELS: Record<string, string> = {
   FULL_EXERCISE: "Full Exercise",
   LIMITED_ROLE: "Limited Role",
@@ -83,6 +97,9 @@ export async function GET(request: Request) {
     "Squadron Number",
     "Squadron",
     "Duty Station",
+    "Sex",
+    "Role",
+    "Division",
     "Breed",
     "Colour",
     "Date of Birth",
@@ -104,6 +121,9 @@ export async function GET(request: Request) {
       escapeCSV(h.squadronNumber),
       escapeCSV(h.squadron ? SQUADRON_LABELS[h.squadron] ?? h.squadron : ""),
       escapeCSV(h.dutyStation ? STATION_LABELS[h.dutyStation] ?? h.dutyStation : ""),
+      escapeCSV(h.sex ? SEX_LABELS[h.sex] ?? h.sex : ""),
+      escapeCSV(h.role ? ROLE_LABELS[h.role] ?? h.role : ""),
+      h.division ? String(h.division) : "",
       escapeCSV(h.breed),
       escapeCSV(h.colour),
       escapeCSV(h.dateOfBirth.toISOString().substring(0, 10)),
