@@ -132,6 +132,9 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "CHARGER",
+      division: 1,
     },
     {
       name: "Monty",
@@ -146,6 +149,9 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "CAV_BLACK",
+      division: 1,
     },
     {
       name: "Wellington",
@@ -160,6 +166,9 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "GREY",
+      division: 1,
     },
     {
       name: "Hercules",
@@ -174,6 +183,9 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "STANDARD",
+      division: 2,
     },
     {
       name: "Ramrod",
@@ -188,6 +200,9 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "CAV_BLACK",
+      division: 2,
     },
     {
       name: "Sable",
@@ -202,6 +217,9 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "MARE",
+      role: "CAV_BLACK",
+      division: 1,
     },
     {
       name: "Churchill",
@@ -216,6 +234,9 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "GREY",
+      division: 2,
     },
     {
       name: "Parade",
@@ -230,6 +251,9 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "STANDARD",
+      division: 1,
     },
     {
       name: "Templar",
@@ -244,6 +268,9 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "CAV_BLACK",
+      division: 2,
     },
     {
       name: "Gallant",
@@ -258,6 +285,9 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "CAV_BLACK",
+      division: 1,
     },
     {
       name: "Ironside",
@@ -272,6 +302,9 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "GELDING",
+      role: "CHARGER",
+      division: 1,
     },
     {
       name: "Valiant",
@@ -286,6 +319,9 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
+      sex: "MARE",
+      role: "STANDARD",
+      division: 2,
     },
   ];
 
