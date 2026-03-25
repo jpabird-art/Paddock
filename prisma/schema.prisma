@@ -122,6 +122,20 @@ enum TaskReadiness {
   FULL_EXERCISE
 }
 
+enum Sex {
+  GELDING
+  MARE
+}
+
+enum HorseRole {
+  CHARGER
+  CAV_BLACK
+  GREY
+  STANDARD
+  COMP
+  RMT
+}
+
 // ─── MODELS ──────────────────────────────────────────────────────────
 
 model User {
@@ -174,8 +188,8 @@ model Horse {
   photoUrl          String?
   ancillaries       String?
   currentLocationId String?
-  sex               String?
-  role              String?
+  sex               Sex?
+  role              HorseRole?
   division          Int?
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt

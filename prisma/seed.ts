@@ -13,6 +13,8 @@ import {
   TackCondition,
   Squadron,
   TaskReadiness,
+  Sex,
+  HorseRole,
 } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { addDays, subDays, subMonths, subYears } from "date-fns";
@@ -132,8 +134,8 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "CHARGER",
+      sex: Sex.GELDING,
+      role: HorseRole.CHARGER,
       division: 1,
     },
     {
@@ -149,8 +151,8 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "CAV_BLACK",
+      sex: Sex.GELDING,
+      role: HorseRole.CAV_BLACK,
       division: 1,
     },
     {
@@ -166,8 +168,8 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "GREY",
+      sex: Sex.GELDING,
+      role: HorseRole.GREY,
       division: 1,
     },
     {
@@ -183,8 +185,8 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "STANDARD",
+      sex: Sex.GELDING,
+      role: HorseRole.STANDARD,
       division: 2,
     },
     {
@@ -200,8 +202,8 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "CAV_BLACK",
+      sex: Sex.GELDING,
+      role: HorseRole.CAV_BLACK,
       division: 2,
     },
     {
@@ -217,8 +219,8 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "MARE",
-      role: "CAV_BLACK",
+      sex: Sex.MARE,
+      role: HorseRole.CAV_BLACK,
       division: 1,
     },
     {
@@ -234,8 +236,8 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "GREY",
+      sex: Sex.GELDING,
+      role: HorseRole.GREY,
       division: 2,
     },
     {
@@ -251,8 +253,8 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "STANDARD",
+      sex: Sex.GELDING,
+      role: HorseRole.STANDARD,
       division: 1,
     },
     {
@@ -268,8 +270,8 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "CAV_BLACK",
+      sex: Sex.GELDING,
+      role: HorseRole.CAV_BLACK,
       division: 2,
     },
     {
@@ -285,8 +287,8 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "CAV_BLACK",
+      sex: Sex.GELDING,
+      role: HorseRole.CAV_BLACK,
       division: 1,
     },
     {
@@ -302,8 +304,8 @@ async function main() {
       squadron: Squadron.THE_LIFE_GUARDS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "GELDING",
-      role: "CHARGER",
+      sex: Sex.GELDING,
+      role: HorseRole.CHARGER,
       division: 1,
     },
     {
@@ -319,8 +321,8 @@ async function main() {
       squadron: Squadron.THE_BLUES_AND_ROYALS,
       dutyStation: DutyStation.HYDE_PARK_BARRACKS,
       taskReadiness: TaskReadiness.FULL_EXERCISE,
-      sex: "MARE",
-      role: "STANDARD",
+      sex: Sex.MARE,
+      role: HorseRole.STANDARD,
       division: 2,
     },
   ];
