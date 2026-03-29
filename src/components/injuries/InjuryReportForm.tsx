@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Camera, X } from "lucide-react";
 
 const schema = z.object({
   severity: z.enum(["MINOR", "MODERATE", "SEVERE"]),
@@ -45,6 +45,9 @@ export function InjuryReportForm({
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [previews, setPreviews] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState({
     severity: "MINOR" as "MINOR" | "MODERATE" | "SEVERE",
@@ -58,6 +61,63 @@ export function InjuryReportForm({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrors((prev) => ({ ...prev, [name]: undefined }));
+  }
+
+  function handlePhotoSelect(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files ?? []);
+    const imageFiles = files.filter((f) => f.type.startsWith("image/"));
+
+    if (photos.length + imageFiles.length > 5) {
+      toast({
+        title: "Too many photos",
+        description: "Maximum 5 photos per injury report.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setPhotos((prev) => [...prev, ...imageFiles]);
+
+    imageFiles.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        setPreviews((prev) => [...prev, ev.target?.result as string]);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // Reset input so the same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
+  function removePhoto(index: number) {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+    setPreviews((prev) => prev.filter((_, i) => i !== index));
+  }
+
+  function resetForm() {
+    setFormData({ severity: "MINOR", description: "", bodyLocation: "" });
+    setPhotos([]);
+    setPreviews([]);
+    setErrors({});
+  }
+
+  async function uploadPhotos(injuryReportId: string) {
+    const results = [];
+    for (const photo of photos) {
+      const fd = new FormData();
+      fd.append("file", photo);
+      fd.append("category", "INJURY_PHOTO");
+      fd.append("description", `Injury photo — ${formData.bodyLocation}`);
+      fd.append("horseId", horseId);
+      fd.append("injuryReportId", injuryReportId);
+
+      const res = await fetch("/api/attachments", { method: "POST", body: fd });
+      if (res.ok) {
+        results.push(await res.json());
+      }
+    }
+    return results;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -92,13 +152,24 @@ export function InjuryReportForm({
         return;
       }
 
+      const injury = await res.json();
+
+      // Upload photos linked to both the injury and the horse
+      if (photos.length > 0) {
+        await uploadPhotos(injury.id);
+      }
+
+      const photoText = photos.length > 0
+        ? ` ${photos.length} photo${photos.length > 1 ? "s" : ""} attached.`
+        : "";
+
       toast({
         title: "Injury reported",
-        description: `Injury report for ${horseName} submitted. Veterinary staff notified.`,
+        description: `Injury report for ${horseName} submitted. Veterinary staff notified.${photoText}`,
       });
 
       setOpen(false);
-      setFormData({ severity: "MINOR", description: "", bodyLocation: "" });
+      resetForm();
       onSuccess?.();
     } catch {
       toast({
@@ -112,14 +183,14 @@ export function InjuryReportForm({
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(v) => { setOpen(v); if (!v) resetForm(); }}>
       <DialogTrigger asChild>
         <Button variant="destructive" size="sm">
           <AlertTriangle className="h-4 w-4 mr-2" />
           Report Injury
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-lg">
+      <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Report Injury — {horseName}</DialogTitle>
         </DialogHeader>
@@ -179,6 +250,54 @@ export function InjuryReportForm({
             )}
           </div>
 
+          {/* Photo Upload */}
+          <div className="space-y-2">
+            <Label>Photos</Label>
+            <p className="text-xs text-gray-500">
+              Attach up to 5 photos of the injury. These will also appear in the horse&apos;s Documents tab.
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              capture="environment"
+              onChange={handlePhotoSelect}
+              className="hidden"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={photos.length >= 5}
+            >
+              <Camera className="h-4 w-4 mr-2" />
+              {photos.length === 0 ? "Add Photos" : `Add More (${photos.length}/5)`}
+            </Button>
+
+            {previews.length > 0 && (
+              <div className="grid grid-cols-3 gap-2 mt-2">
+                {previews.map((src, i) => (
+                  <div key={i} className="relative group">
+                    <img
+                      src={src}
+                      alt={`Injury photo ${i + 1}`}
+                      className="w-full h-24 object-cover rounded-md border border-gray-200"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removePhoto(i)}
+                      className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <DialogFooter>
             <Button
               type="button"
@@ -189,7 +308,7 @@ export function InjuryReportForm({
               Cancel
             </Button>
             <Button type="submit" variant="destructive" disabled={loading}>
-              {loading ? "Submitting..." : "Submit Report"}
+              {loading ? (photos.length > 0 ? "Uploading..." : "Submitting...") : "Submit Report"}
             </Button>
           </DialogFooter>
         </form>
