@@ -15,6 +15,7 @@ const createSchema = z.object({
   boxGroomName: z.string().optional().nullable(),
   vehicleVRN: z.string().optional().nullable(),
   notes: z.string().optional().nullable(),
+  name: z.string().optional().nullable(),
   crew: z.array(z.object({
     name: z.string().min(1),
     serviceNumber: z.string().optional(),
@@ -69,6 +70,7 @@ export async function POST(request: Request) {
     boxGroomName: boxGroomName ?? null,
     vehicleVRN: vehicleVRN ?? null,
     notes: notes ?? null,
+    name: parse.data.name ?? null,
     crew: crew ?? undefined,
     groupId,
     createdById: session!.user.id,

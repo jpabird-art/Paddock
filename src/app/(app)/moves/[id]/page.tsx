@@ -72,16 +72,27 @@ export default async function MoveDetailPage({
           Horse Moves
         </Link>
         <span>/</span>
-        <span className="text-gray-700 font-medium">{move.horse.name}</span>
+        <span className="text-gray-700 font-medium">{move.name ?? move.horse.name}</span>
       </div>
 
       <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">
-            Move —{" "}
-            <Link href={`/horses/${move.horse.id}`} className="text-[#1a2744] hover:underline">
-              {move.horse.name}
-            </Link>
+            {move.name ? (
+              <>
+                {move.name} —{" "}
+                <Link href={`/horses/${move.horse.id}`} className="text-[#1a2744] hover:underline">
+                  {move.horse.name}
+                </Link>
+              </>
+            ) : (
+              <>
+                Move —{" "}
+                <Link href={`/horses/${move.horse.id}`} className="text-[#1a2744] hover:underline">
+                  {move.horse.name}
+                </Link>
+              </>
+            )}
           </h1>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-mono text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
@@ -130,6 +141,7 @@ export default async function MoveDetailPage({
               vehicleVRN: move.vehicleVRN ?? "",
               boxGroomName: move.boxGroomName ?? "",
               notes: move.notes ?? "",
+              name: move.name ?? "",
               crew: (move.crew as { name: string; serviceNumber: string; role: string }[] | null) ?? [],
             }}
           />

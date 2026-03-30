@@ -51,6 +51,7 @@ const createSchema = z.object({
   vehicleVRN: optStr,
   boxGroomName: optStr,
   notes: optStr,
+  name: optStr,
   crew: crewSchema.optional().nullable(),
 });
 
@@ -66,6 +67,7 @@ const editSchema = z.object({
   vehicleVRN: optStr,
   boxGroomName: optStr,
   notes: optStr,
+  name: optStr,
   crew: crewSchema.optional().nullable(),
 });
 
@@ -85,6 +87,7 @@ interface HorseMoveFormProps {
     vehicleVRN?: string;
     boxGroomName?: string;
     notes?: string;
+    name?: string;
     crew?: CrewMember[];
   };
   mode: "create" | "edit";
@@ -118,6 +121,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
   const [vehicleVRN, setVehicleVRN] = useState(initialData?.vehicleVRN ?? "");
   const [boxGroomName, setBoxGroomName] = useState(initialData?.boxGroomName ?? "");
   const [notes, setNotes] = useState(initialData?.notes ?? "");
+  const [moveName, setMoveName] = useState(initialData?.name ?? "");
 
   // Crew state
   const [crew, setCrew] = useState<CrewMember[]>(initialData?.crew ?? []);
@@ -191,6 +195,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
       vehicleVRN: vehicleVRN || null,
       boxGroomName: boxGroomName || null,
       notes: notes || null,
+      name: moveName || null,
       crew: validCrew.length > 0 ? validCrew : null,
     };
 
@@ -384,6 +389,17 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
           {errors.horseId && <p className="text-sm text-red-600">{errors.horseId}</p>}
         </div>
       )}
+
+      <div className="space-y-2">
+        <Label htmlFor="moveName">Move Name</Label>
+        <Input
+          id="moveName"
+          value={moveName}
+          onChange={(e) => setMoveName(e.target.value)}
+          placeholder="e.g. HCTW Uplift, Summer Camp Move"
+        />
+        <p className="text-xs text-gray-400">Optional — helps identify grouped or recurring moves.</p>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">

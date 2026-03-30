@@ -332,6 +332,7 @@ model HorseMove {
   vehicleVRN          String?
   crew                Json?
   notes               String?
+  name                String?
   groupId             String?
   createdById         String
   updatedById         String?
