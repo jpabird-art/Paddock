@@ -8,7 +8,7 @@
  *   npx ts-node --compiler-options '{"module":"CommonJS"}' prisma/import-hcmr-tracker.ts [path-to-xlsx]
  */
 
-import { PrismaClient, Squadron, DutyStation, TaskReadiness, Sex, HorseRole } from "@prisma/client";
+import { PrismaClient, Squadron, TaskReadiness, Sex, HorseRole } from "@prisma/client";
 import * as XLSX from "xlsx";
 import { addMonths } from "date-fns";
 
@@ -37,13 +37,6 @@ function parseTaskReadiness(vetStatus: string | null): TaskReadiness {
   if (s === "VLD") return TaskReadiness.LIMITED_ROLE;
   // Casting and OTR
   return TaskReadiness.NON_TASKWORTHY;
-}
-
-function parseDutyStation(sqnRaw: string | null): DutyStation {
-  if (!sqnRaw) return DutyStation.HYDE_PARK_BARRACKS;
-  const s = sqnRaw.trim();
-  if (s.includes("HCTW") || s === "RMT Sqn") return DutyStation.TRAINING_WING;
-  return DutyStation.HYDE_PARK_BARRACKS;
 }
 
 const LOCATION_MAP: Record<string, string> = {
@@ -252,7 +245,6 @@ async function main() {
     // Parse squadron/division
     const { squadron, division, role } = parseSquadronDiv(sqnRaw);
     const taskReadiness = parseTaskReadiness(vetStatus);
-    const dutyStation = parseDutyStation(sqnRaw);
 
     // Resolve location
     const locationCode = LOCATION_MAP[locationRaw] ?? null;
@@ -276,7 +268,6 @@ async function main() {
         squadron,
         division,
         role,
-        dutyStation,
         taskReadiness,
         currentLocationId,
         isActive: vetStatus !== "Casting",

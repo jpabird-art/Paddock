@@ -20,7 +20,7 @@ export async function GET(
   const injury = await prisma.injuryReport.findUnique({
     where: { id },
     include: {
-      horse: { select: { id: true, name: true, regimentalNumber: true, dutyStation: true } },
+      horse: { select: { id: true, name: true, regimentalNumber: true } },
       reportedBy: { select: { name: true, serviceNumber: true, role: true } },
       resolvedBy: { select: { name: true, serviceNumber: true, role: true } },
       notifications: {

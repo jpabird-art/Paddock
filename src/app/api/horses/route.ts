@@ -4,7 +4,7 @@ import { requirePermission, requireAuth } from "@/lib/permissions";
 import { seedInitialEvents } from "@/lib/health-scheduler";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation, TaskReadiness, Sex, HorseRole } from "@prisma/client";
+import { Squadron, TaskReadiness, Sex, HorseRole } from "@prisma/client";
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -18,7 +18,6 @@ const createSchema = z.object({
   weightKg: z.coerce.number().positive(),
   maxRiderWeightKg: z.coerce.number().positive(),
   squadron: z.nativeEnum(Squadron),
-  dutyStation: z.nativeEnum(DutyStation),
   taskReadiness: z.nativeEnum(TaskReadiness).optional(),
   sex: z.nativeEnum(Sex).optional(),
   role: z.nativeEnum(HorseRole).optional(),
@@ -83,7 +82,6 @@ export async function POST(request: Request) {
       weightKg: data.weightKg,
       maxRiderWeightKg: data.maxRiderWeightKg,
       squadron: data.squadron,
-      dutyStation: data.dutyStation,
       taskReadiness: data.taskReadiness,
       sex: data.sex,
       role: data.role,
@@ -95,25 +93,13 @@ export async function POST(request: Request) {
   // Seed initial health events
   await seedInitialEvents(horse.id, horse.serviceEntryDate);
 
-  // Log initial duty assignment
-  if (session) {
-    await prisma.dutyAssignment.create({
-      data: {
-        horseId: horse.id,
-        assignedById: session.user.id,
-        station: horse.dutyStation,
-        notes: "Initial station assignment on intake.",
-      },
-    });
-  }
-
   await audit({
     userId: session?.user.id,
     userRole: session?.user.role,
     entityType: "horse",
     entityId: horse.id,
     action: "create",
-    after: { name: horse.name, regimentalNumber: horse.regimentalNumber, squadron: horse.squadron, dutyStation: horse.dutyStation },
+    after: { name: horse.name, regimentalNumber: horse.regimentalNumber, squadron: horse.squadron },
   });
 
   return NextResponse.json(horse, { status: 201 });

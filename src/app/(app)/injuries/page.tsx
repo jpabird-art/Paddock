@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { DutyBadge } from "@/components/horses/DutyBadge";
 import { parsePagination, paginationMeta } from "@/lib/pagination";
 import { Pagination } from "@/components/ui/pagination";
 
@@ -31,7 +30,7 @@ export default async function InjuriesPage({
       where,
       include: {
         horse: {
-          select: { id: true, name: true, regimentalNumber: true, dutyStation: true },
+          select: { id: true, name: true, regimentalNumber: true, currentLocation: { select: { name: true } } },
         },
         reportedBy: { select: { name: true, serviceNumber: true } },
         resolvedBy: { select: { name: true } },
@@ -93,7 +92,6 @@ export default async function InjuriesPage({
             <tr className="border-b bg-gray-50">
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Date</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Horse</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Station</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Location</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Severity</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -104,7 +102,7 @@ export default async function InjuriesPage({
           <tbody className="divide-y">
             {injuries.length === 0 ? (
               <tr>
-                <td colSpan={8} className="text-center text-gray-500 py-10">
+                <td colSpan={7} className="text-center text-gray-500 py-10">
                   No injury reports found.
                 </td>
               </tr>
@@ -132,10 +130,9 @@ export default async function InjuriesPage({
                       {injury.horse.regimentalNumber}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <DutyBadge station={injury.horse.dutyStation} />
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {injury.horse.currentLocation?.name ?? <span className="text-gray-400">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-gray-700">{injury.bodyLocation}</td>
                   <td className="px-4 py-3">
                     <SeverityBadge severity={injury.severity} />
                   </td>

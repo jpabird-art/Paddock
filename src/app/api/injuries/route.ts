@@ -17,7 +17,7 @@ export async function GET(request: Request) {
   const injuries = await prisma.injuryReport.findMany({
     where,
     include: {
-      horse: { select: { id: true, name: true, regimentalNumber: true, dutyStation: true } },
+      horse: { select: { id: true, name: true, regimentalNumber: true } },
       reportedBy: { select: { name: true, serviceNumber: true } },
       resolvedBy: { select: { name: true, serviceNumber: true } },
     },

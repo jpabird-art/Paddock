@@ -5,7 +5,6 @@ import { can } from "@/lib/permissions";
 import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
-import { DutyBadge } from "@/components/horses/DutyBadge";
 import { ResolveInjuryForm } from "@/components/injuries/ResolveInjuryForm";
 import { InjuryStatusUpdater } from "@/components/injuries/InjuryStatusUpdater";
 
@@ -32,7 +31,7 @@ export default async function InjuryDetailPage({
           id: true,
           name: true,
           regimentalNumber: true,
-          dutyStation: true,
+          currentLocation: { select: { name: true } },
           colour: true,
           breed: true,
         },
@@ -91,7 +90,11 @@ export default async function InjuryDetailPage({
             <span className="font-mono text-sm text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
               {injury.horse.regimentalNumber}
             </span>
-            <DutyBadge station={injury.horse.dutyStation} />
+            {injury.horse.currentLocation && (
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                {injury.horse.currentLocation.name}
+              </span>
+            )}
             <span
               className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${severityClass}`}
             >

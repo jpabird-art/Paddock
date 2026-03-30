@@ -3,37 +3,42 @@ import { authOptions } from "@/lib/auth";
 import { can } from "@/lib/permissions";
 import { prisma } from "@/lib/prisma";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DutyBadge } from "@/components/horses/DutyBadge";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Shield, AlertTriangle, Calendar, Activity, Pill } from "lucide-react";
-
-const DUTY_STATIONS = [
-  "KINGS_LIFE_GUARD",
-  "TRAINING_WING",
-  "HYDE_PARK_BARRACKS",
-  "WINTER_TRAINING",
-] as const;
+import { Shield, AlertTriangle, Calendar, Activity, Pill, MapPin } from "lucide-react";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
 
-  const [totalHorses, stationCounts, overdueEvents, openInjuries, activeWithdrawals] =
+  const [totalHorses, locationCounts, overdueEvents, openInjuries, activeWithdrawals] =
     await Promise.all([
       prisma.horse.count({ where: { isActive: true } }),
-      Promise.all(
-        DUTY_STATIONS.map((station) =>
-          prisma.horse
-            .count({ where: { isActive: true, dutyStation: station } })
-            .then((count) => ({ station, count }))
-        )
-      ),
+      prisma.location.findMany({
+        where: { isActive: true },
+        select: { id: true, name: true },
+        orderBy: { name: "asc" },
+      }).then(async (locs) => {
+        const counts = await Promise.all(
+          locs.map(async (loc) => ({
+            ...loc,
+            count: await prisma.horse.count({
+              where: { isActive: true, currentLocationId: loc.id },
+            }),
+          }))
+        );
+        return counts;
+      }),
       prisma.healthEvent.findMany({
         where: { status: "OVERDUE" },
         include: {
           horse: {
-            select: { id: true, name: true, regimentalNumber: true, dutyStation: true },
+            select: {
+              id: true,
+              name: true,
+              regimentalNumber: true,
+              currentLocation: { select: { name: true } },
+            },
           },
         },
         orderBy: { scheduledAt: "asc" },
@@ -43,7 +48,12 @@ export default async function DashboardPage() {
         where: { status: { in: ["OPEN", "UNDER_REVIEW"] } },
         include: {
           horse: {
-            select: { id: true, name: true, regimentalNumber: true, dutyStation: true },
+            select: {
+              id: true,
+              name: true,
+              regimentalNumber: true,
+              currentLocation: { select: { name: true } },
+            },
           },
           reportedBy: { select: { name: true } },
         },
@@ -63,6 +73,9 @@ export default async function DashboardPage() {
   const canSeeFullInjuries = can(role, "injury_report", "update");
   const canSeeOverdue = can(role, "health_event", "update");
 
+  // Only show locations that have horses
+  const activeLocations = locationCounts.filter((l) => l.count > 0);
+
   return (
     <div className="space-y-6">
       {/* Page header */}
@@ -74,8 +87,8 @@ export default async function DashboardPage() {
       </div>
 
       {/* Summary stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <Card className="lg:col-span-1 border-l-4 border-l-[#1a2744]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-l-4 border-l-[#1a2744]">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
               <div className="bg-[#1a2744]/10 rounded-full p-2">
@@ -89,11 +102,18 @@ export default async function DashboardPage() {
           </CardContent>
         </Card>
 
-        {stationCounts.map(({ station, count }) => (
-          <Card key={station} className="border-l-4 border-l-gray-200">
+        {activeLocations.map((loc) => (
+          <Card key={loc.id} className="border-l-4 border-l-gray-200">
             <CardContent className="p-5">
-              <div className="text-2xl font-bold text-gray-900 mb-1">{count}</div>
-              <DutyBadge station={station} />
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-50 rounded-full p-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{loc.count}</div>
+                  <div className="text-xs text-gray-500 font-medium">{loc.name}</div>
+                </div>
+              </div>
             </CardContent>
           </Card>
         ))}
@@ -140,7 +160,11 @@ export default async function DashboardPage() {
                           {format(new Date(event.scheduledAt), "dd MMM yyyy")}
                         </div>
                       </div>
-                      <DutyBadge station={event.horse.dutyStation} className="shrink-0" />
+                      {event.horse.currentLocation && (
+                        <span className="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full shrink-0">
+                          {event.horse.currentLocation.name}
+                        </span>
+                      )}
                     </div>
                   ))}
                 </div>

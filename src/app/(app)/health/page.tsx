@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { format } from "date-fns";
-import { DutyBadge } from "@/components/horses/DutyBadge";
 import { HealthEventBadge } from "@/components/health/HealthEventBadge";
 import { HealthCompleteButton } from "@/components/health/HealthCompleteButton";
 import { getServerSession } from "next-auth/next";
@@ -41,7 +40,7 @@ export default async function HealthPage({
             id: true,
             name: true,
             regimentalNumber: true,
-            dutyStation: true,
+            currentLocation: { select: { name: true } },
           },
         },
       },
@@ -89,7 +88,7 @@ export default async function HealthPage({
           <thead>
             <tr className="border-b bg-gray-50">
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Horse</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Station</th>
+              <th className="text-left px-4 py-3 font-semibold text-gray-600">Location</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Event Type</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Scheduled</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -130,8 +129,8 @@ export default async function HealthPage({
                       {event.horse.regimentalNumber}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
-                    <DutyBadge station={event.horse.dutyStation} />
+                  <td className="px-4 py-3 text-sm text-gray-600">
+                    {event.horse.currentLocation?.name ?? <span className="text-gray-400">—</span>}
                   </td>
                   <td className="px-4 py-3 font-medium text-gray-800">
                     {EVENT_TYPE_LABELS[event.type] ?? event.type}

@@ -3,8 +3,8 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { audit } from "@/lib/audit";
-import { Squadron, DutyStation, TaskReadiness, Sex, HorseRole } from "@prisma/client";
-import { deactivateHorse, reassignDutyStation } from "@/lib/horse-services";
+import { Squadron, TaskReadiness, Sex, HorseRole } from "@prisma/client";
+import { deactivateHorse } from "@/lib/horse-services";
 
 const updateSchema = z.object({
   name: z.string().min(1).optional(),
@@ -17,7 +17,6 @@ const updateSchema = z.object({
   weightKg: z.coerce.number().positive().optional(),
   maxRiderWeightKg: z.coerce.number().positive().optional(),
   squadron: z.nativeEnum(Squadron).optional(),
-  dutyStation: z.nativeEnum(DutyStation).optional(),
   taskReadiness: z.nativeEnum(TaskReadiness).optional(),
   isActive: z.boolean().optional(),
   ancillaries: z.string().nullable().optional(),
@@ -82,24 +81,16 @@ export async function PATCH(
   }
 
   const data = parse.data;
-  const dutyStationChanged = data.dutyStation && data.dutyStation !== horse.dutyStation;
-  const now = new Date();
 
-  const updated = await prisma.$transaction(async (tx) => {
-    if (dutyStationChanged && session) {
-      await reassignDutyStation(tx, id, horse.dutyStation, data.dutyStation!, session.user.id);
-    }
-
-    return tx.horse.update({
-      where: { id },
-      data: {
-        ...data,
-        dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
-        serviceEntryDate: data.serviceEntryDate
-          ? new Date(data.serviceEntryDate)
-          : undefined,
-      },
-    });
+  const updated = await prisma.horse.update({
+    where: { id },
+    data: {
+      ...data,
+      dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
+      serviceEntryDate: data.serviceEntryDate
+        ? new Date(data.serviceEntryDate)
+        : undefined,
+    },
   });
 
   await audit({
@@ -108,8 +99,8 @@ export async function PATCH(
     entityType: "horse",
     entityId: id,
     action: "update",
-    before: { name: horse.name, dutyStation: horse.dutyStation, squadron: horse.squadron, isActive: horse.isActive },
-    after: { name: updated.name, dutyStation: updated.dutyStation, squadron: updated.squadron, isActive: updated.isActive },
+    before: { name: horse.name, squadron: horse.squadron, isActive: horse.isActive },
+    after: { name: updated.name, squadron: updated.squadron, isActive: updated.isActive },
   });
 
   return NextResponse.json(updated);

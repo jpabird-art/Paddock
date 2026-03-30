@@ -36,26 +36,19 @@ const READINESS_LABELS: Record<string, string> = {
   NON_TASKWORTHY: "Non-taskworthy",
 };
 
-const STATION_LABELS: Record<string, string> = {
-  KINGS_LIFE_GUARD: "King's Life Guard",
-  TRAINING_WING: "Training Wing",
-  HYDE_PARK_BARRACKS: "Hyde Park Barracks",
-  WINTER_TRAINING: "Winter Training",
-};
-
 export async function GET(request: Request) {
   const { error } = await requireAuth();
   if (error) return error;
 
   const { searchParams } = new URL(request.url);
-  const station = searchParams.get("station");
+  const locationId = searchParams.get("location");
   const squadron = searchParams.get("squadron");
   const readiness = searchParams.get("readiness");
   const q = searchParams.get("q");
 
   const where: Record<string, unknown> = { isActive: true };
-  if (station && station !== "ALL") {
-    where.dutyStation = station;
+  if (locationId && locationId !== "ALL") {
+    where.currentLocationId = locationId;
   }
   if (squadron && squadron !== "ALL") {
     where.squadron = squadron;
@@ -74,6 +67,7 @@ export async function GET(request: Request) {
   const horses = await prisma.horse.findMany({
     where,
     include: {
+      currentLocation: { select: { name: true } },
       riderAssignments: {
         where: { endDate: null },
         include: { rider: { select: { name: true, serviceNumber: true } } },
@@ -96,7 +90,7 @@ export async function GET(request: Request) {
     "Regimental Number",
     "Squadron Number",
     "Squadron",
-    "Duty Station",
+    "Location",
     "Sex",
     "Role",
     "Division",
@@ -120,7 +114,7 @@ export async function GET(request: Request) {
       escapeCSV(h.regimentalNumber),
       escapeCSV(h.squadronNumber),
       escapeCSV(h.squadron ? SQUADRON_LABELS[h.squadron] ?? h.squadron : ""),
-      escapeCSV(h.dutyStation ? STATION_LABELS[h.dutyStation] ?? h.dutyStation : ""),
+      escapeCSV(h.currentLocation?.name ?? ""),
       escapeCSV(h.sex ? SEX_LABELS[h.sex] ?? h.sex : ""),
       escapeCSV(h.role ? ROLE_LABELS[h.role] ?? h.role : ""),
       h.division ? String(h.division) : "",

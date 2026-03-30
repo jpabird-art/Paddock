@@ -53,7 +53,6 @@ export default async function EditHorsePage({
             weightKg: horse.weightKg,
             maxRiderWeightKg: horse.maxRiderWeightKg,
             squadron: horse.squadron ?? undefined,
-            dutyStation: horse.dutyStation,
             taskReadiness: horse.taskReadiness,
             ancillaries: horse.ancillaries ?? "",
             currentLocationId: horse.currentLocationId ?? undefined,

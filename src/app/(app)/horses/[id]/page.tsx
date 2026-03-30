@@ -5,7 +5,6 @@ import { can } from "@/lib/permissions";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { format, differenceInYears } from "date-fns";
-import { DutyBadge } from "@/components/horses/DutyBadge";
 import { TaskReadinessBadge } from "@/components/horses/TaskReadinessBadge";
 import { MoveStatusBadge } from "@/components/moves/MoveStatusBadge";
 import { HealthEventBadge } from "@/components/health/HealthEventBadge";
@@ -15,7 +14,6 @@ import { HorseFeedingPlans } from "@/components/horses/HorseFeedingPlans";
 import { HorseMedicationRecords } from "@/components/horses/HorseMedicationRecords";
 import { HorseRiderHistory } from "@/components/horses/HorseRiderHistory";
 import { HorseTackAllocations } from "@/components/horses/HorseTackAllocations";
-import { HorseDutyHistory } from "@/components/horses/HorseDutyHistory";
 import { HorseInspections } from "@/components/horses/HorseInspections";
 import { HorseAttachments } from "@/components/horses/HorseAttachments";
 import {
@@ -90,10 +88,6 @@ export default async function HorseDetailPage({
         },
         orderBy: { startDate: "desc" },
       },
-      dutyAssignments: {
-        include: { assignedBy: { select: { name: true } } },
-        orderBy: { startDate: "desc" },
-      },
       inspections: {
         include: {
           inspector: { select: { name: true } },
@@ -158,7 +152,11 @@ export default async function HorseDetailPage({
                   {horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : "The Blues and Royals"}
                 </span>
               )}
-              <DutyBadge station={horse.dutyStation} />
+              {horse.currentLocation && (
+                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-200 font-medium">
+                  {horse.currentLocation.name}
+                </span>
+              )}
               <TaskReadinessBadge readiness={horse.taskReadiness} />
               {currentRider && (
                 <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-200 font-medium">
@@ -218,7 +216,6 @@ export default async function HorseDetailPage({
           <TabsTrigger value="riders">Riders</TabsTrigger>
           <TabsTrigger value="tack">Tack</TabsTrigger>
           <TabsTrigger value="inspections">Inspections</TabsTrigger>
-          <TabsTrigger value="duty-history">Duty History</TabsTrigger>
           <TabsTrigger value="moves">Moves</TabsTrigger>
           <TabsTrigger value="attachments">
             Documents
@@ -243,8 +240,7 @@ export default async function HorseDetailPage({
                   : <span className="text-gray-400">—</span>
               } />
               <InfoField label="Squadron" value={horse.squadron === "THE_LIFE_GUARDS" ? "The Life Guards" : horse.squadron === "THE_BLUES_AND_ROYALS" ? "The Blues and Royals" : "—"} />
-              <InfoField label="Duty Station" value={<DutyBadge station={horse.dutyStation} />} />
-              <InfoField label="Current Location" value={
+              <InfoField label="Location" value={
                 horse.currentLocation
                   ? <span className="text-sm font-medium">{horse.currentLocation.name}</span>
                   : <span className="text-gray-400">—</span>
@@ -521,22 +517,6 @@ export default async function HorseDetailPage({
                 schedule: i.schedule,
               }))}
               canManage={canManageInspections}
-            />
-          </div>
-        </TabsContent>
-
-        {/* Duty History Tab */}
-        <TabsContent value="duty-history">
-          <div className="mt-3">
-            <HorseDutyHistory
-              assignments={horse.dutyAssignments.map((d) => ({
-                id: d.id,
-                station: d.station,
-                startDate: d.startDate.toISOString(),
-                endDate: d.endDate?.toISOString() ?? null,
-                notes: d.notes,
-                assignedBy: d.assignedBy,
-              }))}
             />
           </div>
         </TabsContent>

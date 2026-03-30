@@ -1,6 +1,5 @@
 import {
   PrismaClient,
-  DutyStation,
   FeedType,
   FeedFrequency,
   MedicationRoute,
@@ -132,7 +131,7 @@ async function main() {
       weightKg: 580,
       maxRiderWeightKg: 95,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.CHARGER,
@@ -149,7 +148,7 @@ async function main() {
       weightKg: 560,
       maxRiderWeightKg: 90,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.CAV_BLACK,
@@ -166,7 +165,7 @@ async function main() {
       weightKg: 595,
       maxRiderWeightKg: 100,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.GREY,
@@ -183,7 +182,7 @@ async function main() {
       weightKg: 610,
       maxRiderWeightKg: 100,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.STANDARD,
@@ -200,7 +199,7 @@ async function main() {
       weightKg: 545,
       maxRiderWeightKg: 88,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.CAV_BLACK,
@@ -217,7 +216,7 @@ async function main() {
       weightKg: 570,
       maxRiderWeightKg: 92,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.MARE,
       role: HorseRole.CAV_BLACK,
@@ -234,7 +233,7 @@ async function main() {
       weightKg: 600,
       maxRiderWeightKg: 98,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.GREY,
@@ -251,7 +250,7 @@ async function main() {
       weightKg: 555,
       maxRiderWeightKg: 90,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.STANDARD,
@@ -268,7 +267,7 @@ async function main() {
       weightKg: 540,
       maxRiderWeightKg: 87,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.CAV_BLACK,
@@ -285,7 +284,7 @@ async function main() {
       weightKg: 520,
       maxRiderWeightKg: 85,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.CAV_BLACK,
@@ -302,7 +301,7 @@ async function main() {
       weightKg: 625,
       maxRiderWeightKg: 102,
       squadron: Squadron.THE_LIFE_GUARDS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.GELDING,
       role: HorseRole.CHARGER,
@@ -319,7 +318,7 @@ async function main() {
       weightKg: 575,
       maxRiderWeightKg: 93,
       squadron: Squadron.THE_BLUES_AND_ROYALS,
-      dutyStation: DutyStation.HYDE_PARK_BARRACKS,
+
       taskReadiness: TaskReadiness.FULL_EXERCISE,
       sex: Sex.MARE,
       role: HorseRole.STANDARD,
@@ -338,7 +337,6 @@ async function main() {
     const horse = await prisma.horse.upsert({
       where: { regimentalNumber: horseData.regimentalNumber },
       update: {
-        dutyStation: horseData.dutyStation,
         taskReadiness: horseData.taskReadiness ?? TaskReadiness.FULL_EXERCISE,
         currentLocationId: hpbLocation.id,
       },
@@ -521,195 +519,7 @@ async function main() {
 
   console.log("Resolved injury reports created.");
 
-  // ─── 1. DUTY ASSIGNMENTS (historical + current at HPB) ──────────────
-  // Clear and re-seed for demo consistency
-  await prisma.dutyAssignment.deleteMany({});
-
-  const dutyAssignmentsData = [
-    // Sovereign: TRAINING_WING 2018-09 -> 2020-01, then HPB from 2020-01
-    {
-      horseId: horseByName("Sovereign").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2018-09-01"),
-      endDate: new Date("2020-01-15"),
-      notes: "Initial training assignment upon entry to service",
-    },
-    {
-      horseId: horseByName("Sovereign").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2020-01-15"),
-      notes: "Posted to Hyde Park Barracks after completing training",
-    },
-    // Monty: TRAINING_WING 2019-03 -> 2020-09, then HPB from 2020-09
-    {
-      horseId: horseByName("Monty").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2019-03-15"),
-      endDate: new Date("2020-09-01"),
-      notes: "Initial training period",
-    },
-    {
-      horseId: horseByName("Monty").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2020-09-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Wellington: TRAINING_WING 2017-06 -> 2019-03, then HPB from 2019-03
-    {
-      horseId: horseByName("Wellington").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2017-06-01"),
-      endDate: new Date("2019-03-01"),
-      notes: "Initial training assignment",
-    },
-    {
-      horseId: horseByName("Wellington").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2019-03-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Hercules: TRAINING_WING 2020-04 -> 2022-06, then HPB from 2022-06
-    {
-      horseId: horseByName("Hercules").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2020-04-10"),
-      endDate: new Date("2022-06-01"),
-      notes: "Initial training period",
-    },
-    {
-      horseId: horseByName("Hercules").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2022-06-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Ramrod: TRAINING_WING 2021-08 -> 2023-04, then HPB from 2023-04
-    {
-      horseId: horseByName("Ramrod").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2021-08-01"),
-      endDate: new Date("2023-04-01"),
-      notes: "Initial training period",
-    },
-    {
-      horseId: horseByName("Ramrod").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2023-04-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Sable: TRAINING_WING 2019-10 -> 2021-06, then HPB from 2021-06
-    {
-      horseId: horseByName("Sable").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2019-10-20"),
-      endDate: new Date("2021-06-01"),
-      notes: "Training assignment",
-    },
-    {
-      horseId: horseByName("Sable").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2021-06-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Churchill: HPB from 2016-05 (long-serving)
-    {
-      horseId: horseByName("Churchill").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2016-05-01"),
-      notes: "Posted to Hyde Park Barracks on entry to service",
-    },
-    // Parade: HPB from 2018-11
-    {
-      horseId: horseByName("Parade").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2018-11-15"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Templar: TRAINING_WING 2020-07 -> 2022-01, then HPB from 2022-01
-    {
-      horseId: horseByName("Templar").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2020-07-01"),
-      endDate: new Date("2022-01-01"),
-      notes: "Initial training period",
-    },
-    {
-      horseId: horseByName("Templar").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2022-01-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Gallant: TRAINING_WING 2022-03 -> 2024-01, then HPB from 2024-01
-    {
-      horseId: horseByName("Gallant").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2022-03-01"),
-      endDate: new Date("2024-01-01"),
-      notes: "Training programme",
-    },
-    {
-      horseId: horseByName("Gallant").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2024-01-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Ironside: TRAINING_WING 2021-01 -> 2023-06, then HPB from 2023-06
-    {
-      horseId: horseByName("Ironside").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2021-01-15"),
-      endDate: new Date("2023-06-01"),
-      notes: "Training assignment",
-    },
-    {
-      horseId: horseByName("Ironside").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2023-06-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-    // Valiant: TRAINING_WING 2019-06 -> 2021-03, then HPB from 2021-03
-    {
-      horseId: horseByName("Valiant").id,
-      assignedById: admin.id,
-      station: DutyStation.TRAINING_WING,
-      startDate: new Date("2019-06-10"),
-      endDate: new Date("2021-03-01"),
-      notes: "Training period",
-    },
-    {
-      horseId: horseByName("Valiant").id,
-      assignedById: admin.id,
-      station: DutyStation.HYDE_PARK_BARRACKS,
-      startDate: new Date("2021-03-01"),
-      notes: "Posted to Hyde Park Barracks",
-    },
-  ];
-
-  for (const da of dutyAssignmentsData) {
-    await prisma.dutyAssignment.create({ data: da });
-  }
-  console.log("Duty assignments seeded.");
-
-  // ─── 2. RIDER ASSIGNMENTS ───────────────────────────────────────────
+  // ─── 1. RIDER ASSIGNMENTS ───────────────────────────────────────────
   const existingRiderAssignments = await prisma.riderAssignment.count();
   if (existingRiderAssignments === 0) {
     const riderAssignmentsData = [

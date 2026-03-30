@@ -28,7 +28,6 @@ const horseSchema = z.object({
   weightKg: z.coerce.number().min(200).max(1000),
   maxRiderWeightKg: z.coerce.number().min(50).max(150),
   squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"], { required_error: "Squadron is required" }),
-  dutyStation: z.string().min(1, "Duty station is required"),
   taskReadiness: z.enum(["FULL_EXERCISE", "LIMITED_ROLE", "NON_TASKWORTHY"]),
   sex: z.enum(["GELDING", "MARE"]).optional(),
   role: z.enum(["CHARGER", "CAV_BLACK", "GREY", "STANDARD", "COMP", "RMT"]).optional(),
@@ -67,7 +66,6 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     weightKg: initialData?.weightKg ?? 550,
     maxRiderWeightKg: initialData?.maxRiderWeightKg ?? 90,
     squadron: initialData?.squadron ?? ("" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS"),
-    dutyStation: initialData?.dutyStation ?? "HYDE_PARK_BARRACKS",
     taskReadiness: initialData?.taskReadiness ?? "FULL_EXERCISE",
     sex: initialData?.sex as "GELDING" | "MARE" | undefined,
     role: initialData?.role as "CHARGER" | "CAV_BLACK" | "GREY" | "STANDARD" | "COMP" | "RMT" | undefined,
@@ -314,29 +312,6 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           </Select>
           {errors.squadron && (
             <p className="text-sm text-red-600">{errors.squadron}</p>
-          )}
-        </div>
-
-        {/* Duty Station */}
-        <div className="space-y-2">
-          <Label htmlFor="dutyStation">Duty Station</Label>
-          <p className="text-xs text-gray-500">Operational assignment. Current physical location is updated via Moves.</p>
-          <Select
-            value={formData.dutyStation}
-            onValueChange={(v) => handleSelect("dutyStation", v)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select station" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="KINGS_LIFE_GUARD">King&apos;s Life Guard</SelectItem>
-              <SelectItem value="TRAINING_WING">Training Wing</SelectItem>
-              <SelectItem value="HYDE_PARK_BARRACKS">Hyde Park Barracks</SelectItem>
-              <SelectItem value="WINTER_TRAINING">Winter Training</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.dutyStation && (
-            <p className="text-sm text-red-600">{errors.dutyStation}</p>
           )}
         </div>
 

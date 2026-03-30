@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import Link from "next/link";
-import { DutyBadge } from "@/components/horses/DutyBadge";
 import { TaskReadinessBadge } from "@/components/horses/TaskReadinessBadge";
 import { Download } from "lucide-react";
 import {
@@ -20,9 +19,9 @@ import { Pagination } from "@/components/ui/pagination";
 export default async function HorsesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string; station?: string; squadron?: string; readiness?: string; page?: string; pageSize?: string }>;
+  searchParams: Promise<{ q?: string; location?: string; squadron?: string; readiness?: string; page?: string; pageSize?: string }>;
 }) {
-  const { q, station, squadron, readiness, ...paginationRaw } = await searchParams;
+  const { q, location, squadron, readiness, ...paginationRaw } = await searchParams;
   const pagination = parsePagination(paginationRaw);
   const session = await getServerSession(authOptions);
   const { can: canFn } = await import("@/lib/permissions");
@@ -36,8 +35,8 @@ export default async function HorsesPage({
     : (role !== "VET" && userSquadron ? userSquadron : "ALL");
 
   const where: Record<string, unknown> = { isActive: true };
-  if (station && station !== "ALL") {
-    where.dutyStation = station;
+  if (location && location !== "ALL") {
+    where.currentLocationId = location;
   }
   if (effectiveSquadron && effectiveSquadron !== "ALL") {
     where.squadron = effectiveSquadron;
@@ -53,7 +52,7 @@ export default async function HorsesPage({
     ];
   }
 
-  const [horses, totalItems] = await Promise.all([
+  const [horses, totalItems, locations] = await Promise.all([
     prisma.horse.findMany({
       where,
       include: {
@@ -72,13 +71,18 @@ export default async function HorsesPage({
       take: pagination.take,
     }),
     prisma.horse.count({ where }),
+    prisma.location.findMany({
+      where: { isActive: true },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
   const meta = paginationMeta(pagination, totalItems);
 
   // Build export URL preserving current filters
   const exportParams = new URLSearchParams();
   if (q) exportParams.set("q", q);
-  if (station && station !== "ALL") exportParams.set("station", station);
+  if (location && location !== "ALL") exportParams.set("location", location);
   if (effectiveSquadron && effectiveSquadron !== "ALL") exportParams.set("squadron", effectiveSquadron);
   if (readiness && readiness !== "ALL") exportParams.set("readiness", readiness);
   const exportQs = exportParams.toString();
@@ -114,9 +118,10 @@ export default async function HorsesPage({
 
       <HorseSearchFilter
         currentQ={q ?? ""}
-        currentStation={station ?? "ALL"}
         currentSquadron={effectiveSquadron}
         currentReadiness={readiness ?? "ALL"}
+        currentLocation={location ?? "ALL"}
+        locations={locations.map((l) => ({ value: l.id, label: l.name }))}
       />
 
       <div className="bg-white rounded-lg border shadow-sm overflow-hidden">
@@ -129,7 +134,6 @@ export default async function HorsesPage({
               <TableHead className="font-semibold text-gray-700">Squadron</TableHead>
               <TableHead className="font-semibold text-gray-700">Role</TableHead>
               <TableHead className="font-semibold text-gray-700">Div</TableHead>
-              <TableHead className="font-semibold text-gray-700">Station</TableHead>
               <TableHead className="font-semibold text-gray-700">Location</TableHead>
               <TableHead className="font-semibold text-gray-700">Readiness</TableHead>
               <TableHead className="font-semibold text-gray-700">Alerts</TableHead>
@@ -138,7 +142,7 @@ export default async function HorsesPage({
           <TableBody>
             {horses.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} className="text-center text-gray-500 py-10">
+                <TableCell colSpan={8} className="text-center text-gray-500 py-10">
                   No horses found.
                 </TableCell>
               </TableRow>
@@ -164,9 +168,6 @@ export default async function HorsesPage({
                   </TableCell>
                   <TableCell className="text-sm text-gray-700">
                     {horse.division ?? "—"}
-                  </TableCell>
-                  <TableCell>
-                    <DutyBadge station={horse.dutyStation} />
                   </TableCell>
                   <TableCell className="text-sm text-gray-600">
                     {horse.currentLocation?.name ?? <span className="text-gray-400">—</span>}
@@ -201,7 +202,7 @@ export default async function HorsesPage({
           basePath="/horses"
           searchParams={{
             q,
-            station: station !== "ALL" ? station : undefined,
+            location: location !== "ALL" ? location : undefined,
             squadron: effectiveSquadron !== "ALL" ? effectiveSquadron : undefined,
             readiness: readiness !== "ALL" ? readiness : undefined,
           }}

@@ -18,7 +18,7 @@ export async function GET(request: Request) {
     where,
     include: {
       horse: {
-        select: { id: true, name: true, regimentalNumber: true, dutyStation: true },
+        select: { id: true, name: true, regimentalNumber: true },
       },
     },
     orderBy: { scheduledAt: "asc" },

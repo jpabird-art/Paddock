@@ -1,6 +1,5 @@
 import { prisma } from "@/lib/prisma";
 import { MoveStatus } from "@prisma/client";
-import type { DutyStation, Prisma } from "@prisma/client";
 
 /**
  * Soft-delete a horse and cascade to all active related records.
@@ -13,10 +12,6 @@ export async function deactivateHorse(horseId: string): Promise<void> {
     prisma.horse.update({
       where: { id: horseId },
       data: { isActive: false },
-    }),
-    prisma.dutyAssignment.updateMany({
-      where: { horseId, endDate: null },
-      data: { endDate: now },
     }),
     prisma.riderAssignment.updateMany({
       where: { horseId, endDate: null },
@@ -35,35 +30,6 @@ export async function deactivateHorse(horseId: string): Promise<void> {
       data: { status: MoveStatus.CANCELLED },
     }),
   ]);
-}
-
-/**
- * Record a duty station change: close the current assignment and open a new one.
- * Must be called inside a Prisma interactive transaction.
- */
-export async function reassignDutyStation(
-  tx: Prisma.TransactionClient,
-  horseId: string,
-  fromStation: DutyStation,
-  toStation: DutyStation,
-  assignedById: string
-): Promise<void> {
-  const now = new Date();
-
-  await tx.dutyAssignment.updateMany({
-    where: { horseId, endDate: null },
-    data: { endDate: now },
-  });
-
-  await tx.dutyAssignment.create({
-    data: {
-      horseId,
-      assignedById,
-      station: toStation,
-      startDate: now,
-      notes: `Reassigned from ${fromStation} to ${toStation}.`,
-    },
-  });
 }
 
 /**
