@@ -22,6 +22,8 @@ export async function GET(request: Request) {
       name: true,
       regimentalNumber: true,
       squadron: true,
+      role: true,
+      division: true,
       currentLocationId: true,
       currentLocation: { select: { id: true, name: true, code: true } },
     },
@@ -63,10 +65,10 @@ export async function GET(request: Request) {
       id: string;
       name: string;
       code: string;
-      horses: { id: string; name: string; regimentalNumber: string; squadron: string | null; isMoving: boolean; currentLocationName: string | null }[];
+      horses: { id: string; name: string; regimentalNumber: string; squadron: string | null; role: string | null; division: number | null; isMoving: boolean; currentLocationName: string | null }[];
     }
   >();
-  const unlocated: { id: string; name: string; regimentalNumber: string; squadron: string | null }[] = [];
+  const unlocated: { id: string; name: string; regimentalNumber: string; squadron: string | null; role: string | null; division: number | null }[] = [];
   let movingCount = 0;
 
   for (const horse of horses) {
@@ -82,6 +84,8 @@ export async function GET(request: Request) {
         name: horse.name,
         regimentalNumber: horse.regimentalNumber,
         squadron: horse.squadron,
+        role: horse.role,
+        division: horse.division,
       });
       continue;
     }
@@ -102,6 +106,8 @@ export async function GET(request: Request) {
       name: horse.name,
       regimentalNumber: horse.regimentalNumber,
       squadron: horse.squadron,
+      role: horse.role,
+      division: horse.division,
       isMoving,
       currentLocationName: horse.currentLocation?.name ?? null,
     });

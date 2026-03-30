@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -12,6 +12,8 @@ interface ProjectedHorse {
   name: string;
   regimentalNumber: string;
   squadron: string | null;
+  role: string | null;
+  division: number | null;
   isMoving: boolean;
   currentLocationName: string | null;
 }
@@ -28,8 +30,39 @@ interface LocationGroup {
 interface ProjectionData {
   date: string;
   locations: LocationGroup[];
-  unlocated: { id: string; name: string; regimentalNumber: string; squadron: string | null }[];
+  unlocated: { id: string; name: string; regimentalNumber: string; squadron: string | null; role: string | null; division: number | null }[];
   summary: { total: number; moving: number };
+}
+
+const SQUADRON_OPTIONS = [
+  { value: "ALL", label: "All Squadrons" },
+  { value: "THE_LIFE_GUARDS", label: "Life Guards" },
+  { value: "THE_BLUES_AND_ROYALS", label: "Blues & Royals" },
+];
+
+const DIVISION_OPTIONS = [
+  { value: "ALL", label: "All Divisions" },
+  { value: "1", label: "1 Div" },
+  { value: "2", label: "2 Div" },
+];
+
+const ROLE_OPTIONS = [
+  { value: "ALL", label: "All Roles" },
+  { value: "CHARGER", label: "Charger" },
+  { value: "CAV_BLACK", label: "Cav Black" },
+  { value: "GREY", label: "Grey" },
+  { value: "STANDARD", label: "Standard" },
+  { value: "COMP", label: "Comp" },
+  { value: "RMT", label: "RMT" },
+];
+
+type FilterableHorse = { squadron: string | null; role: string | null; division: number | null };
+
+function matchesFilters(horse: FilterableHorse, squadron: string, division: string, role: string): boolean {
+  if (squadron !== "ALL" && horse.squadron !== squadron) return false;
+  if (division !== "ALL" && horse.division !== parseInt(division)) return false;
+  if (role !== "ALL" && horse.role !== role) return false;
+  return true;
 }
 
 export default function LocationPlannerPage() {
@@ -40,13 +73,18 @@ export default function LocationPlannerPage() {
   const [loading, setLoading] = useState(true);
   const [expandedLocations, setExpandedLocations] = useState<Set<string>>(new Set());
 
-  const role = session?.user?.role;
+  // Filters
+  const [squadron, setSquadron] = useState("ALL");
+  const [division, setDivision] = useState("ALL");
+  const [role, setRole] = useState("ALL");
+
+  const userRole = session?.user?.role;
 
   useEffect(() => {
-    if (status === "authenticated" && role && !["ADMIN", "OFFICER", "VET"].includes(role)) {
+    if (status === "authenticated" && userRole && !["ADMIN", "OFFICER", "VET"].includes(userRole)) {
       router.replace("/dashboard");
     }
-  }, [status, role, router]);
+  }, [status, userRole, router]);
 
   useEffect(() => {
     if (status !== "authenticated") return;
@@ -68,6 +106,37 @@ export default function LocationPlannerPage() {
     };
   }, [date, status]);
 
+  // Apply client-side filters
+  const filtered = useMemo(() => {
+    if (!data) return null;
+    const hasFilters = squadron !== "ALL" || division !== "ALL" || role !== "ALL";
+    if (!hasFilters) return data;
+
+    const locations = data.locations
+      .map((loc) => {
+        const horses = loc.horses.filter((h) => matchesFilters(h, squadron, division, role));
+        return {
+          ...loc,
+          horses,
+          total: horses.length,
+          movingIn: horses.filter((h) => h.isMoving).length,
+        };
+      })
+      .filter((loc) => loc.horses.length > 0);
+
+    const unlocated = data.unlocated.filter((h) => matchesFilters(h, squadron, division, role));
+
+    const totalHorses = locations.reduce((sum, l) => sum + l.total, 0) + unlocated.length;
+    const totalMoving = locations.reduce((sum, l) => sum + l.movingIn, 0);
+
+    return {
+      ...data,
+      locations,
+      unlocated,
+      summary: { total: totalHorses, moving: totalMoving },
+    };
+  }, [data, squadron, division, role]);
+
   function toggleExpand(locationId: string) {
     setExpandedLocations((prev) => {
       const next = new Set(prev);
@@ -85,12 +154,13 @@ export default function LocationPlannerPage() {
     );
   }
 
-  if (!session || !["ADMIN", "OFFICER", "VET"].includes(role ?? "")) {
+  if (!session || !["ADMIN", "OFFICER", "VET"].includes(userRole ?? "")) {
     return null;
   }
 
   const today = new Date().toISOString().substring(0, 10);
   const isPast = date < today;
+  const selectClass = "border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]";
 
   return (
     <div className="space-y-5">
@@ -108,27 +178,54 @@ export default function LocationPlannerPage() {
             type="date"
             value={date}
             onChange={(e) => setDate(e.target.value)}
-            className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]"
+            className={selectClass}
           />
         </div>
       </div>
 
+      {/* Filters */}
+      <div className="flex gap-3 flex-wrap">
+        <select value={squadron} onChange={(e) => setSquadron(e.target.value)} className={selectClass}>
+          {SQUADRON_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <select value={division} onChange={(e) => setDivision(e.target.value)} className={selectClass}>
+          {DIVISION_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <select value={role} onChange={(e) => setRole(e.target.value)} className={selectClass}>
+          {ROLE_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        {(squadron !== "ALL" || division !== "ALL" || role !== "ALL") && (
+          <button
+            onClick={() => { setSquadron("ALL"); setDivision("ALL"); setRole("ALL"); }}
+            className="text-xs text-gray-500 hover:text-gray-700 underline px-1"
+          >
+            Clear filters
+          </button>
+        )}
+      </div>
+
       {/* Summary bar */}
-      {data && (
+      {filtered && (
         <div className="flex gap-3 flex-wrap items-center">
           <div className="bg-[#1a2744]/5 border border-[#1a2744]/10 px-4 py-2 rounded-lg">
-            <span className="text-[#1a2744] font-semibold text-sm">{data.summary.total}</span>
+            <span className="text-[#1a2744] font-semibold text-sm">{filtered.summary.total}</span>
             <span className="text-gray-600 text-sm ml-1.5">horses</span>
           </div>
-          {data.summary.moving > 0 && (
+          {filtered.summary.moving > 0 && (
             <div className="bg-amber-50 border border-amber-200 px-4 py-2 rounded-lg">
-              <span className="text-amber-800 font-semibold text-sm">{data.summary.moving}</span>
+              <span className="text-amber-800 font-semibold text-sm">{filtered.summary.moving}</span>
               <span className="text-amber-600 text-sm ml-1.5">moving</span>
             </div>
           )}
-          {data.locations.length > 0 && (
+          {filtered.locations.length > 0 && (
             <div className="bg-blue-50 border border-blue-200 px-4 py-2 rounded-lg">
-              <span className="text-blue-800 font-semibold text-sm">{data.locations.length}</span>
+              <span className="text-blue-800 font-semibold text-sm">{filtered.locations.length}</span>
               <span className="text-blue-600 text-sm ml-1.5">locations</span>
             </div>
           )}
@@ -146,9 +243,9 @@ export default function LocationPlannerPage() {
       )}
 
       {/* Location cards */}
-      {!loading && data && (
+      {!loading && filtered && (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {data.locations.map((loc) => {
+          {filtered.locations.map((loc) => {
             const isExpanded = expandedLocations.has(loc.id);
             const COLLAPSE_THRESHOLD = 10;
             const shouldCollapse = loc.horses.length > COLLAPSE_THRESHOLD;
@@ -224,7 +321,7 @@ export default function LocationPlannerPage() {
           })}
 
           {/* Unlocated section */}
-          {data.unlocated.length > 0 && (
+          {filtered.unlocated.length > 0 && (
             <Card className="border-dashed">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base font-semibold flex items-center justify-between text-gray-500">
@@ -233,13 +330,13 @@ export default function LocationPlannerPage() {
                     Unlocated
                   </div>
                   <span className="bg-gray-100 text-gray-500 text-xs px-2 py-0.5 rounded-full font-medium">
-                    {data.unlocated.length}
+                    {filtered.unlocated.length}
                   </span>
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="divide-y">
-                  {data.unlocated.map((horse) => (
+                  {filtered.unlocated.map((horse) => (
                     <div key={horse.id} className="py-2">
                       <Link
                         href={`/horses/${horse.id}`}
@@ -260,9 +357,9 @@ export default function LocationPlannerPage() {
       )}
 
       {/* Empty state */}
-      {!loading && data && data.locations.length === 0 && data.unlocated.length === 0 && (
+      {!loading && filtered && filtered.locations.length === 0 && filtered.unlocated.length === 0 && (
         <div className="text-center py-16 text-gray-500 text-sm">
-          No active horses found.
+          No horses match the selected filters.
         </div>
       )}
     </div>
