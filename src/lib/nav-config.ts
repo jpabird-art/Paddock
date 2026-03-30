@@ -24,6 +24,7 @@ export const navItems: NavItem[] = [
   { href: "/health", label: "Health Schedule", icon: Calendar, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/injuries", label: "Injury Reports", icon: AlertTriangle, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/moves", label: "Moves", icon: Truck, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
+  { href: "/moves/planner", label: "Location Planner", icon: MapPin, roles: ["ADMIN", "VET", "OFFICER"] },
   { href: "/tack", label: "Tack & Equipment", icon: Wrench, roles: ["ADMIN", "OFFICER", "TROOPER"] },
   { href: "/inspections", label: "Inspections", icon: ClipboardCheck, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/admin", label: "Administration", icon: Users, roles: ["ADMIN"] },
