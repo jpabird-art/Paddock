@@ -18,7 +18,7 @@ import { useToast } from "@/components/ui/use-toast";
 
 const horseSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  regimentalNumber: z.string().regex(/^[A-Z]{2,4}-?\d{2,5}$/, "Format: e.g. HCMR-013"),
+  regimentalNumber: z.string().min(1, "Regimental number is required"),
   squadronNumber: z.string().optional(),
   breed: z.string().min(1, "Breed is required"),
   colour: z.string().min(1, "Colour is required"),
@@ -33,12 +33,13 @@ const horseSchema = z.object({
   sex: z.enum(["GELDING", "MARE"]).optional(),
   role: z.enum(["CHARGER", "CAV_BLACK", "GREY", "STANDARD", "COMP", "RMT"]).optional(),
   division: z.coerce.number().min(1).max(2).optional(),
+  currentLocationId: z.string().optional(),
 });
 
 type HorseFormData = z.infer<typeof horseSchema>;
 
 interface HorseFormProps {
-  initialData?: Partial<HorseFormData> & { id?: string; ancillaries?: string; sex?: string; role?: string; division?: number };
+  initialData?: Partial<HorseFormData> & { id?: string; ancillaries?: string; sex?: string; role?: string; division?: number; currentLocationId?: string };
   mode: "create" | "edit";
   locations?: { id: string; name: string; code: string }[];
 }
@@ -71,6 +72,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     sex: initialData?.sex as "GELDING" | "MARE" | undefined,
     role: initialData?.role as "CHARGER" | "CAV_BLACK" | "GREY" | "STANDARD" | "COMP" | "RMT" | undefined,
     division: initialData?.division,
+    currentLocationId: initialData?.currentLocationId,
   });
 
   function handleChange(
@@ -413,6 +415,28 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
             </SelectContent>
           </Select>
         </div>
+
+        {/* Current Location */}
+        {locations.length > 0 && (
+          <div className="space-y-2">
+            <Label htmlFor="currentLocationId">Current Location</Label>
+            <Select
+              value={formData.currentLocationId ?? ""}
+              onValueChange={(v) => handleSelect("currentLocationId", v)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((loc) => (
+                  <SelectItem key={loc.id} value={loc.id}>
+                    {loc.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
       </div>
 
       {/* Ancillaries */}

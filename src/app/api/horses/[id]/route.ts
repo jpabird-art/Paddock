@@ -24,6 +24,7 @@ const updateSchema = z.object({
   sex: z.nativeEnum(Sex).nullable().optional(),
   role: z.nativeEnum(HorseRole).nullable().optional(),
   division: z.coerce.number().min(1).max(2).nullable().optional(),
+  currentLocationId: z.string().nullable().optional(),
 });
 
 export async function GET(

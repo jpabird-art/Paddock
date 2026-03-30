@@ -8,7 +8,7 @@ import { Squadron, DutyStation, TaskReadiness, Sex, HorseRole } from "@prisma/cl
 
 const createSchema = z.object({
   name: z.string().min(1),
-  regimentalNumber: z.string().regex(/^[A-Z]{2,4}-?\d{2,5}$/, "Format: 2-4 uppercase letters, optional hyphen, then 2-5 digits (e.g. HCMR-013)"),
+  regimentalNumber: z.string().min(1),
   squadronNumber: z.string().optional(),
   breed: z.string().min(1),
   colour: z.string().min(1),
@@ -23,6 +23,7 @@ const createSchema = z.object({
   sex: z.nativeEnum(Sex).optional(),
   role: z.nativeEnum(HorseRole).optional(),
   division: z.coerce.number().min(1).max(2).optional(),
+  currentLocationId: z.string().optional(),
 });
 
 export async function GET() {
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
       sex: data.sex,
       role: data.role,
       division: data.division,
+      currentLocationId: data.currentLocationId,
     },
   });
 

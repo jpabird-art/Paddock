@@ -56,6 +56,7 @@ export default async function EditHorsePage({
             dutyStation: horse.dutyStation,
             taskReadiness: horse.taskReadiness,
             ancillaries: horse.ancillaries ?? "",
+            currentLocationId: horse.currentLocationId ?? undefined,
           }}
         />
       </div>
