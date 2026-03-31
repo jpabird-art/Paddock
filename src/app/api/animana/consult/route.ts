@@ -3,8 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/permissions";
 import { parseAnimanaConsult } from "@/lib/animana-parser";
 import type { AnimanaConsultEntry } from "@/lib/animana-parser";
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const pdfParse = require("pdf-parse");
 
 /**
  * POST /api/animana/consult
@@ -34,6 +32,9 @@ export async function POST(request: Request) {
   const buffer = Buffer.from(await file.arrayBuffer());
   let pdfData;
   try {
+    // Dynamic require avoids pdf-parse loading a test PDF at build time
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const pdfParse = require("pdf-parse");
     pdfData = await pdfParse(buffer);
   } catch {
     return NextResponse.json({ error: "Failed to read PDF" }, { status: 400 });
