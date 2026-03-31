@@ -8,6 +8,7 @@ import {
   MapPin,
   Wrench,
   ClipboardCheck,
+  FileUp,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -29,6 +30,7 @@ export const navItems: NavItem[] = [
   { href: "/inspections", label: "Inspections", icon: ClipboardCheck, roles: ["ADMIN", "VET", "OFFICER", "TROOPER"] },
   { href: "/admin", label: "Administration", icon: Users, roles: ["ADMIN"] },
   { href: "/admin/locations", label: "Locations", icon: MapPin, roles: ["ADMIN", "OFFICER"] },
+  { href: "/admin/animana", label: "Animana Import", icon: FileUp, roles: ["ADMIN", "VET"] },
 ];
 
 export const ROLE_LABELS: Record<string, string> = {
