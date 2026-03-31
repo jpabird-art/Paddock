@@ -6,12 +6,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 import { format } from "date-fns";
 import { Shield, AlertTriangle, Calendar, Activity, Pill, MapPin } from "lucide-react";
+import { ReadinessChart } from "@/components/dashboard/ReadinessChart";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
 
-  const [totalHorses, locationCounts, overdueEvents, openInjuries, activeWithdrawals] =
+  const [totalHorses, locationCounts, readinessCounts, overdueEvents, openInjuries, activeWithdrawals] =
     await Promise.all([
       prisma.horse.count({ where: { isActive: true } }),
       prisma.location.findMany({
@@ -28,6 +29,11 @@ export default async function DashboardPage() {
           }))
         );
         return counts;
+      }),
+      prisma.horse.groupBy({
+        by: ["taskReadiness"],
+        where: { isActive: true },
+        _count: true,
       }),
       prisma.healthEvent.findMany({
         where: { status: "OVERDUE" },
@@ -118,6 +124,24 @@ export default async function DashboardPage() {
           </Card>
         ))}
       </div>
+
+      {/* Task Readiness */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <Shield className="h-4 w-4 text-[#1a2744]" />
+            Task Readiness
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ReadinessChart
+            counts={readinessCounts.map((r) => ({
+              taskReadiness: r.taskReadiness,
+              _count: r._count,
+            }))}
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Overdue health events */}
