@@ -28,11 +28,7 @@ export default async function HorsesPage({
   const role = session?.user?.role ?? "TROOPER";
   const canCreate = canFn(role, "horse", "create");
 
-  // Default non-vet users to their own squadron
-  const userSquadron = session?.user?.squadron ?? null;
-  const effectiveSquadron = squadron !== undefined
-    ? squadron
-    : (role !== "VET" && userSquadron ? userSquadron : "ALL");
+  const effectiveSquadron = squadron ?? "ALL";
 
   const where: Record<string, unknown> = { isActive: true };
   if (location && location !== "ALL") {
