@@ -3,6 +3,25 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error } = await requirePermission("feeding_plan", "delete");
+  if (error) return error;
+
+  const { id } = await params;
+
+  const plan = await prisma.feedingPlan.findUnique({ where: { id } });
+  if (!plan) {
+    return NextResponse.json({ error: "Feeding plan not found" }, { status: 404 });
+  }
+
+  await prisma.feedingPlan.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
+}
+
 const patchSchema = z.object({
   feedType: z.string().min(1).optional(),
   quantityKg: z.number().positive().optional(),

@@ -3,6 +3,25 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { error } = await requirePermission("medication_record", "delete");
+  if (error) return error;
+
+  const { id } = await params;
+
+  const record = await prisma.medicationRecord.findUnique({ where: { id } });
+  if (!record) {
+    return NextResponse.json({ error: "Medication record not found" }, { status: 404 });
+  }
+
+  await prisma.medicationRecord.delete({ where: { id } });
+
+  return NextResponse.json({ success: true });
+}
+
 const patchSchema = z.object({
   notes: z.string().optional(),
 });

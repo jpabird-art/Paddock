@@ -30,6 +30,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Trash2 } from "lucide-react";
 
 interface MedicationRecordData {
   id: string;
@@ -48,6 +49,7 @@ interface HorseMedicationRecordsProps {
   horseId: string;
   initialRecords: MedicationRecordData[];
   canManage: boolean;
+  canDelete: boolean;
 }
 
 const ROUTE_LABELS: Record<string, string> = {
@@ -61,12 +63,14 @@ export function HorseMedicationRecords({
   horseId,
   initialRecords,
   canManage,
+  canDelete,
 }: HorseMedicationRecordsProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [records, setRecords] = useState<MedicationRecordData[]>(initialRecords);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const [medicationName, setMedicationName] = useState("");
   const [dosage, setDosage] = useState("");
@@ -87,6 +91,25 @@ export function HorseMedicationRecords({
   function isInWithdrawal(withdrawalEndDate: string | null): boolean {
     if (!withdrawalEndDate) return false;
     return new Date(withdrawalEndDate) > new Date();
+  }
+
+  async function handleDeleteRecord(recordId: string) {
+    if (!confirm("Delete this medication record? This cannot be undone.")) return;
+    setDeleting(recordId);
+    try {
+      const res = await fetch(`/api/medication-records/${recordId}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast({ title: "Error", description: "Failed to delete record.", variant: "destructive" });
+        return;
+      }
+      setRecords(records.filter((r) => r.id !== recordId));
+      toast({ title: "Deleted", description: "Medication record removed." });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setDeleting(null);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -268,6 +291,7 @@ export function HorseMedicationRecords({
                   <TableHead>Administered By</TableHead>
                   <TableHead>Date</TableHead>
                   <TableHead>Notes</TableHead>
+                  {canDelete && <TableHead className="w-16"></TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -303,6 +327,18 @@ export function HorseMedicationRecords({
                       <TableCell className="max-w-[200px] truncate text-gray-500">
                         {record.notes ?? "—"}
                       </TableCell>
+                      {canDelete && (
+                        <TableCell>
+                          <button
+                            onClick={() => handleDeleteRecord(record.id)}
+                            disabled={deleting === record.id}
+                            className="text-gray-300 hover:text-red-500 transition-colors disabled:opacity-50"
+                            title="Delete record"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </TableCell>
+                      )}
                     </TableRow>
                   );
                 })}

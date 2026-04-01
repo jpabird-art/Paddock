@@ -22,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Trash2 } from "lucide-react";
 
 interface FeedingPlanData {
   id: string;
@@ -38,6 +39,7 @@ interface HorseFeedingPlansProps {
   horseId: string;
   initialPlans: FeedingPlanData[];
   canManage: boolean;
+  canDelete: boolean;
 }
 
 const FEED_TYPE_LABELS: Record<string, string> = {
@@ -62,12 +64,14 @@ export function HorseFeedingPlans({
   horseId,
   initialPlans,
   canManage,
+  canDelete,
 }: HorseFeedingPlansProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [plans, setPlans] = useState<FeedingPlanData[]>(initialPlans);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   const [feedType, setFeedType] = useState("");
   const [quantityKg, setQuantityKg] = useState("");
@@ -130,6 +134,25 @@ export function HorseFeedingPlans({
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(planId: string) {
+    if (!confirm("Delete this feeding plan? This cannot be undone.")) return;
+    setDeleting(planId);
+    try {
+      const res = await fetch(`/api/feeding-plans/${planId}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast({ title: "Error", description: "Failed to delete feeding plan.", variant: "destructive" });
+        return;
+      }
+      setPlans(plans.filter((p) => p.id !== planId));
+      toast({ title: "Deleted", description: "Feeding plan removed." });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -269,6 +292,9 @@ export function HorseFeedingPlans({
                   <th className="text-left px-4 py-3 font-semibold text-gray-700">
                     Start Date
                   </th>
+                  {canDelete && (
+                    <th className="text-left px-4 py-3 font-semibold text-gray-700 w-16"></th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -292,6 +318,18 @@ export function HorseFeedingPlans({
                     <td className="px-4 py-3 text-gray-600">
                       {format(new Date(plan.startDate), "dd MMM yyyy")}
                     </td>
+                    {canDelete && (
+                      <td className="px-4 py-3">
+                        <button
+                          onClick={() => handleDelete(plan.id)}
+                          disabled={deleting === plan.id}
+                          className="text-gray-300 hover:text-red-500 transition-colors disabled:opacity-50"
+                          title="Delete plan"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

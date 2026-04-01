@@ -34,8 +34,11 @@ export default async function HorseDetailPage({
 
   const canEditHorse = can(role, "horse", "update");
   const canManageHealth = can(role, "health_note", "create");
+  const canDeleteHealth = can(role, "health_note", "delete");
   const canManageFeeding = can(role, "feeding_plan", "create");
+  const canDeleteFeeding = can(role, "feeding_plan", "delete");
   const canManageMedication = can(role, "medication_record", "create");
+  const canDeleteMedication = can(role, "medication_record", "delete");
   const canManageRiders = can(role, "rider_assignment", "create");
   const canManageTack = can(role, "tack_allocation", "create");
   const canManageInspections = can(role, "inspection", "create");
@@ -346,6 +349,7 @@ export default async function HorseDetailPage({
                 author: n.author,
               }))}
               canAdd={canManageHealth}
+              canDelete={canDeleteHealth}
             />
           </div>
         </TabsContent>
@@ -366,6 +370,7 @@ export default async function HorseDetailPage({
                 isActive: p.isActive,
               }))}
               canManage={canManageFeeding}
+              canDelete={canDeleteFeeding}
             />
           </div>
         </TabsContent>
@@ -388,6 +393,7 @@ export default async function HorseDetailPage({
                 administeredBy: m.administeredBy,
               }))}
               canManage={canManageMedication}
+              canDelete={canDeleteMedication}
             />
           </div>
         </TabsContent>

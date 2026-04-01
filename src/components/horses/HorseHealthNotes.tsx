@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 
 interface HealthNote {
   id: string;
@@ -18,6 +19,7 @@ interface HorseHealthNotesProps {
   horseId: string;
   initialNotes: HealthNote[];
   canAdd: boolean;
+  canDelete: boolean;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -31,12 +33,14 @@ export function HorseHealthNotes({
   horseId,
   initialNotes,
   canAdd,
+  canDelete,
 }: HorseHealthNotesProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [notes, setNotes] = useState<HealthNote[]>(initialNotes);
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+  const [deleting, setDeleting] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -73,6 +77,27 @@ export function HorseHealthNotes({
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function handleDelete(noteId: string) {
+    if (!confirm("Delete this health note? This cannot be undone.")) return;
+    setDeleting(noteId);
+    try {
+      const res = await fetch(`/api/horses/${horseId}/health-notes/${noteId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        toast({ title: "Error", description: "Failed to delete note.", variant: "destructive" });
+        return;
+      }
+      setNotes(notes.filter((n) => n.id !== noteId));
+      toast({ title: "Deleted", description: "Health note removed." });
+      router.refresh();
+    } catch {
+      toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+    } finally {
+      setDeleting(null);
     }
   }
 
@@ -116,9 +141,21 @@ export function HorseHealthNotes({
                       {ROLE_LABELS[note.author.role] ?? note.author.role}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-400">
-                    {format(new Date(note.createdAt), "dd MMM yyyy HH:mm")}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-gray-400">
+                      {format(new Date(note.createdAt), "dd MMM yyyy HH:mm")}
+                    </span>
+                    {canDelete && (
+                      <button
+                        onClick={() => handleDelete(note.id)}
+                        disabled={deleting === note.id}
+                        className="text-gray-300 hover:text-red-500 transition-colors disabled:opacity-50"
+                        title="Delete note"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">{note.content}</p>
               </div>
