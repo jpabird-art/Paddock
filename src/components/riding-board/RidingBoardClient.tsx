@@ -11,6 +11,7 @@ interface HorseOption {
   id: string;
   name: string;
   regimentalNumber: string;
+  squadron: string | null;
 }
 
 interface UserOption {
@@ -20,33 +21,49 @@ interface UserOption {
   rank: string | null;
 }
 
+type SquadronFilter = "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS";
+
+const SQUADRON_LABELS: Record<SquadronFilter, string> = {
+  THE_LIFE_GUARDS: "Life Guards",
+  THE_BLUES_AND_ROYALS: "Blues & Royals",
+};
+
 interface Props {
   horses: HorseOption[];
   users: UserOption[];
   canEdit: boolean;
   initialDate?: string;
+  userSquadron: string | null;
 }
 
 type ViewMode = "daily" | "weekly";
 
-export function RidingBoardClient({ horses, users, canEdit, initialDate }: Props) {
+export function RidingBoardClient({ horses, users, canEdit, initialDate, userSquadron }: Props) {
+  const defaultSquadron = (userSquadron === "THE_LIFE_GUARDS" || userSquadron === "THE_BLUES_AND_ROYALS")
+    ? userSquadron as SquadronFilter
+    : "THE_LIFE_GUARDS";
+
   const [date, setDate] = useState(initialDate ?? format(new Date(), "yyyy-MM-dd"));
   const [view, setView] = useState<ViewMode>("daily");
+  const [squadron, setSquadron] = useState<SquadronFilter>(defaultSquadron);
   const [assignments, setAssignments] = useState<ExerciseAssignmentData[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Filter horses to selected squadron
+  const filteredHorses = horses.filter((h) => h.squadron === squadron);
 
   const fetchAssignments = useCallback(async () => {
     setLoading(true);
     try {
       const param = view === "daily" ? `date=${date}` : `weekOf=${date}`;
-      const res = await fetch(`/api/exercise-assignments?${param}`);
+      const res = await fetch(`/api/exercise-assignments?${param}&squadron=${squadron}`);
       if (res.ok) {
         setAssignments(await res.json());
       }
     } finally {
       setLoading(false);
     }
-  }, [date, view]);
+  }, [date, view, squadron]);
 
   useEffect(() => {
     fetchAssignments();
@@ -102,6 +119,23 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate }: Props
             className={selectClass}
           />
         </div>
+      </div>
+
+      {/* Squadron tabs */}
+      <div className="flex items-center gap-1 border-b border-gray-200">
+        {(Object.entries(SQUADRON_LABELS) as [SquadronFilter, string][]).map(([key, label]) => (
+          <button
+            key={key}
+            onClick={() => setSquadron(key)}
+            className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
+              squadron === key
+                ? "border-[#1a2744] text-[#1a2744]"
+                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
       </div>
 
       {/* Controls */}
@@ -165,7 +199,7 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate }: Props
           assignments={assignments}
           date={date}
           canEdit={canEdit}
-          horses={horses}
+          horses={filteredHorses}
           users={users}
         />
       ) : (

@@ -51,6 +51,11 @@ export async function GET(request: Request) {
     };
   }
 
+  const squadron = searchParams.get("squadron");
+  if (squadron) {
+    where.horse = { squadron };
+  }
+
   if (horseId) where.horseId = horseId;
   if (riderId) where.riderId = riderId;
 

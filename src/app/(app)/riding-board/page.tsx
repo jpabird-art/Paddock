@@ -19,12 +19,13 @@ export default async function RidingBoardPage({
   }
 
   const canEdit = can(role, "exercise_assignment", "create");
+  const userSquadron = session.user.squadron ?? null;
   const { date } = await searchParams;
 
   const [horses, users] = await Promise.all([
     prisma.horse.findMany({
       where: { isActive: true },
-      select: { id: true, name: true, regimentalNumber: true },
+      select: { id: true, name: true, regimentalNumber: true, squadron: true },
       orderBy: { name: "asc" },
     }),
     prisma.user.findMany({
@@ -40,6 +41,7 @@ export default async function RidingBoardPage({
       users={users}
       canEdit={canEdit}
       initialDate={date}
+      userSquadron={userSquadron}
     />
   );
 }
