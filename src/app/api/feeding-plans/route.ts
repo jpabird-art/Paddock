@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { FeedType, FeedFrequency } from "@prisma/client";
+import { audit } from "@/lib/audit";
 
 const createSchema = z.object({
   horseId: z.string().min(1),
@@ -53,6 +54,15 @@ export async function POST(request: Request) {
     include: {
       horse: { select: { id: true, name: true, regimentalNumber: true } },
     },
+  });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "feeding_plan",
+    entityId: plan.id,
+    action: "create",
+    after: { horseId: plan.horseId, feedType: plan.feedType },
   });
 
   return NextResponse.json(plan, { status: 201 });

@@ -1,0 +1,239 @@
+================================================================================
+         PADDOCK — WELFARE ANALYTICS IMPLEMENTATION PLAN
+         Predictive Horse Welfare & Tasking Analysis
+================================================================================
+
+Date Prepared: 15 April 2026
+Prepared By:   Capt James Bird, Division Commander, HCMR
+
+================================================================================
+CONTEXT
+================================================================================
+
+PADDOCK currently tracks horse health events, injuries, duty assignments,
+medications, and inspections — but there is no way to see how these relate
+to each other. The regiment needs to understand patterns such as:
+
+  "Does 6 months on TRAINING_WING correlate with higher injury rates?"
+
+This feature adds a /welfare analytics page that aggregates existing data
+into fleet-level insights, duty-to-outcome correlations, per-horse risk
+scores, and rule-based predictive alerts.
+
+No database schema changes required — all data already exists across the
+DutyAssignment, InjuryReport, HealthEvent, MedicationRecord, and
+Inspection models.
+
+
+================================================================================
+PHASE 1: FOUNDATION
+================================================================================
+
+1. ADD WELFARE_ANALYTICS RESOURCE TO PERMISSIONS
+   File: src/lib/permissions.ts
+   - Add "welfare_analytics" to the Resource type union
+   - Grant access:  ADMIN ["view"], OFFICER ["view"], VET ["view"]
+   - TROOPER: no access (empty array)
+
+2. ADD NAVIGATION ITEM
+   File: src/lib/nav-config.ts
+   - Add "Welfare Analytics" link to sidebar after Inspections
+   - Visible to: ADMIN, VET, OFFICER
+   - Route: /welfare
+
+3. CREATE TYPE DEFINITIONS
+   New file: src/types/welfare.ts
+   - FleetOverview (readiness counts, injury trends, compliance rates)
+   - InjuryTrendPoint (month, severity counts)
+   - HealthComplianceData (event type, status counts)
+   - StationCorrelation (station, injury rate, avg days to injury)
+   - HorseRiskScore (score 0-100, risk level, contributing factors)
+   - PredictiveInsight (horse, risk level, message, recommendation)
+
+
+================================================================================
+PHASE 2: ANALYTICS ENGINE
+================================================================================
+
+4. CREATE CORE ANALYTICS MODULE
+   New file: src/lib/welfare-analytics.ts
+   Server-side only. Uses Prisma directly (same pattern as dashboard).
+
+   Four functions:
+
+   A) getFleetOverview()
+      - Task readiness distribution (groupBy taskReadiness)
+      - Injury trend: InjuryReport grouped by month (last 12 months),
+        counted by severity
+      - Health compliance: HealthEvent counts by status per type
+      - Active medication withdrawal count
+
+   B) getDutyCorrelation()
+      - Fetch all DutyAssignments + InjuryReports for active horses
+      - For each injury, find the overlapping duty assignment where
+        startDate <= reportedAt AND (endDate IS NULL OR endDate >= reportedAt)
+      - Compute per station:
+        * Injury rate (injuries per horse-month)
+        * Average days at station before first injury
+        * Body location frequency
+      - Normalise free-text bodyLocation into categories:
+        Hoof, Front Limb, Hind Limb, Back, Head/Neck, Chest/Shoulder, Other
+
+   C) computeHorseRiskScores()
+      - Single query: all active horses with recent duty assignments,
+        injuries (last 6 months), overdue health events, inspections (last 6 months)
+      - Score algorithm (0-100, higher = more risk):
+
+        FACTOR                          MAX PTS   CALCULATION
+        ---------------------------------------------------------------
+        Time at current station         20        min(months/9, 1) x 20
+        Recent injuries (6mo)           25        Weighted count:
+                                                  SEVERE x 1.5
+                                                  MODERATE x 1.0
+                                                  MINOR x 0.5
+                                                  min(weighted/3, 1) x 25
+        Overdue health events           15        min(count/2, 1) x 15
+        Age factor                      15        Under 5 -> 10
+                                                  Over 18 -> 15
+                                                  Over 15 -> 8
+                                                  Otherwise -> 0
+        Inspection failures (6mo)       15        FAIL=1, ADVISORY=0.5
+                                                  min(weighted/2, 1) x 15
+        Current readiness degradation   10        NON_TASKWORTHY = 10
+                                                  LIMITED_ROLE = 5
+                                                  FULL_EXERCISE = 0
+
+      - Risk levels derived from score:
+         0 - 25   LOW        (green)
+        26 - 50   MODERATE   (amber)
+        51 - 75   HIGH       (orange)
+        76 - 100  CRITICAL   (red)
+
+   D) generatePredictiveInsights()
+      Rule-based alerts using risk scores + historical station data:
+
+      Rule 1: STATION DURATION WARNING
+      If horse has been at TRAINING_WING or KINGS_LIFE_GUARD for > 5 months
+      and the historical injury rate at that duration is elevated compared
+      to baseline, generate alert.
+
+      Rule 2: RECURRING INJURY PATTERN
+      If a horse has 2+ injuries to the same body location in the last
+      12 months, flag as "recurring injury site".
+
+      Rule 3: HEALTH COMPLIANCE FAILURE
+      If a horse has 2+ overdue health events, flag as "health compliance
+      failure — increased risk of undetected conditions".
+
+      Rule 4: POST-INJURY RETURN RISK
+      If a horse returned from NON_TASKWORTHY or LIMITED_ROLE to
+      FULL_EXERCISE within the last 30 days and has a prior SEVERE injury,
+      flag as "recently returned to full duties — monitor closely".
+
+      Rule 5: AGE-WORKLOAD MISMATCH
+      If horse is > 16 years old and currently at KINGS_LIFE_GUARD
+      (highest ceremonial workload), flag for review.
+
+
+================================================================================
+PHASE 3: USER INTERFACE — PAGE & TABS
+================================================================================
+
+5. CREATE WELFARE PAGE
+   New file: src/app/(app)/welfare/page.tsx
+   - Server component (follows dashboard pattern)
+   - Permission check on load — redirect if no access
+   - Calls all 4 analytics functions in parallel
+   - Renders tabbed layout with 4 tabs:
+     Tab 1: Overview
+     Tab 2: Duty Correlation
+     Tab 3: Risk Register
+     Tab 4: Predictive Insights
+
+6. CREATE LOADING STATE
+   New file: src/app/(app)/welfare/loading.tsx
+   - Skeleton cards matching the tab layout
+
+
+================================================================================
+PHASE 4: USER INTERFACE — CHART COMPONENTS
+================================================================================
+
+All components in src/components/welfare/, using Recharts (already installed).
+
+7. WelfareOverviewTab.tsx
+   - Summary stat cards (total horses, % full exercise, open injuries,
+     overdue health events)
+   - Readiness donut chart (reuses existing ReadinessChart component)
+   - Injury trend area chart: X = month, stacked areas by severity
+   - Health compliance bar chart: X = health event type, stacked by status
+
+8. DutyCorrelationTab.tsx
+   - Station injury rate chart: horizontal bar chart, one bar per station
+     showing injuries per horse-month
+   - Time-to-injury chart: bar chart showing average days at station
+     before first injury, grouped by station
+   - Body location by station chart: stacked bar chart,
+     X = station, stacks = body location categories
+   - Shows "Insufficient data" message when < 10 data points for a station
+
+9. RiskRegisterTab.tsx
+   - Sortable table with columns:
+     Name | Regt No | Station | Role | Risk Score | Top Risk Factor | Readiness
+   - Filter dropdown by risk level (LOW / MODERATE / HIGH / CRITICAL)
+   - Horse name links to individual horse profile
+
+10. RiskScoreBadge.tsx
+    - Small reusable badge component
+    - Displays score number with colour coding (green/amber/orange/red)
+
+11. PredictiveInsightsTab.tsx
+    - Alert cards grouped by risk level (CRITICAL shown first)
+    - Each card shows: horse name (linked), alert type, message,
+      recommendation text
+    - Station summary panel: "N horses approaching risk threshold at
+      TRAINING_WING"
+    - Confidence note when historical data is limited
+
+
+================================================================================
+FILES SUMMARY
+================================================================================
+
+NEW FILES (10):
+  src/types/welfare.ts
+  src/lib/welfare-analytics.ts
+  src/app/(app)/welfare/page.tsx
+  src/app/(app)/welfare/loading.tsx
+  src/components/welfare/WelfareOverviewTab.tsx
+  src/components/welfare/DutyCorrelationTab.tsx
+  src/components/welfare/RiskRegisterTab.tsx
+  src/components/welfare/RiskScoreBadge.tsx
+  src/components/welfare/PredictiveInsightsTab.tsx
+  src/__tests__/welfare-analytics.test.ts
+
+MODIFIED FILES (2):
+  src/lib/permissions.ts    — add welfare_analytics resource
+  src/lib/nav-config.ts     — add welfare nav item
+
+NO DATABASE SCHEMA OR MIGRATION CHANGES REQUIRED.
+
+
+================================================================================
+VERIFICATION PLAN
+================================================================================
+
+1. Type check:  npx tsc --noEmit  (passes with no errors)
+2. Unit tests:  npx vitest run src/__tests__/welfare-analytics.test.ts
+                (risk score algorithm tests pass)
+3. Role access: Log in as OFFICER/VET/ADMIN — "Welfare Analytics" appears
+                in sidebar. Navigate to /welfare — all 4 tabs render.
+4. Role denial: Log in as TROOPER — nav item hidden, direct URL redirects.
+5. Data check:  Each tab displays sensible output with real or seed data.
+6. Edge case:   "Insufficient data" messages appear when stations have
+                fewer than 10 data points.
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

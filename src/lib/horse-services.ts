@@ -13,10 +13,6 @@ export async function deactivateHorse(horseId: string): Promise<void> {
       where: { id: horseId },
       data: { isActive: false },
     }),
-    prisma.riderAssignment.updateMany({
-      where: { horseId, endDate: null },
-      data: { endDate: now },
-    }),
     prisma.feedingPlan.updateMany({
       where: { horseId, isActive: true },
       data: { isActive: false, endDate: now },

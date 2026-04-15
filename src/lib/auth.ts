@@ -2,6 +2,8 @@ import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { verifyTotp, consumeBackupCode } from "@/lib/totp";
+import { audit } from "@/lib/audit";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -10,6 +12,7 @@ export const authOptions: NextAuthOptions = {
       credentials: {
         serviceNumber: { label: "Service Number", type: "text" },
         password: { label: "Password", type: "password" },
+        totpCode: { label: "MFA Code", type: "text" },
       },
       async authorize(credentials) {
         if (!credentials?.serviceNumber || !credentials?.password) {
@@ -21,6 +24,12 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.isActive) {
+          audit({
+            entityType: "auth",
+            entityId: credentials.serviceNumber.toUpperCase(),
+            action: "login_failed",
+            metadata: { reason: user ? "inactive_account" : "unknown_user" },
+          });
           return null;
         }
 
@@ -30,8 +39,55 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!passwordValid) {
+          audit({
+            userId: user.id,
+            userRole: user.role,
+            entityType: "auth",
+            entityId: user.id,
+            action: "login_failed",
+            metadata: { reason: "invalid_password" },
+          });
           return null;
         }
+
+        // MFA check — if user has MFA enabled, require a valid TOTP code
+        if (user.mfaEnabled && user.totpSecret) {
+          const code = credentials.totpCode?.trim();
+          if (!code) {
+            // Signal to the client that MFA is required
+            throw new Error("MFA_REQUIRED");
+          }
+
+          // Try TOTP first, then backup codes
+          const totpValid = verifyTotp(code, user.totpSecret);
+          if (!totpValid) {
+            const remaining = consumeBackupCode(code, user.backupCodes);
+            if (remaining === null) {
+              audit({
+                userId: user.id,
+                userRole: user.role,
+                entityType: "auth",
+                entityId: user.id,
+                action: "mfa_failed",
+                metadata: { reason: "invalid_code" },
+              });
+              throw new Error("MFA_INVALID");
+            }
+            // Valid backup code — remove it from the list
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { backupCodes: remaining },
+            });
+          }
+        }
+
+        audit({
+          userId: user.id,
+          userRole: user.role,
+          entityType: "auth",
+          entityId: user.id,
+          action: "login_success",
+        });
 
         return {
           id: user.id,

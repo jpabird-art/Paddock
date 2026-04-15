@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
+import { audit } from "@/lib/audit";
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requirePermission("medication_record", "delete");
+  const { error, session } = await requirePermission("medication_record", "delete");
   if (error) return error;
 
   const { id } = await params;
@@ -18,6 +19,15 @@ export async function DELETE(
   }
 
   await prisma.medicationRecord.delete({ where: { id } });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "medication_record",
+    entityId: id,
+    action: "delete",
+    before: { horseId: record.horseId, medicationName: record.medicationName },
+  });
 
   return NextResponse.json({ success: true });
 }
@@ -54,7 +64,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requirePermission("medication_record", "update");
+  const { error, session } = await requirePermission("medication_record", "update");
   if (error) return error;
 
   const { id } = await params;

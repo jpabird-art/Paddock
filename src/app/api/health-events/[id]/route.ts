@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/permissions";
 import { scheduleNextEvent } from "@/lib/health-scheduler";
 import { z } from "zod";
+import { audit } from "@/lib/audit";
 
 const patchSchema = z.object({
   status: z.enum(["SCHEDULED", "OVERDUE", "COMPLETED"]).optional(),
@@ -16,7 +17,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { error } = await requirePermission("health_event", "update");
+  const { error, session } = await requirePermission("health_event", "update");
   if (error) return error;
 
   const event = await prisma.healthEvent.findUnique({
@@ -43,6 +44,16 @@ export async function PATCH(
   const updated = await prisma.healthEvent.update({
     where: { id },
     data,
+  });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "health_event",
+    entityId: id,
+    action: "update",
+    before: { status: event.status },
+    after: { status: updated.status },
   });
 
   // Schedule next occurrence only on the first transition into COMPLETED

@@ -148,6 +148,9 @@ model User {
   squadron      Squadron?
   rank          String?
   isActive      Boolean   @default(true)
+  mfaEnabled    Boolean   @default(false)
+  totpSecret    String?
+  backupCodes   String[]  @default([])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -158,13 +161,15 @@ model User {
   injuryNotifications InjuryNotification[]
   movesCreated        HorseMove[]          @relation("MoveCreatedBy")
   movesUpdated        HorseMove[]          @relation("MoveUpdatedBy")
-  riderAssignments    RiderAssignment[]
   feedingPlansCreated FeedingPlan[]        @relation("FeedingPlanCreatedBy")
   medicationsAdministered MedicationRecord[] @relation("MedicationAdministeredBy")
   tackAllocationsAssigned TackAllocation[] @relation("TackAllocationAssignedBy")
   inspectionsPerformed    Inspection[]     @relation("InspectionPerformedBy")
   inspectionSchedulesCreated InspectionSchedule[] @relation("InspectionScheduleCreatedBy")
   attachmentsUploaded     Attachment[]     @relation("AttachmentUploadedBy")
+  exerciseAssignmentsAsRider  ExerciseAssignment[] @relation("ExerciseRider")
+  exerciseAssignmentsCreated  ExerciseAssignment[] @relation("ExerciseAssignedBy")
+  exerciseNotifications       ExerciseNotification[]
 
   @@map("users")
 }
@@ -200,12 +205,12 @@ model Horse {
   injuryReports     InjuryReport[]
   dutyAssignments   DutyAssignment[]
   moves             HorseMove[]
-  riderAssignments  RiderAssignment[]
   feedingPlans      FeedingPlan[]
   medicationRecords MedicationRecord[]
   tackAllocations   TackAllocation[]
   inspections       Inspection[]
   attachments       Attachment[]       @relation("HorseAttachments")
+  exerciseAssignments ExerciseAssignment[]
 
   @@index([isActive, squadron])    // horse list filtered by active + squadron
   @@index([isActive, dutyStation])  // dashboard groups by station
@@ -351,20 +356,43 @@ model HorseMove {
   @@map("horse_moves")
 }
 
-model RiderAssignment {
-  id              String    @id @default(cuid())
-  horseId         String
-  riderId         String
-  suitabilityScore Int?
-  startDate       DateTime  @default(now())
-  endDate         DateTime?
-  notes           String?
-  createdAt       DateTime  @default(now())
+model ExerciseAssignment {
+  id            String   @id @default(cuid())
+  horseId       String
+  riderId       String
+  assignedById  String
+  exerciseName  String
+  date          DateTime
+  timeSlot      String
+  duration      Int?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
-  rider User  @relation(fields: [riderId], references: [id])
+  horse      Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  rider      User  @relation("ExerciseRider", fields: [riderId], references: [id])
+  assignedBy User  @relation("ExerciseAssignedBy", fields: [assignedById], references: [id])
 
-  @@map("rider_assignments")
+  notifications ExerciseNotification[]
+
+  @@index([date, timeSlot])
+  @@index([horseId, date])
+  @@index([riderId, date])
+  @@map("exercise_assignments")
+}
+
+model ExerciseNotification {
+  id                     String    @id @default(cuid())
+  exerciseAssignmentId   String
+  recipientId            String
+  sentAt                 DateTime  @default(now())
+  acknowledged           Boolean   @default(false)
+  acknowledgedAt         DateTime?
+
+  exerciseAssignment ExerciseAssignment @relation(fields: [exerciseAssignmentId], references: [id], onDelete: Cascade)
+  recipient          User               @relation(fields: [recipientId], references: [id])
+
+  @@map("exercise_notifications")
 }
 
 model FeedingPlan {

@@ -12,7 +12,6 @@ import { InjuryReportForm } from "@/components/injuries/InjuryReportForm";
 import { HorseHealthNotes } from "@/components/horses/HorseHealthNotes";
 import { HorseFeedingPlans } from "@/components/horses/HorseFeedingPlans";
 import { HorseMedicationRecords } from "@/components/horses/HorseMedicationRecords";
-import { HorseRiderHistory } from "@/components/horses/HorseRiderHistory";
 import { HorseTackAllocations } from "@/components/horses/HorseTackAllocations";
 import { HorseInspections } from "@/components/horses/HorseInspections";
 import { HorseAttachments } from "@/components/horses/HorseAttachments";
@@ -39,7 +38,6 @@ export default async function HorseDetailPage({
   const canDeleteFeeding = can(role, "feeding_plan", "delete");
   const canManageMedication = can(role, "medication_record", "create");
   const canDeleteMedication = can(role, "medication_record", "delete");
-  const canManageRiders = can(role, "rider_assignment", "create");
   const canManageTack = can(role, "tack_allocation", "create");
   const canManageInspections = can(role, "inspection", "create");
   const canUploadAttachments = can(role, "attachment", "create");
@@ -81,10 +79,6 @@ export default async function HorseDetailPage({
         include: { administeredBy: { select: { name: true } } },
         orderBy: { administeredAt: "desc" },
       },
-      riderAssignments: {
-        include: { rider: { select: { name: true, serviceNumber: true } } },
-        orderBy: { startDate: "desc" },
-      },
       tackAllocations: {
         include: {
           tackItem: { select: { type: true, identifier: true, brand: true, condition: true } },
@@ -107,15 +101,6 @@ export default async function HorseDetailPage({
 
   if (!horse) notFound();
 
-  // Fetch users list for rider assignment dropdown
-  const users = canManageRiders
-    ? await prisma.user.findMany({
-        where: { isActive: true },
-        select: { id: true, name: true, serviceNumber: true },
-        orderBy: { name: "asc" },
-      })
-    : [];
-
   const age = differenceInYears(new Date(), new Date(horse.dateOfBirth));
   const serviceYears = differenceInYears(new Date(), new Date(horse.serviceEntryDate));
 
@@ -123,8 +108,6 @@ export default async function HorseDetailPage({
     (i) => i.status === "OPEN" || i.status === "UNDER_REVIEW"
   );
   const overdueEvents = horse.healthEvents.filter((e) => e.status === "OVERDUE");
-
-  const currentRider = horse.riderAssignments.find((r) => !r.endDate);
 
   return (
     <div className="space-y-6 max-w-5xl">
@@ -161,11 +144,6 @@ export default async function HorseDetailPage({
                 </span>
               )}
               <TaskReadinessBadge readiness={horse.taskReadiness} />
-              {currentRider && (
-                <span className="bg-blue-100 text-blue-700 text-xs px-2 py-0.5 rounded-full border border-blue-200 font-medium">
-                  Rider: {currentRider.rider.name}
-                </span>
-              )}
               {openInjuries.length > 0 && (
                 <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full border border-red-200 font-medium">
                   {openInjuries.length} open injury
@@ -216,7 +194,6 @@ export default async function HorseDetailPage({
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="riders">Riders</TabsTrigger>
           <TabsTrigger value="tack">Tack</TabsTrigger>
           <TabsTrigger value="inspections">Inspections</TabsTrigger>
           <TabsTrigger value="moves">Moves</TabsTrigger>
@@ -280,12 +257,6 @@ export default async function HorseDetailPage({
                 label="Max Rider Weight"
                 value={`${horse.maxRiderWeightKg} kg`}
               />
-              {currentRider && (
-                <InfoField
-                  label="Current Rider"
-                  value={`${currentRider.rider.name} (${currentRider.rider.serviceNumber})`}
-                />
-              )}
             </div>
           </div>
         </TabsContent>
@@ -468,25 +439,6 @@ export default async function HorseDetailPage({
                 </tbody>
               </table>
             )}
-          </div>
-        </TabsContent>
-
-        {/* Riders Tab */}
-        <TabsContent value="riders">
-          <div className="mt-3">
-            <HorseRiderHistory
-              horseId={horse.id}
-              initialAssignments={horse.riderAssignments.map((r) => ({
-                id: r.id,
-                suitabilityScore: r.suitabilityScore,
-                startDate: r.startDate.toISOString(),
-                endDate: r.endDate?.toISOString() ?? null,
-                notes: r.notes,
-                rider: r.rider,
-              }))}
-              canManage={canManageRiders}
-              users={users}
-            />
           </div>
         </TabsContent>
 

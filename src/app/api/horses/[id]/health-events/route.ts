@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { HealthEventStatus, HealthEventType } from "@prisma/client";
+import { audit } from "@/lib/audit";
 
 const createSchema = z.object({
   type: z.nativeEnum(HealthEventType),
@@ -31,7 +32,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const { error } = await requirePermission("health_event", "create");
+  const { error, session } = await requirePermission("health_event", "create");
   if (error) return error;
 
   const horse = await prisma.horse.findUnique({ where: { id } });
@@ -53,6 +54,15 @@ export async function POST(
       notes: parse.data.notes,
       status: HealthEventStatus.SCHEDULED,
     },
+  });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "health_event",
+    entityId: event.id,
+    action: "create",
+    after: { horseId: id, type: event.type },
   });
 
   return NextResponse.json(event, { status: 201 });

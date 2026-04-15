@@ -8,7 +8,9 @@
       "Bash(pkill:*)",
       "Bash(which gh:*)",
       "Bash(which git:*)",
-      "Bash(git init:*)"
+      "Bash(git init:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)"
     ]
   }
 }

@@ -39,7 +39,7 @@ describe("can()", () => {
   it("OFFICER can create horses and manage duty assignments", () => {
     expect(can("OFFICER", "horse", "create")).toBe(true);
     expect(can("OFFICER", "duty_assignment", "create")).toBe(true);
-    expect(can("OFFICER", "rider_assignment", "create")).toBe(true);
+    expect(can("OFFICER", "exercise_assignment", "create")).toBe(true);
   });
 
   it("OFFICER cannot delete horses", () => {

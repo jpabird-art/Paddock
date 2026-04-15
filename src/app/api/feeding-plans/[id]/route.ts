@@ -2,12 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
+import { audit } from "@/lib/audit";
 
 export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requirePermission("feeding_plan", "delete");
+  const { error, session } = await requirePermission("feeding_plan", "delete");
   if (error) return error;
 
   const { id } = await params;
@@ -18,6 +19,15 @@ export async function DELETE(
   }
 
   await prisma.feedingPlan.delete({ where: { id } });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "feeding_plan",
+    entityId: id,
+    action: "delete",
+    before: { horseId: plan.horseId, feedType: plan.feedType },
+  });
 
   return NextResponse.json({ success: true });
 }
@@ -60,7 +70,7 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
-  const { error } = await requirePermission("feeding_plan", "update");
+  const { error, session } = await requirePermission("feeding_plan", "update");
   if (error) return error;
 
   const { id } = await params;
@@ -90,6 +100,16 @@ export async function PATCH(
     include: {
       horse: { select: { id: true, name: true, regimentalNumber: true } },
     },
+  });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "feeding_plan",
+    entityId: id,
+    action: "update",
+    before: { feedType: plan.feedType, quantityKg: plan.quantityKg, isActive: plan.isActive },
+    after: { feedType: updated.feedType, quantityKg: updated.quantityKg, isActive: updated.isActive },
   });
 
   return NextResponse.json(updated);

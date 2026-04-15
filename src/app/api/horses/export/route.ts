@@ -68,11 +68,6 @@ export async function GET(request: Request) {
     where,
     include: {
       currentLocation: { select: { name: true } },
-      riderAssignments: {
-        where: { endDate: null },
-        include: { rider: { select: { name: true, serviceNumber: true } } },
-        take: 1,
-      },
       injuryReports: {
         where: { status: { in: ["OPEN", "UNDER_REVIEW"] } },
         select: { id: true },
@@ -102,13 +97,11 @@ export async function GET(request: Request) {
     "Weight (kg)",
     "Max Rider Weight (kg)",
     "Task Readiness",
-    "Current Rider",
     "Open Injuries",
     "Overdue Health Events",
   ];
 
   const rows = horses.map((h) => {
-    const rider = h.riderAssignments[0]?.rider;
     return [
       escapeCSV(h.name),
       escapeCSV(h.regimentalNumber),
@@ -126,7 +119,6 @@ export async function GET(request: Request) {
       String(h.weightKg),
       String(h.maxRiderWeightKg),
       escapeCSV(READINESS_LABELS[h.taskReadiness] ?? h.taskReadiness),
-      escapeCSV(rider ? `${rider.name} (${rider.serviceNumber})` : ""),
       String(h.injuryReports.length),
       String(h.healthEvents.length),
     ].join(",");

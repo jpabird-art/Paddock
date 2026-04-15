@@ -1,0 +1,327 @@
+================================================================================
+              PADDOCK vs HERD — USE CASE BRIEF FOR OFFICER AUDIENCE
+================================================================================
+
+Date:        15 April 2026
+Prepared By: Capt James Bird, Division Commander, HCMR
+Classification: OFFICIAL
+Audience:    Officers and senior NCOs considering adoption of PADDOCK
+
+PURPOSE
+-------
+To demonstrate, through practical use cases, why PADDOCK is a more
+effective horse management system for HCMR than HERD.
+
+
+================================================================================
+WHAT IS PADDOCK?
+================================================================================
+
+PADDOCK is a purpose-built digital horse management system designed
+specifically for the Household Cavalry Mounted Regiment. It runs as a
+web application accessible from any device with a browser — phone, tablet,
+or desktop — with no software installation required.
+
+It was developed in-house by an officer within the regiment, meaning it
+reflects how we actually work rather than how a civilian software vendor
+thinks we work.
+
+
+================================================================================
+THE CORE PROBLEM WITH HERD
+================================================================================
+
+HERD is a generic equine management tool. It was not designed for a
+military mounted unit. The consequence is that it does not understand:
+
+  - Our rank structure and chain of command
+  - Our duty stations (King's Life Guard, Training Wing, Hyde Park
+    Barracks, Winter Training)
+  - Our horse roles (Charger, Cav Black, Grey, Standard, Comp, RMT)
+  - Our squadrons (The Life Guards, The Blues and Royals)
+  - Our permission structure (what a Trooper can do vs a Vet vs an Officer)
+  - Our operational rhythm (ceremonial commitments, guard rotations,
+    training cycles)
+
+PADDOCK was built from the ground up around all of these.
+
+
+================================================================================
+USE CASE 1: INJURY REPORTING
+================================================================================
+
+SCENARIO: A Trooper notices a horse is lame during morning stables.
+
+WITH HERD:
+  - Trooper tells the Corporal of Horse verbally
+  - CoH writes it in the yard book or sends a WhatsApp message
+  - Information may or may not reach the vet that day
+  - If it does, there is no photo, no structured record, no timestamp
+  - No audit trail of who knew what and when
+
+WITH PADDOCK:
+  - Trooper opens PADDOCK on their phone
+  - Taps "Report Injury" on the horse's profile
+  - Selects severity (Minor/Moderate/Severe), body location, description
+  - Attaches up to 5 photos directly from the phone camera
+  - Submits — the report is timestamped and attributed to the Trooper
+  - ALL vets and admins are automatically notified immediately
+  - If severity is SEVERE: the horse's task readiness is automatically
+    downgraded to NON-TASKWORTHY
+  - If severity is MODERATE: the horse is automatically moved to
+    LIMITED ROLE (if currently at Full Exercise)
+  - Full audit trail: who reported it, when, what was done about it
+
+WHY IT MATTERS:
+  The Commanding Officer can see exactly how long it took from injury
+  to report to veterinary attention. If a horse is injured at 0600 and
+  the vet doesn't see the report until 1400, that is visible. With HERD
+  or paper, that gap is invisible.
+
+
+================================================================================
+USE CASE 2: "HOW MANY HORSES CAN WE MOUNT FOR KING'S LIFE GUARD?"
+================================================================================
+
+SCENARIO: The Adjutant needs to know at short notice how many horses
+are available for a ceremonial commitment next week.
+
+WITH HERD:
+  - Ring the yard
+  - Ask the CoH to count heads
+  - Cross-reference against the sick board
+  - Check if any are on medication withdrawal
+  - Hope nobody forgot to update the whiteboard
+  - Manually compile the answer — takes 30+ minutes and may be wrong
+
+WITH PADDOCK:
+  - Open the Dashboard
+  - Task Readiness chart shows immediately:
+    * X horses at FULL EXERCISE (available)
+    * Y horses at LIMITED ROLE (may be available depending on task)
+    * Z horses NON-TASKWORTHY (unavailable)
+  - Open Injuries page — filter by OPEN status to see current casualties
+  - Check Active Withdrawals panel — see which horses are on medication
+    and when withdrawal ends
+  - Open Location Planner — select the date, filter by squadron and role,
+    see exactly which horses will be at which location on that date,
+    including any in transit
+
+  Answer in under 2 minutes, with confidence, from anywhere.
+
+
+================================================================================
+USE CASE 3: HORSE MOVES — WINDSOR, PIRBRIGHT, MELTON MOWBRAY
+================================================================================
+
+SCENARIO: 12 horses need to move to Melton Mowbray for training.
+The Adjutant needs to plan the transport.
+
+WITH HERD:
+  - Spreadsheet or email chain
+  - No visibility of which horses are already moving elsewhere
+  - Driver details, vehicle registration, box groom details all on
+    separate paperwork
+  - No one place to see the full picture
+
+WITH PADDOCK:
+  - Create a group move: select the 12 horses, set departure/arrival
+    dates, assign driver (name + service number), box groom, vehicle VRN
+  - The move appears on every horse's individual profile under "Moves"
+  - The Location Planner automatically updates the projected location
+    for each horse on the move date
+  - Status tracking: PLANNED → IN TRANSIT → COMPLETED
+  - When completed, each horse's current location updates automatically
+  - If a move is cancelled, status is updated and the location projection
+    reverts
+
+  One person plans the move. Everyone can see it. No duplication.
+
+
+================================================================================
+USE CASE 4: VETERINARY HEALTH SCHEDULE
+================================================================================
+
+SCENARIO: The vet needs to know which horses are due for farriery,
+dental checks, or vaccinations.
+
+WITH HERD:
+  - Separate spreadsheet or calendar
+  - Relies on someone manually checking and chasing
+  - Easy for events to slip without anyone noticing
+
+WITH PADDOCK:
+  - Health Schedule page shows all upcoming and overdue events across
+    the entire fleet
+  - Filter by type (Dental, Vet Checkup, Vaccination, Farriery)
+  - Filter by status (Scheduled, Overdue, Completed)
+  - OVERDUE events are flagged in red on the Dashboard — visible to
+    anyone who logs in
+  - When a health event is completed, PADDOCK automatically schedules
+    the next occurrence based on the event type's frequency
+  - Each horse's profile shows their full health history in one place
+
+  Nothing falls through the cracks. Overdue events are visible to
+  everyone, not hidden in a spreadsheet only one person checks.
+
+
+================================================================================
+USE CASE 5: ROLE-BASED ACCESS — WHO CAN DO WHAT
+================================================================================
+
+SCENARIO: A Trooper wants to edit a horse's profile. A vet wants to
+prescribe medication. An officer wants to assign a horse to duty.
+
+WITH HERD:
+  - Either everyone has the same access (risky) or access is so
+    restricted that people can't do their jobs without workarounds
+
+WITH PADDOCK:
+  Four roles with precisely defined permissions:
+
+  TROOPER:
+    - View all horse records
+    - Report injuries (with photos)
+    - Add health notes
+    - Upload documents
+    - Cannot edit horse profiles, prescribe medication, assign duties,
+      or manage users
+
+  VET:
+    - Everything a Trooper can do, plus:
+    - Create and update health events
+    - Prescribe and record medication (with batch numbers and withdrawal
+      tracking)
+    - Manage feeding plans
+    - Resolve injury reports
+    - Conduct and record inspections
+    - Cannot assign duties or manage users
+
+  OFFICER:
+    - Create and edit horse profiles
+    - Assign horses to duty stations
+    - Assign riders (with suitability scoring)
+    - Manage tack allocations
+    - Approve and manage horse moves
+    - Manage locations
+    - Cannot prescribe medication or manage users
+
+  ADMIN:
+    - Full access to everything
+    - User management (create accounts, assign roles, deactivate users)
+    - System configuration
+    - Audit log visibility
+
+  This means a Trooper cannot accidentally change a horse's weight, a vet
+  cannot reassign a horse to a different squadron, and an officer cannot
+  alter a medication record. Everyone can do their job, no one can do
+  someone else's.
+
+
+================================================================================
+USE CASE 6: MEDICATION WITHDRAWAL TRACKING
+================================================================================
+
+SCENARIO: A horse has been given bute. The vet needs to ensure it is not
+tasked for ceremonial duties during the withdrawal period.
+
+WITH HERD:
+  - Vet writes it in a book
+  - Hopes the yard staff check before putting the horse on the board
+
+WITH PADDOCK:
+  - Vet records the medication: name, dosage, route, batch number,
+    withdrawal period in days
+  - PADDOCK automatically calculates the withdrawal end date
+  - The horse appears on the Dashboard's "Active Withdrawals" panel
+    until the withdrawal period expires
+  - Anyone checking the horse's profile can see the withdrawal status
+    under the Medication tab
+
+  No horse goes on parade during a withdrawal period unless someone
+  actively overrides the visible warning.
+
+
+================================================================================
+USE CASE 7: AUDIT TRAIL — "WHO CHANGED THAT?"
+================================================================================
+
+SCENARIO: A horse's task readiness was changed from FULL EXERCISE to
+LIMITED ROLE. The CO wants to know who changed it and why.
+
+WITH HERD:
+  - No audit trail
+  - Ask around until someone remembers
+
+WITH PADDOCK:
+  - Every change to every record is logged automatically
+  - The audit log records: who made the change, when, what the value
+    was before, and what it was changed to
+  - Admins can view the full audit log
+  - This is not optional or configurable — it happens on every write
+    operation
+
+  Full accountability. No ambiguity.
+
+
+================================================================================
+USE CASE 8: DOCUMENT MANAGEMENT
+================================================================================
+
+SCENARIO: An officer needs to see a horse's passport or a vet certificate.
+
+WITH HERD:
+  - Filing cabinet, or a shared drive folder that nobody maintains
+
+WITH PADDOCK:
+  - Each horse's profile has a Documents tab
+  - Documents are categorised: Passport, Injury Photo, Vet Certificate,
+    Document, Other
+  - Uploaded with attribution (who uploaded, when)
+  - Accessible from anywhere — no need to be in the office
+
+
+================================================================================
+SUMMARY: PADDOCK vs HERD AT A GLANCE
+================================================================================
+
+  Capability                      HERD          PADDOCK
+  ----------------------------    ----------    ----------
+  Built for HCMR                  No            Yes
+  HC rank structure               No            Yes
+  HC duty stations                No            Yes
+  HC horse roles                  No            Yes
+  Squadron awareness              No            Yes
+  Role-based permissions          Basic         4-tier RBAC
+  Injury reporting with photos    No            Yes
+  Automatic vet notification      No            Yes
+  Auto task readiness downgrade   No            Yes
+  Health schedule with auto-      No            Yes
+    recurrence
+  Medication withdrawal tracking  No            Yes
+  Location planner with move      No            Yes
+    projection
+  Group horse moves               No            Yes
+  Full audit trail                No            Yes
+  Rider suitability history       No            Yes
+  Tack allocation tracking        No            Yes
+  Inspection scheduling           No            Yes
+  Document management per horse   No            Yes
+  Feeding plan management         No            Yes
+  Works on phone/tablet           Limited       Yes
+  Accessible from anywhere        No            Yes
+  Requires software install       Yes           No
+  Developed and maintained        External      In-house
+    in-house                      vendor
+
+BOTTOM LINE
+-----------
+HERD tells you what horses you have. PADDOCK tells you what you can do
+with them, what's wrong with them, what's about to go wrong with them,
+and who is responsible. It was designed by someone who does this job,
+for people who do this job.
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

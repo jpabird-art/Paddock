@@ -1,0 +1,41 @@
+Subject: Paddock — Horse Welfare Management App Trial Proposal (HCMR)
+
+Sir,
+
+ISSUE
+
+HCMR has no effective digital system for managing horse welfare. HERD is inaccessible to most soldiers and lacks core functionality. I have developed an alternative and am seeking your support to trial it within the regiment.
+
+RECOMMENDATION
+
+That you support a 3-month trial of Paddock, a purpose-built horse management web app, hosted locally at Hyde Park Barracks on GOV.WiFi with no cloud dependency or MOD system integration.
+
+TIMING
+
+I would welcome your direction at your earliest convenience. The system is ready to deploy and could be operational within a week of approval. An ideal start point would be post-Easter leave, allowing us to capture real data as the regiment builds up to the peak ceremonial season.
+
+BACKGROUND
+
+HCMR's horse welfare is currently tracked through a combination of Excel spreadsheets, WhatsApp messages, and verbal reports. Information is frequently lost, delayed, or duplicated. HERD, the MOD's Power App, functions as an interactive spreadsheet — it has no injury reporting, no health scheduling, no location tracking, and sits behind MODNET, restricting access to the handful of MODNET-enabled soldiers. The troopers who handle the horses daily cannot use it.
+
+I have developed Paddock in my spare time to address this. It is a web application purpose-built for mounted regiment horse management. Key capabilities include:
+
+- Live horse roster with health status, operational readiness, and location tracking
+- Automated health scheduling (dental, farriery, vaccinations, vet checks) with overdue alerts
+- Structured injury reporting with severity grading, photo uploads, and chain of command notification
+- Horse move planning and tracking between locations
+- Feeding plans, medication records with withdrawal tracking, rider suitability history, and tack allocation
+- Role-based access control — troopers report and view; vets manage clinical records; officers manage assignments
+- Full audit logging of every action
+
+For the trial, Paddock would be hosted on a Mac Mini physically located at Hyde Park Barracks, accessible only via GOV.WiFi. This provides two layers of authentication: GOV.WiFi requires a .mod.gov.uk or ArmyMail login to join the network, and Paddock then requires a service number and password. No data leaves the barracks, no data transits the public internet, and there is no integration with any MOD system. The trial can be stood up in hours and removed entirely by unplugging a single device, with zero risk to the wider MOD estate.
+
+The estimated efficiency gain is significant. Replacing manual tracking across the regiment could save in excess of 30 hours per week in duplicated administrative effort, while improving the accuracy and timeliness of welfare reporting — particularly for injury escalation, which currently relies on verbal handover between shifts.
+
+I am happy to demonstrate the system at your convenience.
+
+Regards,
+
+James Bird
+Capt
+Division Commander, HCMR

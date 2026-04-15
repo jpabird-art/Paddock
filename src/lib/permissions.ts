@@ -20,7 +20,7 @@ export type Resource =
   | "location"
   | "user"
   | "duty_assignment"
-  | "rider_assignment"
+  | "exercise_assignment"
   | "feeding_plan"
   | "medication_record"
   | "tack_item"
@@ -44,7 +44,7 @@ const PERMISSIONS: PermissionMatrix = {
     location:            ["view", "create", "update", "delete"],
     user:                ["view", "create", "update", "delete"],
     duty_assignment:     ["view", "create", "update", "delete"],
-    rider_assignment:    ["view", "create", "update", "delete"],
+    exercise_assignment: ["view", "create", "update", "delete"],
     feeding_plan:        ["view", "create", "update", "delete"],
     medication_record:   ["view", "create", "update", "delete"],
     tack_item:           ["view", "create", "update", "delete"],
@@ -64,7 +64,7 @@ const PERMISSIONS: PermissionMatrix = {
     location:            ["view", "create", "update"],
     user:                ["view"],
     duty_assignment:     ["view", "create", "update"],
-    rider_assignment:    ["view", "create", "update"],
+    exercise_assignment: ["view", "create", "update", "delete"],
     feeding_plan:        ["view", "create", "update"],
     medication_record:   ["view"],
     tack_item:           ["view", "create", "update"],
@@ -84,7 +84,7 @@ const PERMISSIONS: PermissionMatrix = {
     location:            ["view"],
     user:                [],
     duty_assignment:     ["view"],
-    rider_assignment:    ["view"],
+    exercise_assignment: ["view"],
     feeding_plan:        ["view", "create", "update", "delete"],
     medication_record:   ["view", "create", "update", "delete"],
     tack_item:           ["view"],
@@ -104,7 +104,7 @@ const PERMISSIONS: PermissionMatrix = {
     location:            ["view"],
     user:                [],
     duty_assignment:     ["view"],
-    rider_assignment:    ["view"],
+    exercise_assignment: ["view"],
     feeding_plan:        ["view"],
     medication_record:   ["view"],
     tack_item:           ["view"],

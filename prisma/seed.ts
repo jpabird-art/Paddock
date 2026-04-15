@@ -519,54 +519,7 @@ async function main() {
 
   console.log("Resolved injury reports created.");
 
-  // ─── 1. RIDER ASSIGNMENTS ───────────────────────────────────────────
-  const existingRiderAssignments = await prisma.riderAssignment.count();
-  if (existingRiderAssignments === 0) {
-    const riderAssignmentsData = [
-      // Tpr Daniel Walsh assigned to Sovereign (current)
-      {
-        horseId: horseByName("Sovereign").id,
-        riderId: trooper1.id,
-        suitabilityScore: 4,
-        startDate: new Date("2024-06-01"),
-        notes: "Primary rider for ceremonial duties",
-      },
-      // Tpr Emily Brooks assigned to Monty (current)
-      {
-        horseId: horseByName("Monty").id,
-        riderId: trooper2.id,
-        suitabilityScore: 5,
-        startDate: new Date("2024-03-15"),
-        notes: "Excellent pairing, strong bond",
-      },
-      // Tpr Daniel Walsh previously assigned to Hercules (historical)
-      {
-        horseId: horseByName("Hercules").id,
-        riderId: trooper1.id,
-        suitabilityScore: 3,
-        startDate: new Date("2023-01-01"),
-        endDate: new Date("2024-05-31"),
-        notes: "Transferred to Sovereign for ceremonial duties",
-      },
-      // Tpr Emily Brooks assigned to Templar (current)
-      {
-        horseId: horseByName("Templar").id,
-        riderId: trooper2.id,
-        suitabilityScore: 4,
-        startDate: new Date("2025-01-10"),
-        notes: "Secondary mount for Hyde Park duties",
-      },
-    ];
-
-    for (const ra of riderAssignmentsData) {
-      await prisma.riderAssignment.create({ data: ra });
-    }
-    console.log("Rider assignments seeded.");
-  } else {
-    console.log("Rider assignments already exist, skipping.");
-  }
-
-  // ─── 3. FEEDING PLANS ───────────────────────────────────────────────
+  // ─── FEEDING PLANS ──────────────────────────────────────────────────
   const existingFeedingPlans = await prisma.feedingPlan.count();
   if (existingFeedingPlans === 0) {
     const feedingPlansData = [

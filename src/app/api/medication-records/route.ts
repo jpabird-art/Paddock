@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requirePermission, requireAuth } from "@/lib/permissions";
 import { z } from "zod";
 import { MedicationRoute } from "@prisma/client";
+import { audit } from "@/lib/audit";
 
 const createSchema = z.object({
   horseId: z.string().min(1),
@@ -62,6 +63,15 @@ export async function POST(request: Request) {
       horse: { select: { id: true, name: true, regimentalNumber: true } },
       administeredBy: { select: { id: true, name: true, serviceNumber: true } },
     },
+  });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "medication_record",
+    entityId: record.id,
+    action: "create",
+    after: { horseId: record.horseId, medicationName: record.medicationName, dosage: record.dosage },
   });
 
   return NextResponse.json(record, { status: 201 });

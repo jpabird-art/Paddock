@@ -16,7 +16,8 @@ async function main() {
   results.push(["Tack items", (await prisma.tackItem.deleteMany({})).count]);
   results.push(["Medication records", (await prisma.medicationRecord.deleteMany({})).count]);
   results.push(["Feeding plans", (await prisma.feedingPlan.deleteMany({})).count]);
-  results.push(["Rider assignments", (await prisma.riderAssignment.deleteMany({})).count]);
+  results.push(["Exercise assignments", (await prisma.exerciseAssignment.deleteMany({})).count]);
+  results.push(["Exercise notifications", (await prisma.exerciseNotification.deleteMany({})).count]);
   results.push(["Horse moves", (await prisma.horseMove.deleteMany({})).count]);
   results.push(["Duty assignments", (await prisma.dutyAssignment.deleteMany({})).count]);
   results.push(["Injury notifications", (await prisma.injuryNotification.deleteMany({})).count]);

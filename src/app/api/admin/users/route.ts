@@ -4,6 +4,7 @@ import { requirePermission } from "@/lib/permissions";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { Squadron } from "@prisma/client";
+import { audit } from "@/lib/audit";
 
 const createSchema = z.object({
   name: z.string().min(1),
@@ -40,7 +41,7 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const { error } = await requirePermission("user", "create");
+  const { error, session } = await requirePermission("user", "create");
   if (error) return error;
 
   const body = await request.json();
@@ -87,6 +88,15 @@ export async function POST(request: Request) {
       isActive: true,
       createdAt: true,
     },
+  });
+
+  await audit({
+    userId: session!.user.id,
+    userRole: session!.user.role,
+    entityType: "user",
+    entityId: user.id,
+    action: "create",
+    after: { name: user.name, serviceNumber: user.serviceNumber, role: user.role, squadron: user.squadron },
   });
 
   return NextResponse.json(user, { status: 201 });

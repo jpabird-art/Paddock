@@ -1,0 +1,214 @@
+================================================================================
+                    PADDOCK - OAMD TEST FOR OPERATIONAL TRIAL
+              Household Cavalry Mounted Regiment Horse Management App
+================================================================================
+
+Date Prepared: 15 April 2026
+Prepared By:   Capt James Bird, Division Commander, HCMR
+
+================================================================================
+SECTION 1: OAMD TEST
+================================================================================
+
+OUTCOME
+-------
+PADDOCK is trialled within the regiment and validated as a fit-for-purpose
+digital horse management system that replaces or supplements existing manual
+and paper-based record keeping.
+
+ACTION
+------
+1. Train all designated users (Troopers, NCOs, Vets, Officers) on the app
+   prior to the trial start date.
+2. Users employ PADDOCK as the primary tool for horse welfare records, injury
+   reporting, health scheduling, duty assignments, and location tracking
+   throughout the trial period.
+3. No reversion to legacy systems/processes during the trial unless a critical
+   system failure occurs (in which case the fallback is documented).
+4. Feedback is collected continuously and formally at trial midpoint and end.
+
+MEASURE
+-------
+The trial is successful if ALL of the following are met:
+
+  a) Adoption:     All trained users actively use PADDOCK throughout the trial
+                   period with no voluntary reversion to paper/legacy systems.
+  b) Accuracy:     Horse records (health events, injuries, locations, duty
+                   assignments) in PADDOCK match ground truth with no data
+                   loss or critical errors.
+  c) Timeliness:   Injury reports are submitted within the same working day.
+                   Health schedules (dental, farriery, vet, vaccinations) are
+                   maintained up to date with no missed entries.
+  d) Usability:    User feedback scores average 3.5/5 or above across all
+                   categories (ease of use, reliability, usefulness).
+  e) Availability: System uptime of 95% or greater during the trial period
+                   (excluding planned maintenance).
+  f) Role Coverage: Each role (Trooper, Vet, Officer, Admin) has successfully
+                   used their designated features without permission issues.
+
+DEADLINE
+--------
+  Trial Start:          27 April 2026
+  Midpoint Review:      27 May 2026
+  Trial End:            29 June 2026
+  Feedback Collected:   By 29 June 2026
+  Final Report Due:     6 July 2026
+
+
+================================================================================
+SECTION 2: USER TRAINING PLAN
+================================================================================
+
+TRAINING AIM
+------------
+All designated PADDOCK users are confident and competent in using the app for
+their role-specific functions before the trial begins on 27 April 2026.
+
+TRAINING AUDIENCE & ROLE MAPPING
+---------------------------------
+  Role        Typical Rank/Post             Key App Functions
+  ----------  ----------------------------  ------------------------------------
+  TROOPER     Troopers, LCoH               View horse records, submit injury
+                                            reports, attach photos/documents
+  VET         Regimental/Visiting Vets      Manage health events, clinical notes,
+                                            medications, feeding plans, resolve
+                                            injuries, record inspections
+  OFFICER     Troop Leaders, Div Comd,      Assign duties, approve horse moves,
+              Adjutant                      manage tack/inspections, create
+                                            horses, manage locations
+  ADMIN       System Administrators         Full access: user management,
+                                            locations, system configuration
+
+TRAINING SCHEDULE
+-----------------
+  Date              Session                     Audience        Duration
+  ----------------  --------------------------  --------------  --------
+  21 Apr 2026       Session 1: Overview &       All Users       45 min
+                    Login/Navigation
+  22 Apr 2026       Session 2: Trooper          Troopers        30 min
+                    Functions (view, report)
+  23 Apr 2026       Session 3: Vet Functions    Vets            45 min
+                    (health, meds, inspections)
+  24 Apr 2026       Session 4: Officer          Officers        45 min
+                    Functions (duties, moves,
+                    locations)
+  25 Apr 2026       Session 5: Admin Overview   Admins          30 min
+                    (users, config)
+  25 Apr 2026       Drop-in Troubleshooting     All Users       60 min
+  27 Apr 2026       TRIAL BEGINS                --              --
+
+TRAINING DELIVERY METHOD
+-------------------------
+1. Hands-on demonstration using the live system (or staging environment).
+2. Each user logs in on their own device during the session.
+3. Walk through core workflows relevant to their role.
+4. Provide a one-page quick reference card per role (print & digital).
+5. Nominate one "PADDOCK Champion" per troop/section as first point of
+   contact for questions during the trial.
+
+TRAINING MATERIALS
+------------------
+  - Quick Reference Cards (one per role: Trooper, Vet, Officer, Admin)
+  - Login credentials issued in advance
+  - Short video walkthroughs (screen recordings of key workflows) - optional
+  - Contact details for technical support during the trial
+
+
+================================================================================
+SECTION 3: FEEDBACK TEMPLATE & COLLECTION PLAN
+================================================================================
+
+FEEDBACK COLLECTION SCHEDULE
+-----------------------------
+  When                  Method                  Who
+  --------------------  ----------------------  -------------------
+  Ongoing (daily)       Bug/issue log           All users
+  Weekly                Informal check-in       PADDOCK Champions
+  27 May 2026           Midpoint feedback form  All users
+  29 Jun 2026           End-of-trial feedback   All users
+                        form
+  29 Jun - 3 Jul 2026   Structured interviews   Selected users
+                                                (2 per role)
+
+-------------------------------------------------------------------------------
+                     PADDOCK TRIAL - USER FEEDBACK FORM
+                  (Use at Midpoint: 27 May / End: 29 Jun)
+-------------------------------------------------------------------------------
+
+Name (optional):  ________________________
+Role in PADDOCK:  [ ] Trooper  [ ] Vet  [ ] Officer  [ ] Admin
+Date:             ________________________
+Feedback Point:   [ ] Midpoint  [ ] End of Trial
+
+PART A: RATING (1 = Poor, 5 = Excellent)
+
+  1. Ease of use (navigation, layout)                     1  2  3  4  5
+  2. Reliability (crashes, errors, data loss)              1  2  3  4  5
+  3. Speed (loading times, responsiveness)                 1  2  3  4  5
+  4. Usefulness for your daily tasks                       1  2  3  4  5
+  5. Quality of training received                          1  2  3  4  5
+  6. Improvement over previous method (paper/spreadsheet)  1  2  3  4  5
+
+PART B: OPEN QUESTIONS
+
+  7. Which features did you use most frequently?
+     _________________________________________________________________
+     _________________________________________________________________
+
+  8. Which features were difficult to use or unclear?
+     _________________________________________________________________
+     _________________________________________________________________
+
+  9. Were there any tasks you could NOT complete using PADDOCK?
+     _________________________________________________________________
+     _________________________________________________________________
+
+  10. Did you ever revert to paper/legacy systems? If yes, why?
+      _________________________________________________________________
+      _________________________________________________________________
+
+  11. What ONE improvement would make the biggest difference?
+      _________________________________________________________________
+      _________________________________________________________________
+
+  12. Any bugs or errors encountered? (Describe what happened)
+      _________________________________________________________________
+      _________________________________________________________________
+
+  13. Any other comments or suggestions?
+      _________________________________________________________________
+      _________________________________________________________________
+
+-------------------------------------------------------------------------------
+                    BUG / ISSUE LOG (Ongoing - keep by device)
+-------------------------------------------------------------------------------
+
+  Date: ___________  Time: ___________  User: ___________
+
+  What were you trying to do?
+  _________________________________________________________________
+
+  What happened instead?
+  _________________________________________________________________
+
+  Screenshot attached?  [ ] Yes  [ ] No
+
+-------------------------------------------------------------------------------
+
+FEEDBACK ANALYSIS PLAN
+-----------------------
+1. Compile all midpoint feedback by 29 May 2026; brief key findings to
+   chain of command and development team.
+2. Action critical issues identified at midpoint before trial end.
+3. Compile all end-of-trial feedback by 1 July 2026.
+4. Produce final trial report by 6 July 2026, including:
+   - Summary of OAMD measures (pass/fail for each)
+   - Quantitative analysis of ratings (averages, trends midpoint vs end)
+   - Qualitative themes from open questions and interviews
+   - Recommendation: adopt / adopt with modifications / do not adopt
+   - Annex: raw feedback data and bug log summary
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================

@@ -1,0 +1,225 @@
+================================================================================
+              HCMR — VISITOR REQUEST DECISION SUPPORT MATRIX
+================================================================================
+
+Date:        15 April 2026
+Prepared By: Capt James Bird, Division Commander, HCMR
+Classification: OFFICIAL
+
+PURPOSE
+-------
+To provide a consistent, transparent framework for assessing whether a
+proposed visit to the Household Cavalry Mounted Regiment delivers genuine
+value or creates an unjustified burden on personnel and resources.
+
+
+================================================================================
+SECTION 1: SCORING CRITERIA
+================================================================================
+
+Score each criterion 0-3:
+
+  0 = None / Not applicable
+  1 = Low / Marginal
+  2 = Moderate / Useful
+  3 = High / Significant
+
+
+CRITERION 1: RELATIONSHIP VALUE
+--------------------------------
+Does the visitor belong to an organisation with an existing or potential
+relationship that benefits HCMR?
+
+  3  Formal partnership or affiliation (e.g. Livery Company with historic
+     ties, allied regiment, MOD stakeholder, DSVS, Defence Animal Trust)
+  2  Organisation with shared interests and potential for future
+     partnership (e.g. equine charity, veterinary institution)
+  1  Loose connection or goodwill link (e.g. local council, general
+     military association)
+  0  No organisational affiliation to HCMR
+
+
+CRITERION 2: OPERATIONAL BENEFIT
+---------------------------------
+Does the visit deliver a tangible outcome for the regiment?
+
+  3  Direct operational gain (e.g. funding, equipment, veterinary
+     expertise, training support, policy influence)
+  2  Useful exchange of knowledge or capability (e.g. equine welfare
+     research, farriery techniques, saddlery expertise)
+  1  Minor benefit such as general awareness or morale uplift
+  0  No identifiable operational benefit
+
+
+CRITERION 3: REPUTATIONAL VALUE
+---------------------------------
+Does the visit enhance HCMR's public profile, recruitment, or standing
+within Defence and the Crown?
+
+  3  High-profile positive exposure (e.g. Royal visit, senior Defence
+     figure, reputable media with editorial control)
+  2  Moderate positive exposure (e.g. established journalist, respected
+     public figure with genuine interest)
+  1  Limited or niche exposure (e.g. social media personality, local
+     press)
+  0  No reputational benefit, or risk of negative/trivialised coverage
+
+
+CRITERION 4: RECIPROCITY
+--------------------------
+Is the relationship two-way? Does HCMR gain as much as it gives?
+
+  3  Clear mutual benefit (e.g. Livery Company provides funding/support,
+     HCMR provides ceremonial connection and access)
+  2  Visitor offers something in return (e.g. expertise, future
+     sponsorship, charitable support)
+  1  Visitor is primarily a recipient but goodwill may pay off
+  0  Entirely one-sided — visitor gains access/content, HCMR gains nothing
+
+
+CRITERION 5: DISRUPTION COST
+------------------------------
+How much does the visit cost in time, personnel, and operational impact?
+(NOTE: This criterion is scored in REVERSE — lower disruption = higher score)
+
+  3  Minimal disruption (e.g. short visit during routine activity,
+     no dedicated escort beyond normal duties)
+  2  Moderate disruption (e.g. requires a dedicated host for 1-2 hours,
+     minor schedule adjustment)
+  1  Significant disruption (e.g. half-day programme, multiple personnel
+     diverted, horses prepared specifically)
+  0  Major disruption (e.g. full-day event, rehearsal required,
+     operational activity displaced)
+
+
+================================================================================
+SECTION 2: DECISION THRESHOLDS
+================================================================================
+
+  Total Score (out of 15)    Recommendation
+  -------------------------  ----------------------------------------
+  12 - 15                    APPROVE — clear value to HCMR
+   9 - 11                    APPROVE WITH CONDITIONS — value exists but
+                             scope/timing should be managed to minimise
+                             disruption
+   6 - 8                     REFER UPWARDS — marginal value, requires
+                             CO/Adjt decision with justification
+   0 - 5                     DECLINE — insufficient benefit to justify
+                             the cost; suggest alternative (e.g. public
+                             Changing of the Guard, museum visit)
+
+
+================================================================================
+SECTION 3: WORKED EXAMPLES
+================================================================================
+
+EXAMPLE A: Master of a Livery Company (historic affiliation)
+--------------------------------------------------------------
+  Relationship Value:    3  (formal historic partnership)
+  Operational Benefit:   2  (potential funding, goodwill for future support)
+  Reputational Value:    2  (positive association, City of London ties)
+  Reciprocity:           3  (Livery provides financial/material support,
+                             HCMR provides ceremonial connection)
+  Disruption Cost:       2  (1-2 hour visit, one officer escort)
+                         --
+  TOTAL:                12  -> APPROVE
+
+
+EXAMPLE B: Celebrity (no affiliation, wants social media content)
+------------------------------------------------------------------
+  Relationship Value:    0  (no organisational link)
+  Operational Benefit:   0  (no tangible gain)
+  Reputational Value:    1  (some exposure, but no editorial control
+                             and risk of trivialisation)
+  Reciprocity:           0  (entirely one-sided — celebrity gains content,
+                             HCMR gains nothing substantive)
+  Disruption Cost:       1  (requires escort, photo management, likely
+                             wants access to horses/stables)
+                         --
+  TOTAL:                 2  -> DECLINE
+
+
+EXAMPLE C: Veterinary university requesting research visit
+-----------------------------------------------------------
+  Relationship Value:    2  (potential future partnership)
+  Operational Benefit:   3  (direct welfare expertise, research data)
+  Reputational Value:    1  (niche but positive)
+  Reciprocity:           3  (university gains research access, HCMR
+                             gains veterinary insight)
+  Disruption Cost:       2  (moderate — vet staff time, stable access)
+                         --
+  TOTAL:                11  -> APPROVE WITH CONDITIONS
+
+
+EXAMPLE D: MP requesting constituency visit
+---------------------------------------------
+  Relationship Value:    1  (no formal link but political relationship)
+  Operational Benefit:   2  (potential policy/funding advocacy)
+  Reputational Value:    2  (positive Defence engagement narrative)
+  Reciprocity:           2  (MP gains profile, HCMR gains political
+                             awareness of its needs)
+  Disruption Cost:       2  (1-2 hour escorted visit)
+                         --
+  TOTAL:                 9  -> APPROVE WITH CONDITIONS
+
+
+EXAMPLE E: School group requesting educational visit
+-----------------------------------------------------
+  Relationship Value:    0  (no organisational link)
+  Operational Benefit:   0  (no direct gain)
+  Reputational Value:    2  (positive community/recruitment engagement)
+  Reciprocity:           1  (primarily one-sided but supports recruitment
+                             pipeline and public engagement mandate)
+  Disruption Cost:       1  (significant — large group, safety management,
+                             multiple escorts, dedicated programme)
+                         --
+  TOTAL:                 4  -> DECLINE (suggest Changing of the Guard
+                                       or museum visit instead)
+
+
+EXAMPLE F: Allied regiment (e.g. King's Troop RHA) exchange visit
+------------------------------------------------------------------
+  Relationship Value:    3  (formal military relationship)
+  Operational Benefit:   3  (training exchange, shared best practice)
+  Reputational Value:    1  (internal Defence — limited public value)
+  Reciprocity:           3  (fully mutual — both units learn)
+  Disruption Cost:       2  (moderate — hosting duties, stable access)
+                         --
+  TOTAL:                12  -> APPROVE
+
+
+================================================================================
+SECTION 4: PROCESS
+================================================================================
+
+  1. Visitor request received (by Adjutant, Div Comd, or external liaison)
+  2. Requesting officer completes scoring matrix (5 criteria, 0-3 each)
+  3. Score totalled and recommendation identified:
+     - APPROVE / APPROVE WITH CONDITIONS / REFER UPWARDS / DECLINE
+  4. For REFER UPWARDS: brief submitted to CO/Adjt with completed matrix
+  5. Decision recorded and communicated to requesting party
+  6. If approved: assign host officer, confirm date, brief visitors on
+     dress/security/photography policy
+  7. Post-visit: note any follow-up actions (thank you letter, future
+     engagement, partnership development)
+
+
+================================================================================
+SECTION 5: ADDITIONAL CONSIDERATIONS
+================================================================================
+
+The matrix provides a baseline. The following factors may override or
+adjust the score at the CO's discretion:
+
+  - Royal or Crown direction (automatic approve regardless of score)
+  - Chain of Command direction (e.g. Brigade or Div HQ request)
+  - Security concerns (may decline an otherwise high-scoring visit)
+  - Operational tempo (during Major General's Inspection, State
+    Ceremonial periods, or deployment — raise the threshold to 11+)
+  - Cumulative burden (if multiple visits are stacking up in the same
+    week, apply stricter thresholds to protect training time)
+
+
+================================================================================
+                              END OF DOCUMENT
+================================================================================
