@@ -8,13 +8,13 @@ interface ParadeConfig {
 
 const PARADES_24: ParadeConfig[] = [
   { name: "Major General's Inspection", officers: 15, soldiers: 105 },
-  { name: "Queen's Birthday Parade", officers: 7, soldiers: 111 },
+  { name: "King's Birthday Parade", officers: 7, soldiers: 111 },
   { name: "Escort", officers: 9, soldiers: 112 },
 ];
 
 const PARADES_16: ParadeConfig[] = [
   { name: "Major General's Inspection", officers: 15, soldiers: 73 },
-  { name: "Queen's Birthday Parade", officers: 7, soldiers: 79 },
+  { name: "King's Birthday Parade", officers: 7, soldiers: 79 },
   { name: "Escort", officers: 9, soldiers: 80 },
 ];
 
