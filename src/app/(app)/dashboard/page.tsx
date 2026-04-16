@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { Shield, AlertTriangle, Calendar, Activity, Pill, MapPin } from "lucide-react";
 import { ReadinessChart } from "@/components/dashboard/ReadinessChart";
 import { ParadeReadiness } from "@/components/dashboard/ParadeReadiness";
-import { LocationMap } from "@/components/dashboard/LocationMap";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -19,7 +18,7 @@ export default async function DashboardPage() {
       prisma.horse.count({ where: { isActive: true } }),
       prisma.location.findMany({
         where: { isActive: true },
-        select: { id: true, name: true, code: true },
+        select: { id: true, name: true },
         orderBy: { name: "asc" },
       }).then(async (locs) => {
         const counts = await Promise.all(
@@ -102,25 +101,38 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      {/* Location Map */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <MapPin className="h-4 w-4 text-[#1a2744]" />
-            Horse Locations
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LocationMap
-            locations={activeLocations.map((loc) => ({
-              id: loc.id,
-              name: loc.name,
-              code: loc.code,
-              count: loc.count,
-            }))}
-          />
-        </CardContent>
-      </Card>
+      {/* Summary stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="border-l-4 border-l-[#1a2744]">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#1a2744]/10 rounded-full p-2">
+                <Shield className="h-5 w-5 text-[#1a2744]" />
+              </div>
+              <div>
+                <div className="text-2xl font-bold text-gray-900">{totalHorses}</div>
+                <div className="text-xs text-gray-500 font-medium uppercase tracking-wide">Total Horses</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {activeLocations.map((loc) => (
+          <Card key={loc.id} className="border-l-4 border-l-gray-200">
+            <CardContent className="p-5">
+              <div className="flex items-center gap-3">
+                <div className="bg-blue-50 rounded-full p-2">
+                  <MapPin className="h-4 w-4 text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{loc.count}</div>
+                  <div className="text-xs text-gray-500 font-medium">{loc.name}</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       {/* Task Readiness */}
       <Card>
