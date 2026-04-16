@@ -30,7 +30,7 @@ const schema = z.object({
   serviceNumber: z.string().min(1, "Service number is required"),
   email: z.string().email("Valid email required"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["ADMIN", "VET", "OFFICER", "TROOPER"]),
+  role: z.enum(["ADMIN", "VET", "FARRIER", "OFFICER", "TROOPER"]),
   squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"]).nullable().optional(),
   rank: z.string().optional(),
 }).refine(
@@ -50,7 +50,7 @@ export function CreateUserForm() {
     serviceNumber: "",
     email: "",
     password: "",
-    role: "TROOPER" as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+    role: "TROOPER" as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
     squadron: "" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS" | "",
     rank: "",
   });
@@ -66,7 +66,7 @@ export function CreateUserForm() {
     setFormData((prev) => ({
       ...prev,
       rank: rankCode,
-      role: (rank?.defaultRole ?? prev.role) as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+      role: (rank?.defaultRole ?? prev.role) as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
     }));
   }
 
@@ -232,6 +232,7 @@ export function CreateUserForm() {
                   {{
                     OFFICER: "Officer",
                     VET: "Veterinary",
+                    FARRIER: "Farrier",
                     TROOPER: "Trooper",
                     ADMIN: "Admin",
                   }[formData.role]}
@@ -242,7 +243,7 @@ export function CreateUserForm() {
                   onValueChange={(v) =>
                     setFormData((prev) => ({
                       ...prev,
-                      role: v as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+                      role: v as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
                     }))
                   }
                 >
@@ -253,6 +254,7 @@ export function CreateUserForm() {
                     <SelectItem value="TROOPER">Trooper</SelectItem>
                     <SelectItem value="OFFICER">Officer</SelectItem>
                     <SelectItem value="VET">Veterinary</SelectItem>
+                    <SelectItem value="FARRIER">Farrier</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>

@@ -5,11 +5,12 @@
  *
  * TROOPER  — view most records, create injury reports + health notes, update own injury reports
  * VET      — manage clinical records (health events, notes, medications, feeding plans), resolve injuries, create moves
+ * FARRIER  — same access as VET, plus full CRUD on farrier records
  * OFFICER  — assign duties, approve moves, manage locations, create horses, manage tack/inspections/feeding/health events
  * ADMIN    — full access: users, locations, system config, plus everything above
  */
 
-export type Role = "ADMIN" | "VET" | "OFFICER" | "TROOPER";
+export type Role = "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER";
 
 export type Resource =
   | "horse"
@@ -27,6 +28,7 @@ export type Resource =
   | "tack_allocation"
   | "inspection_schedule"
   | "inspection"
+  | "farrier_record"
   | "attachment"
   | "audit_log";
 
@@ -51,6 +53,7 @@ const PERMISSIONS: PermissionMatrix = {
     tack_allocation:     ["view", "create", "update", "delete"],
     inspection_schedule: ["view", "create", "update", "delete"],
     inspection:          ["view", "create", "update", "delete"],
+    farrier_record:      ["view", "create", "update", "delete"],
     attachment:          ["view", "create", "update", "delete"],
     audit_log:           ["view"],
   },
@@ -71,6 +74,7 @@ const PERMISSIONS: PermissionMatrix = {
     tack_allocation:     ["view", "create", "update"],
     inspection_schedule: ["view", "create", "update"],
     inspection:          ["view", "create", "update"],
+    farrier_record:      ["view", "create", "update"],
     attachment:          ["view", "create", "delete"],
     audit_log:           [],
   },
@@ -91,6 +95,28 @@ const PERMISSIONS: PermissionMatrix = {
     tack_allocation:     ["view"],
     inspection_schedule: ["view"],
     inspection:          ["view", "create", "update"],
+    farrier_record:      ["view"],
+    attachment:          ["view", "create"],
+    audit_log:           [],
+  },
+
+  FARRIER: {
+    horse:               ["view", "update"],
+    health_event:        ["view", "create", "update"],
+    health_note:         ["view", "create", "delete"],
+    injury_report:       ["view", "create", "update"],
+    horse_move:          ["view", "create"],
+    location:            ["view"],
+    user:                [],
+    duty_assignment:     ["view"],
+    exercise_assignment: ["view"],
+    feeding_plan:        ["view", "create", "update", "delete"],
+    medication_record:   ["view", "create", "update", "delete"],
+    tack_item:           ["view"],
+    tack_allocation:     ["view"],
+    inspection_schedule: ["view"],
+    inspection:          ["view", "create", "update"],
+    farrier_record:      ["view", "create", "update", "delete"],
     attachment:          ["view", "create"],
     audit_log:           [],
   },
@@ -111,6 +137,7 @@ const PERMISSIONS: PermissionMatrix = {
     tack_allocation:     ["view"],
     inspection_schedule: ["view"],
     inspection:          ["view"],
+    farrier_record:      ["view"],
     attachment:          ["view", "create"],
     audit_log:           [],
   },

@@ -9,7 +9,7 @@ import { Squadron } from "@prisma/client";
 const patchSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  role: z.enum(["ADMIN", "VET", "OFFICER", "TROOPER"]).optional(),
+  role: z.enum(["ADMIN", "VET", "FARRIER", "OFFICER", "TROOPER"]).optional(),
   squadron: z.nativeEnum(Squadron).nullable().optional(),
   rank: z.string().nullable().optional(),
   isActive: z.boolean().optional(),

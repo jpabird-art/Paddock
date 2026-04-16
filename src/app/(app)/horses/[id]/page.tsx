@@ -15,6 +15,7 @@ import { HorseMedicationRecords } from "@/components/horses/HorseMedicationRecor
 import { HorseTackAllocations } from "@/components/horses/HorseTackAllocations";
 import { HorseInspections } from "@/components/horses/HorseInspections";
 import { HorseAttachments } from "@/components/horses/HorseAttachments";
+import { HorseFarrierRecords } from "@/components/horses/HorseFarrierRecords";
 import {
   Tabs,
   TabsContent,
@@ -42,6 +43,8 @@ export default async function HorseDetailPage({
   const canManageInspections = can(role, "inspection", "create");
   const canUploadAttachments = can(role, "attachment", "create");
   const canDeleteAttachments = can(role, "attachment", "delete");
+  const canManageFarrier = can(role, "farrier_record", "create");
+  const canDeleteFarrier = can(role, "farrier_record", "delete");
   const canReportInjury = can(role, "injury_report", "create");
   const canViewInjuryDetail = can(role, "injury_report", "update");
 
@@ -91,6 +94,10 @@ export default async function HorseDetailPage({
           schedule: { select: { name: true } },
         },
         orderBy: { scheduledDate: "desc" },
+      },
+      farrierRecords: {
+        include: { createdBy: { select: { name: true } } },
+        orderBy: { serviceDate: "desc" },
       },
       attachments: {
         include: { uploadedBy: { select: { name: true } } },
@@ -196,6 +203,7 @@ export default async function HorseDetailPage({
           </TabsTrigger>
           <TabsTrigger value="tack">Tack</TabsTrigger>
           <TabsTrigger value="inspections">Inspections</TabsTrigger>
+          <TabsTrigger value="farrier">Farrier</TabsTrigger>
           <TabsTrigger value="moves">Moves</TabsTrigger>
           <TabsTrigger value="attachments">
             Documents
@@ -475,6 +483,26 @@ export default async function HorseDetailPage({
                 schedule: i.schedule,
               }))}
               canManage={canManageInspections}
+            />
+          </div>
+        </TabsContent>
+
+        {/* Farrier Tab */}
+        <TabsContent value="farrier">
+          <div className="mt-3">
+            <HorseFarrierRecords
+              horseId={horse.id}
+              initialRecords={horse.farrierRecords.map((r) => ({
+                id: r.id,
+                serviceDate: r.serviceDate.toISOString(),
+                shoeType: r.shoeType,
+                hoofCondition: r.hoofCondition,
+                farrierName: r.farrierName,
+                notes: r.notes,
+                createdBy: r.createdBy,
+              }))}
+              canManage={canManageFarrier}
+              canDelete={canDeleteFarrier}
             />
           </div>
         </TabsContent>

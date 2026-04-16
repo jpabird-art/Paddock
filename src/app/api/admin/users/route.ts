@@ -11,7 +11,7 @@ const createSchema = z.object({
   serviceNumber: z.string().min(1),
   email: z.string().email(),
   password: z.string().min(8),
-  role: z.enum(["ADMIN", "VET", "OFFICER", "TROOPER"]),
+  role: z.enum(["ADMIN", "VET", "FARRIER", "OFFICER", "TROOPER"]),
   squadron: z.nativeEnum(Squadron).nullable().optional(),
   rank: z.string().optional(),
 }).refine(

@@ -13,6 +13,7 @@ datasource db {
 enum Role {
   ADMIN
   VET
+  FARRIER
   OFFICER
   TROOPER
 }
@@ -170,6 +171,7 @@ model User {
   exerciseAssignmentsAsRider  ExerciseAssignment[] @relation("ExerciseRider")
   exerciseAssignmentsCreated  ExerciseAssignment[] @relation("ExerciseAssignedBy")
   exerciseNotifications       ExerciseNotification[]
+  farrierRecordsCreated       FarrierRecord[]      @relation("FarrierRecordCreatedBy")
 
   @@map("users")
 }
@@ -211,6 +213,7 @@ model Horse {
   inspections       Inspection[]
   attachments       Attachment[]       @relation("HorseAttachments")
   exerciseAssignments ExerciseAssignment[]
+  farrierRecords      FarrierRecord[]
 
   @@index([isActive, squadron])    // horse list filtered by active + squadron
   @@index([isActive, dutyStation])  // dashboard groups by station
@@ -393,6 +396,25 @@ model ExerciseNotification {
   recipient          User               @relation(fields: [recipientId], references: [id])
 
   @@map("exercise_notifications")
+}
+
+model FarrierRecord {
+  id            String   @id @default(cuid())
+  horseId       String
+  serviceDate   DateTime
+  shoeType      String?
+  hoofCondition String?
+  farrierName   String?
+  notes         String?
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  horse     Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  createdBy User  @relation("FarrierRecordCreatedBy", fields: [createdById], references: [id])
+
+  @@index([horseId, serviceDate])
+  @@map("farrier_records")
 }
 
 model FeedingPlan {

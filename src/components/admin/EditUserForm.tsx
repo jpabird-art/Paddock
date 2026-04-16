@@ -44,7 +44,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
   const [formData, setFormData] = useState({
     name: user.name,
     email: user.email,
-    role: user.role as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+    role: user.role as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
     rank: user.rank ?? "",
     squadron: (user.squadron ?? "") as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS" | "",
     password: "",
@@ -60,7 +60,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
     setFormData((prev) => ({
       ...prev,
       rank: rankCode,
-      role: (rank?.defaultRole ?? prev.role) as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+      role: (rank?.defaultRole ?? prev.role) as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
     }));
   }
 
@@ -68,7 +68,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
     setFormData({
       name: user.name,
       email: user.email,
-      role: user.role as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+      role: user.role as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
       rank: user.rank ?? "",
       squadron: (user.squadron ?? "") as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS" | "",
       password: "",
@@ -196,7 +196,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
               </Label>
               {formData.rank ? (
                 <div className="flex h-9 items-center rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-600">
-                  {{ OFFICER: "Officer", VET: "Veterinary", TROOPER: "Trooper", ADMIN: "Admin" }[formData.role]}
+                  {{ OFFICER: "Officer", VET: "Veterinary", FARRIER: "Farrier", TROOPER: "Trooper", ADMIN: "Admin" }[formData.role]}
                 </div>
               ) : (
                 <Select
@@ -204,7 +204,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
                   onValueChange={(v) =>
                     setFormData((prev) => ({
                       ...prev,
-                      role: v as "ADMIN" | "VET" | "OFFICER" | "TROOPER",
+                      role: v as "ADMIN" | "VET" | "FARRIER" | "OFFICER" | "TROOPER",
                     }))
                   }
                 >
@@ -215,6 +215,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
                     <SelectItem value="TROOPER">Trooper</SelectItem>
                     <SelectItem value="OFFICER">Officer</SelectItem>
                     <SelectItem value="VET">Veterinary</SelectItem>
+                    <SelectItem value="FARRIER">Farrier</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>
