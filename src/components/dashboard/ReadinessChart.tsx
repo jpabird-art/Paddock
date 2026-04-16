@@ -19,11 +19,14 @@ export function ReadinessChart({
 }: {
   counts: { taskReadiness: string; _count: number }[];
 }) {
-  const data: ReadinessData[] = counts.map((c) => ({
-    name: READINESS_CONFIG[c.taskReadiness]?.label ?? c.taskReadiness,
-    value: c._count,
-    color: READINESS_CONFIG[c.taskReadiness]?.color ?? "#9ca3af",
-  }));
+  const ORDER = ["FULL_EXERCISE", "LIMITED_ROLE", "NON_TASKWORTHY"];
+  const data: ReadinessData[] = [...counts]
+    .sort((a, b) => ORDER.indexOf(a.taskReadiness) - ORDER.indexOf(b.taskReadiness))
+    .map((c) => ({
+      name: READINESS_CONFIG[c.taskReadiness]?.label ?? c.taskReadiness,
+      value: c._count,
+      color: READINESS_CONFIG[c.taskReadiness]?.color ?? "#9ca3af",
+    }));
 
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
