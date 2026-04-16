@@ -7,178 +7,175 @@ interface LocationData {
   count: number;
 }
 
-// Approximate UK map coordinates (SVG viewBox 0 0 400 600)
-// Mapped from real lat/lng to SVG x,y positions on a simplified UK outline
-const LOCATION_COORDS: Record<string, { x: number; y: number }> = {
-  HPB: { x: 235, y: 420 },           // Hyde Park Barracks, London
-  HCTW: { x: 215, y: 405 },          // Combermere Barracks, Windsor
-  DATR: { x: 210, y: 330 },          // Melton Mowbray
-  DATR_BEC: { x: 210, y: 330 },      // Melton Mowbray
-  DATR_VTS: { x: 210, y: 330 },      // Melton Mowbray
-  LAKESIDE_GRASS: { x: 205, y: 410 },// Near Windsor
-  LAKESIDE_WORKING: { x: 205, y: 410 },
-  LILLY_MILL: { x: 220, y: 340 },    // Leicestershire area
-  RMAS: { x: 220, y: 415 },          // Sandhurst
-  BELL_EQUINE: { x: 255, y: 425 },   // Maidstone, Kent
-  WTT: { x: 265, y: 360 },           // Norfolk area
-  GRASS: { x: 205, y: 410 },
-  WORKING_LIVERY: { x: 210, y: 400 },
-  OTHER: { x: 195, y: 385 },
+// Real lat/lng for each location
+const LOCATION_GEO: Record<string, { lat: number; lng: number }> = {
+  HPB: { lat: 51.502, lng: -0.163 },
+  HCTW: { lat: 51.43, lng: -0.61 },
+  DATR: { lat: 52.765, lng: -0.885 },
+  DATR_BEC: { lat: 52.765, lng: -0.885 },
+  DATR_VTS: { lat: 52.765, lng: -0.885 },
+  LAKESIDE_GRASS: { lat: 51.44, lng: -0.58 },
+  LAKESIDE_WORKING: { lat: 51.44, lng: -0.58 },
+  LILLY_MILL: { lat: 52.6, lng: -0.8 },
+  RMAS: { lat: 51.348, lng: -0.769 },
+  BELL_EQUINE: { lat: 51.27, lng: 0.52 },
+  WTT: { lat: 52.95, lng: 1.1 },
+  GRASS: { lat: 51.44, lng: -0.58 },
+  WORKING_LIVERY: { lat: 51.40, lng: -0.55 },
+  OTHER: { lat: 51.5, lng: -0.4 },
 };
 
-// Group locations that share coordinates
+// Projection: scale & translate real coords into SVG space
+// Designed so southern England fills a readable portion of the view
+const SCALE = 38;
+const OX = 8; // longitude offset (shift right)
+const OY = 60; // latitude offset (shift down from top)
+
+function geoToSvg(lat: number, lng: number): { x: number; y: number } {
+  return { x: (lng + OX) * SCALE, y: (OY - lat) * SCALE };
+}
+
 function groupLocations(locations: LocationData[]) {
   const groups = new Map<string, { x: number; y: number; locations: LocationData[]; total: number }>();
-
   for (const loc of locations) {
-    const coords = LOCATION_COORDS[loc.code];
-    if (!coords) continue;
-    const key = `${coords.x},${coords.y}`;
+    const geo = LOCATION_GEO[loc.code];
+    if (!geo) continue;
+    const { x, y } = geoToSvg(geo.lat, geo.lng);
+    const key = `${Math.round(x)},${Math.round(y)}`;
     const existing = groups.get(key);
     if (existing) {
       existing.locations.push(loc);
       existing.total += loc.count;
     } else {
-      groups.set(key, { ...coords, locations: [loc], total: loc.count });
+      groups.set(key, { x, y, locations: [loc], total: loc.count });
     }
   }
-
-  return [...groups.values()];
+  return [...groups.values()].sort((a, b) => a.y - b.y);
 }
 
-// Simplified UK outline as SVG path
-const UK_PATH = `
-M 180 100 L 195 95 L 210 100 L 215 110 L 225 105 L 235 115
-L 230 130 L 240 140 L 235 155 L 220 160 L 215 150 L 200 155
-L 190 150 L 185 140 L 175 135 L 180 120 L 175 110 Z
+// ── Great Britain coastline ─────────────────────────────────────────
+// ~100 real lat/lng waypoints traced clockwise from NW Scotland,
+// projected with the same geoToSvg function.
+// Scotland
+const scotCoords: [number, number][] = [
+  [-5.6,58.6],[-5.0,58.4],[-5.2,57.9],[-5.5,57.6],[-5.8,57.8],[-6.1,57.6],
+  [-5.7,57.4],[-5.4,57.0],[-5.9,56.8],[-5.5,56.5],[-5.8,56.2],[-5.3,56.1],
+  [-5.6,55.9],[-5.1,55.8],[-4.8,55.9],[-4.6,55.7],[-4.9,55.5],[-5.1,55.3],
+  [-4.8,55.1],[-4.5,55.3],[-4.2,55.0],[-3.8,55.0],[-3.4,54.9],[-3.0,55.0],
+  [-2.6,55.1],[-2.1,55.7],[-1.8,55.6],[-1.6,55.3],[-1.8,55.0],[-2.0,55.8],
+  [-2.5,56.1],[-2.8,56.3],[-2.5,56.7],[-2.0,56.5],[-1.8,56.9],[-2.2,57.1],
+  [-2.0,57.5],[-1.8,57.7],[-2.5,57.7],[-3.0,57.9],[-3.4,58.0],[-3.2,58.4],
+  [-3.5,58.6],[-4.0,58.6],[-4.3,58.5],[-4.8,58.7],[-5.2,58.6],[-5.6,58.6],
+];
 
-M 155 170 L 165 160 L 180 165 L 195 160 L 210 165 L 220 170
-L 230 165 L 240 175 L 250 170 L 260 180 L 265 195 L 275 200
-L 280 215 L 270 230 L 275 245 L 285 255 L 280 270 L 270 275
-L 265 285 L 275 295 L 280 310 L 275 325 L 265 330 L 270 345
-L 280 355 L 275 365 L 265 370 L 270 385 L 260 395 L 265 410
-L 255 420 L 260 435 L 250 445 L 240 440 L 230 445 L 220 440
-L 210 445 L 200 435 L 195 420 L 185 415 L 180 400 L 170 395
-L 165 380 L 155 370 L 150 355 L 145 340 L 140 325 L 135 310
-L 130 295 L 135 280 L 130 265 L 140 250 L 135 235 L 145 220
-L 140 205 L 150 190 L 145 175 Z
+// England & Wales (from Scottish border clockwise)
+const ewCoords: [number, number][] = [
+  [-3.0,55.0],[-2.6,55.1],[-2.1,55.7],[-1.8,55.6],[-1.6,55.3],[-1.8,55.0],
+  [-1.6,54.6],[-1.2,54.5],[-1.0,54.3],[-1.2,53.9],[-0.8,53.7],[-0.3,53.7],
+  [0.0,53.5],[0.3,53.3],[0.4,52.9],[1.0,52.9],[1.7,52.8],[1.8,52.5],
+  [1.6,52.1],[1.3,51.8],[1.1,51.8],[0.9,51.5],[0.7,51.4],[1.4,51.2],
+  [1.2,51.0],[0.8,51.1],[0.3,51.2],[0.1,51.0],[-0.8,50.7],[-1.2,50.8],
+  [-1.6,50.7],[-2.0,50.6],[-2.5,50.6],[-3.0,50.5],[-3.4,50.4],[-3.6,50.3],
+  [-4.2,50.4],[-4.5,50.5],[-5.0,50.1],[-5.7,50.1],[-5.5,50.4],[-5.0,50.5],
+  [-4.8,50.8],[-4.5,50.9],[-4.2,51.2],[-3.8,51.2],[-3.4,51.2],[-3.1,51.3],
+  [-3.0,51.5],[-2.9,51.6],[-3.2,51.7],[-3.6,51.6],[-4.1,51.7],[-4.3,51.6],
+  [-4.7,51.7],[-5.1,51.7],[-5.3,51.9],[-5.0,52.1],[-4.6,52.1],[-4.1,52.3],
+  [-4.1,52.5],[-4.3,52.7],[-4.0,52.9],[-3.8,53.0],[-3.1,53.1],[-3.0,53.3],
+  [-3.1,53.4],[-3.5,53.4],[-3.8,53.3],[-4.1,53.3],[-4.4,53.2],[-4.3,53.4],
+  [-3.9,53.5],[-3.4,53.7],[-3.1,53.7],[-3.0,54.0],[-3.2,54.1],[-3.4,54.3],
+  [-3.3,54.5],[-3.5,54.7],[-3.2,54.8],[-3.0,55.0],
+];
 
-M 100 280 L 110 270 L 120 275 L 130 270 L 125 285 L 130 300
-L 120 310 L 110 305 L 100 310 L 95 300 L 100 290 Z
-`;
+function coordsToPath(coords: [number, number][]): string {
+  return coords
+    .map(([lng, lat], i) => {
+      const { x, y } = geoToSvg(lat, lng);
+      return `${i === 0 ? "M" : "L"} ${x.toFixed(1)} ${y.toFixed(1)}`;
+    })
+    .join(" ") + " Z";
+}
 
 export function LocationMap({ locations }: { locations: LocationData[] }) {
   const activeLocations = locations.filter((l) => l.count > 0);
   const groups = groupLocations(activeLocations);
   const totalHorses = activeLocations.reduce((sum, l) => sum + l.count, 0);
 
-  // Label positioning: alternate sides to avoid overlap
-  const labelPositions = groups.map((g, i) => {
-    const isRight = g.x > 220;
-    const labelX = isRight ? 320 : 60;
-    const labelY = 80 + i * 48;
-    return { ...g, labelX, labelY, isRight };
-  });
+  const scotPath = coordsToPath(scotCoords);
+  const ewPath = coordsToPath(ewCoords);
+
+  // Sort groups by Y so labels stack top-to-bottom matching map position
+  const sorted = [...groups].sort((a, b) => a.y - b.y);
+
+  // Labels on the right, vertically spaced to fit the view
+  const labelX = 380;
+  const labelStartY = 270;
+  const labelSpacing = sorted.length > 5 ? 20 : 26;
+
+  const positioned = sorted.map((g, i) => ({
+    ...g,
+    labelX,
+    labelY: labelStartY + i * labelSpacing,
+  }));
+
+  const lastLabelY = labelStartY + (sorted.length - 1) * labelSpacing;
+  const viewHeight = Math.max(140, lastLabelY - 250 + 30);
 
   return (
-    <div className="w-full">
-      <svg viewBox="30 60 360 420" className="w-full h-auto max-h-[500px]">
-        {/* UK outline */}
-        <path
-          d={UK_PATH}
-          fill="#f1f5f9"
-          stroke="#cbd5e1"
-          strokeWidth="1.5"
-        />
+    <div className="w-full max-w-2xl mx-auto">
+      <svg viewBox={`60 250 400 ${viewHeight}`} className="w-full h-auto">
+        {/* Scotland — faded for context */}
+        <path d={scotPath} fill="#e8ecf0" stroke="#b0bac6" strokeWidth="0.5" strokeLinejoin="round" opacity="0.5" />
 
-        {/* Connection lines and labels */}
-        {labelPositions.map((g, i) => {
-          const labelNames = g.locations.length === 1
-            ? g.locations[0].name
-            : g.locations.map((l) => l.name).join(", ");
+        {/* England & Wales */}
+        <path d={ewPath} fill="#e2e8f0" stroke="#94a3b8" strokeWidth="0.8" strokeLinejoin="round" />
+
+        {/* Pins, connectors, labels */}
+        {positioned.map((g, i) => {
+          const displayName =
+            g.locations.length === 1
+              ? g.locations[0].name
+              : g.locations.map((l) => l.name).join(" / ");
+          const shortName =
+            displayName.length > 32
+              ? g.locations[0].name + ` +${g.locations.length - 1}`
+              : displayName;
 
           return (
             <g key={i}>
-              {/* Connector line */}
+              {/* Dashed connector */}
               <line
                 x1={g.x}
                 y1={g.y}
-                x2={g.labelX + (g.isRight ? -5 : 5)}
-                y2={g.labelY}
+                x2={g.labelX - 2}
+                y2={g.labelY - 3}
                 stroke="#94a3b8"
-                strokeWidth="0.75"
-                strokeDasharray="3,2"
+                strokeWidth="0.35"
+                strokeDasharray="2,1.5"
               />
-
-              {/* Map pin dot */}
-              <circle
-                cx={g.x}
-                cy={g.y}
-                r="4"
-                fill="#1a2744"
-                stroke="white"
-                strokeWidth="1.5"
-              />
-
-              {/* Count bubble at pin */}
-              <circle
-                cx={g.x}
-                cy={g.y - 10}
-                r="8"
-                fill="#1a2744"
-              />
-              <text
-                x={g.x}
-                y={g.y - 7}
-                textAnchor="middle"
-                fontSize="8"
-                fontWeight="bold"
-                fill="white"
-              >
+              {/* Pin dot */}
+              <circle cx={g.x} cy={g.y} r="2.8" fill="#1a2744" stroke="white" strokeWidth="0.7" />
+              {/* Count badge */}
+              <rect x={g.x - 7} y={g.y - 11} width="14" height="8" rx="4" fill="#1a2744" />
+              <text x={g.x} y={g.y - 5.2} textAnchor="middle" fontSize="5" fontWeight="bold" fill="white">
                 {g.total}
               </text>
-
-              {/* Label */}
-              <text
-                x={g.labelX}
-                y={g.labelY - 4}
-                textAnchor={g.isRight ? "start" : "end"}
-                fontSize="9"
-                fontWeight="600"
-                fill="#1e293b"
-              >
-                {g.locations.length === 1 ? g.locations[0].name : `${g.locations[0].name} area`}
+              {/* Label name */}
+              <text x={g.labelX} y={g.labelY - 2} textAnchor="start" fontSize="6" fontWeight="600" fill="#1e293b">
+                {shortName}
               </text>
-              {g.locations.length > 1 ? (
-                <>
-                  <text
-                    x={g.labelX}
-                    y={g.labelY + 8}
-                    textAnchor={g.isRight ? "start" : "end"}
-                    fontSize="7.5"
-                    fill="#64748b"
-                  >
-                    {g.locations.map((l) => `${l.name}: ${l.count}`).join(" · ")}
-                  </text>
-                </>
-              ) : (
-                <text
-                  x={g.labelX}
-                  y={g.labelY + 8}
-                  textAnchor={g.isRight ? "start" : "end"}
-                  fontSize="7.5"
-                  fill="#64748b"
-                >
-                  {g.total} {g.total === 1 ? "horse" : "horses"}
-                </text>
-              )}
+              {/* Label detail */}
+              <text x={g.labelX} y={g.labelY + 5.5} textAnchor="start" fontSize="5" fill="#64748b">
+                {g.locations.length > 1
+                  ? g.locations.map((l) => `${l.name}: ${l.count}`).join(" · ")
+                  : `${g.total} ${g.total === 1 ? "horse" : "horses"}`}
+              </text>
             </g>
           );
         })}
 
-        {/* Total badge */}
-        <rect x="145" y="465" width="110" height="24" rx="12" fill="#1a2744" />
-        <text x="200" y="481" textAnchor="middle" fontSize="10" fontWeight="bold" fill="white">
+        {/* Total */}
+        <rect x="145" y={250 + viewHeight - 18} width="70" height="12" rx="6" fill="#1a2744" />
+        <text x="180" y={250 + viewHeight - 9.5} textAnchor="middle" fontSize="6" fontWeight="bold" fill="white">
           {totalHorses} horses total
         </text>
       </svg>
