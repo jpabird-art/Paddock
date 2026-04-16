@@ -7,12 +7,13 @@ import Link from "next/link";
 import { format } from "date-fns";
 import { Shield, AlertTriangle, Calendar, Activity, Pill, MapPin } from "lucide-react";
 import { ReadinessChart } from "@/components/dashboard/ReadinessChart";
+import { ParadeReadiness } from "@/components/dashboard/ParadeReadiness";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
 
-  const [totalHorses, locationCounts, readinessCounts, overdueEvents, openInjuries, activeWithdrawals] =
+  const [totalHorses, locationCounts, readinessCounts, fitHorses, fitBySquadron, overdueEvents, openInjuries, activeWithdrawals] =
     await Promise.all([
       prisma.horse.count({ where: { isActive: true } }),
       prisma.location.findMany({
@@ -33,6 +34,14 @@ export default async function DashboardPage() {
       prisma.horse.groupBy({
         by: ["taskReadiness"],
         where: { isActive: true },
+        _count: true,
+      }),
+      prisma.horse.count({
+        where: { isActive: true, taskReadiness: "FULL_EXERCISE" },
+      }),
+      prisma.horse.groupBy({
+        by: ["squadron"],
+        where: { isActive: true, taskReadiness: "FULL_EXERCISE", squadron: { not: null } },
         _count: true,
       }),
       prisma.healthEvent.findMany({
@@ -138,6 +147,25 @@ export default async function DashboardPage() {
             counts={readinessCounts.map((r) => ({
               taskReadiness: r.taskReadiness,
               _count: r._count,
+            }))}
+          />
+        </CardContent>
+      </Card>
+
+      {/* Parade Readiness */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-semibold flex items-center gap-2">
+            <Shield className="h-4 w-4 text-[#1a2744]" />
+            Parade Readiness
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ParadeReadiness
+            fitHorses={fitHorses}
+            fitBySquadron={fitBySquadron.map((s) => ({
+              squadron: s.squadron!,
+              count: s._count,
             }))}
           />
         </CardContent>
