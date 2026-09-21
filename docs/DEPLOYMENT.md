@@ -16,10 +16,9 @@ customer.
 
 ## 1. The marketing service
 
-Create a Railway service from this repository. It needs no database of its own,
-but `DATABASE_URL` is still validated at boot, so point it at any reachable
-PostgreSQL instance (a small shared one is fine) or a throwaway Railway
-Postgres.
+Create a Railway service from this repository. It needs no database: the
+marketing pages read nothing, and the container skips migrations when
+`PADDOCK_SITE_MODE=marketing`, so leave `DATABASE_URL` unset.
 
 ```
 PADDOCK_SITE_MODE=marketing
@@ -29,8 +28,11 @@ PADDOCK_CONTACT_PHONE=+44 20 7946 0000
 PADDOCK_CONTACT_ADDRESS=London, United Kingdom
 NEXTAUTH_SECRET=<openssl rand -base64 32>
 NEXTAUTH_URL=https://paddock.app
-DATABASE_URL=<postgres connection string>
 ```
+
+Set `PADDOCK_SITE_MODE` before the first deploy. Without it the service boots
+in tenant mode, tries `prisma migrate deploy`, and crash-loops on a missing
+`DATABASE_URL`.
 
 To send contact enquiries by email rather than returning a "please email us"
 message, also set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` and
