@@ -53,7 +53,8 @@ no default credentials: the bootstrap account is the only way in, and its
 password is the one you set.
 
 To work on the public site instead, set `PADDOCK_SITE_MODE=marketing` in `.env`
-and reload.
+and reload. Marketing mode needs no database: it reads nothing, and the start
+command skips migrations.
 
 ---
 
@@ -61,7 +62,7 @@ and reload.
 
 | Variable | Description | Required |
 |---|---|---|
-| `DATABASE_URL` | PostgreSQL connection string | Yes |
+| `DATABASE_URL` | PostgreSQL connection string | Tenant mode only |
 | `NEXTAUTH_SECRET` | Auth signing secret, minimum 32 characters | Yes |
 | `NEXTAUTH_URL` | Full URL this deployment is served from | No |
 | `PADDOCK_SITE_MODE` | `tenant` (default) or `marketing` | No |
