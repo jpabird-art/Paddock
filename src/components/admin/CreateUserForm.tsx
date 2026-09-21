@@ -178,7 +178,7 @@ export function CreateUserForm() {
               type="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="e.g. j.smith@hcmr.mod.uk"
+              placeholder="e.g. j.smith@example.org"
             />
             {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
           </div>

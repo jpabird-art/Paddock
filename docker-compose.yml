@@ -31,7 +31,9 @@ services:
       - SMTP_PORT=${SMTP_PORT:-587}
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
-      - SMTP_FROM=${SMTP_FROM:-paddock@hcmr.local}
+      - SMTP_FROM=${SMTP_FROM:-paddock@localhost}
+      - PADDOCK_SITE_MODE=${PADDOCK_SITE_MODE:-tenant}
+      - PADDOCK_ORG_NAME=${PADDOCK_ORG_NAME:-}
     volumes:
       - uploads:/app/uploads
     depends_on:

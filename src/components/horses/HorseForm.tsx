@@ -169,7 +169,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
             name="regimentalNumber"
             value={formData.regimentalNumber}
             onChange={handleChange}
-            placeholder="e.g. HCMR-013"
+            placeholder="e.g. PAD-013"
             className="font-mono"
           />
           {errors.regimentalNumber && (
