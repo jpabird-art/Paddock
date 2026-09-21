@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { MobileNav } from "@/components/layout/MobileNav";
+import { getSiteConfig } from "@/lib/site-config";
 
 export default async function AppLayout({
   children,
@@ -10,6 +11,7 @@ export default async function AppLayout({
   children: React.ReactNode;
 }) {
   const session = await getServerSession(authOptions);
+  const { orgName } = getSiteConfig();
 
   if (!session?.user) {
     redirect("/login");
@@ -17,8 +19,8 @@ export default async function AppLayout({
 
   return (
     <div className="flex flex-col lg:flex-row h-screen bg-gray-50 overflow-hidden">
-      <MobileNav user={session.user} />
-      <Sidebar user={session.user} />
+      <MobileNav user={session.user} orgName={orgName} />
+      <Sidebar user={session.user} orgName={orgName} />
       <main className="flex-1 overflow-y-auto">
         <div className="p-4 lg:p-6 max-w-screen-xl mx-auto">
           {children}

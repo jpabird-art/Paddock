@@ -8,10 +8,12 @@ import { format } from "date-fns";
 import { Shield, AlertTriangle, Calendar, Activity, Pill, MapPin } from "lucide-react";
 import { ReadinessChart } from "@/components/dashboard/ReadinessChart";
 import { ParadeReadiness } from "@/components/dashboard/ParadeReadiness";
+import { getSiteConfig } from "@/lib/site-config";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
   const role = session?.user?.role ?? "TROOPER";
+  const { orgName } = getSiteConfig();
 
   const [totalHorses, locationCounts, readinessCounts, fitHorses, fitBySquadron, overdueEvents, openInjuries, activeWithdrawals] =
     await Promise.all([
@@ -97,7 +99,7 @@ export default async function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          Household Cavalry Mounted Regiment — Fleet Overview
+          {orgName ? `${orgName} — fleet overview` : "Fleet overview"}
         </p>
       </div>
 

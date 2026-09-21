@@ -1,74 +1,90 @@
-# HCMR Fleet Management System
+# Paddock
 
-Horse management system for the Household Cavalry Mounted Regiment. Tracks health schedules, injuries, movements, duty assignments, rider assignments, tack, inspections, feeding plans, and medications across the regiment's horse fleet.
+Equine operations software. Paddock holds the health, injuries, movements,
+exercise, farriery, feed, medication, tack and inspections of every horse in an
+organisation's care on a single auditable record.
+
+The repository serves two roles from one codebase:
+
+- **Marketing site** — the public product site at `paddock.app`: home,
+  capabilities, contact and a portal that sends each customer to their own
+  instance.
+- **Tenant application** — a single customer's paddock, behind sign-in, at
+  their own subdomain and on their own database.
+
+`PADDOCK_SITE_MODE` decides which. See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+for the Railway setup.
 
 ---
 
-## Demo Credentials
-
-| Role    | Service Number | Password      |
-|---------|---------------|---------------|
-| Admin   | `ADMIN001`    | `password123` |
-| Vet     | `VET001`      | `password123` |
-| Officer | `OFF001`      | `password123` |
-| Trooper | `TRP001`      | `password123` |
-| Trooper | `TRP002`      | `password123` |
-
----
-
-## Quick Start (Local Development)
+## Quick start
 
 ### Prerequisites
+
 - Node.js 20+
 - npm
-- PostgreSQL database (local or hosted, e.g. [Neon](https://neon.tech))
+- PostgreSQL (local, or hosted on Railway or Neon)
 
 ### Setup
 
 ```bash
-# 1. Clone the repo
 git clone <repo-url>
-cd hcmr-fleet
+cd Paddock
 
-# 2. Install dependencies
 npm install
 
-# 3. Configure environment
 cp .env.example .env
-# Edit .env with your PostgreSQL connection string and secrets
+# Fill in DATABASE_URL and NEXTAUTH_SECRET
 
-# 4. Set up database and seed demo data
 npx prisma migrate dev
-npm run prisma:seed
 
-# 5. Start the dev server
+# Create the first administrator
+BOOTSTRAP_ADMIN_NAME="Jane Smith" \
+BOOTSTRAP_ADMIN_SERVICE_NUMBER=ADMIN001 \
+BOOTSTRAP_ADMIN_EMAIL=jane@example.org \
+BOOTSTRAP_ADMIN_PASSWORD='<a long random password>' \
+npm run bootstrap
+
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and log in with any demo credential above.
+Open <http://localhost:3000> and sign in. There is no demo data and there are
+no default credentials: the bootstrap account is the only way in, and its
+password is the one you set.
+
+To work on the public site instead, set `PADDOCK_SITE_MODE=marketing` in `.env`
+and reload.
 
 ---
 
-## Environment Variables
+## Environment variables
 
 | Variable | Description | Required |
 |---|---|---|
 | `DATABASE_URL` | PostgreSQL connection string | Yes |
-| `NEXTAUTH_SECRET` | Auth signing secret (min 32 chars). Generate with `openssl rand -base64 32` | Yes |
-| `NEXTAUTH_URL` | Full URL where the app is running | No (defaults to `http://localhost:3000`) |
-| `NODE_ENV` | `development`, `production`, or `test` | No |
+| `NEXTAUTH_SECRET` | Auth signing secret, minimum 32 characters | Yes |
+| `NEXTAUTH_URL` | Full URL this deployment is served from | No |
+| `PADDOCK_SITE_MODE` | `tenant` (default) or `marketing` | No |
+| `PADDOCK_ORG_NAME` | Customer name shown in the app and as MFA issuer | No |
+| `PADDOCK_PORTAL_DOMAIN` | Domain tenant instances sit under | No |
+| `PADDOCK_TENANT_DIRECTORY` | Published tenant list for the portal | No |
+| `PADDOCK_CONTACT_EMAIL` | Where contact enquiries are sent | No |
+| `PADDOCK_CONTACT_PHONE` | Shown on the contact page when set | No |
+| `PADDOCK_CONTACT_ADDRESS` | Shown on the contact page | No |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` / `SMTP_FROM` | Email delivery; notifications and the contact form are disabled without them | No |
+
+Bootstrap-only variables are listed in `.env.example`.
 
 ---
 
-## Tech Stack
+## Tech stack
 
-- **Next.js 16** with App Router, Turbopack, React Server Components
-- **PostgreSQL** via **Prisma 5** ORM (15 enums, 17 models)
-- **NextAuth.js v4** with JWT strategy and credentials provider
-- **RBAC** — 4 roles (Admin, Vet, Officer, Trooper) x 16 resources x 4 actions
+- **Next.js 16** — App Router, React Server Components, standalone output
+- **PostgreSQL** via **Prisma 5**
+- **NextAuth.js v4** — JWT sessions, credentials provider, TOTP second factor
+- **RBAC** — five roles across sixteen resources and four actions
 - **Tailwind CSS** with Radix UI primitives
-- **Vitest** for unit testing
-- **Zod** for runtime validation with Prisma enum alignment
+- **Vitest** for unit tests, **Zod** for runtime validation
 
 ---
 
@@ -77,106 +93,87 @@ Open [http://localhost:3000](http://localhost:3000) and log in with any demo cre
 ```
 src/
   app/
-    (app)/          # Authenticated app pages (dashboard, horses, injuries, moves, etc.)
-    api/            # REST API routes (Next.js Route Handlers)
-      admin/        # User management, audit logs
-      attachments/  # File upload/download
-      horses/       # Horse CRUD
-      health-events/# Health scheduling
-      injuries/     # Injury reporting
-      horse-moves/  # Movement tracking
-      ...
-  components/       # React components (layout, horses, injuries, moves, etc.)
-  lib/              # Shared utilities (auth, permissions, audit, prisma)
+    (marketing)/    # Public site: home, capabilities, contact, portal
+    (auth)/         # Sign-in
+    (app)/          # The application, behind auth
+    api/            # Route handlers
+  components/
+    marketing/      # Public-site components and capability copy
+    layout/         # Sidebar, mobile navigation
+    ...             # Feature components
+  lib/
+    site-config.ts  # Site mode, branding, tenancy
+    permissions.ts  # RBAC
+    ...
 prisma/
-  schema.prisma     # Database schema (17 models, 15 enums)
-  seed.ts           # Demo data seeder
-  migrations/       # Prisma migration history
-uploads/            # Uploaded attachment files (gitignored)
+  schema.prisma          # 18 models
+  migrations/            # Migration history
+  bootstrap.ts           # First administrator for a new instance
+  purge-horse-data.ts    # Irreversible deletion of all horse data
+docs/
+  DEPLOYMENT.md          # Railway, per-tenant
 ```
 
-### Key Models
+### Roles
 
-- **Horse** — regimental number, squadron, duty station, health tracking
-- **User** — role-based (Admin/Vet/Officer/Trooper), squadron assignment
-- **InjuryReport** — severity levels, status workflow, resolution tracking
-- **HorseMove** — location-to-location movement with driver/vehicle details
-- **HealthEvent** — scheduled veterinary events (dental, farrier, vaccination, etc.)
-- **DutyAssignment** — historical duty station tracking with transactional integrity
-- **AuditLog** — before/after snapshots for critical operations
-
-### Squadrons
-
-Two squadrons: **The Life Guards** and **The Blues and Royals**. All users (except Vets) and all horses are assigned to a squadron.
-
-### RBAC Summary
-
-| Role | Key Capabilities |
-|------|-----------------|
-| Admin | Full access to all resources including user management |
-| Officer | Create horses, manage duties/riders/moves/tack/inspections |
-| Vet | Manage health events, medications, feeding plans, resolve injuries |
-| Trooper | View most records, create injury reports and attachments |
+| Role | Key capabilities |
+|---|---|
+| Admin | Everything, including user management and the audit log |
+| Officer | Create horses, manage duties, exercise, moves, tack, inspections |
+| Vet | Health events, medications, feeding plans, injury resolution |
+| Farrier | Farrier records and the horses they cover |
+| Trooper | View most records, raise injury reports, add attachments |
 
 ---
 
-## Available Scripts
+## Scripts
 
 ```bash
-npm run dev           # Start development server (Turbopack)
-npm run build         # Build for production
-npm run start         # Start production server
-npm run test          # Run unit tests (Vitest)
-npm run test:watch    # Run tests in watch mode
-npm run check         # Build + test (quality gate)
-npm run prisma:seed   # Seed demo data
-npm run prisma:studio # Open Prisma Studio (DB browser)
+npm run dev           # Development server
+npm run build         # Production build
+npm run start         # Migrate, then serve
+npm run typecheck     # tsc --noEmit
+npm run test          # Vitest
+npm run check         # Typecheck and tests
+npm run bootstrap     # Create the first administrator (env-driven)
+npm run purge         # Delete all horse data (guarded, irreversible)
+npm run prisma:studio # Database browser
 ```
 
 ---
 
-## API Endpoints
+## API
 
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| GET | `/api/health` | None | Healthcheck (DB connectivity + latency) |
-| GET/POST | `/api/horses` | Auth | List/create horses |
-| GET/PATCH/DELETE | `/api/horses/[id]` | Auth | Horse CRUD |
-| GET/POST | `/api/injuries` | Auth | List/create injury reports |
-| PATCH | `/api/injuries/[id]` | Auth | Update injury status |
-| GET/POST | `/api/horse-moves` | Auth | List/create moves |
-| GET | `/api/health-events` | Auth | List health events |
-| GET/POST | `/api/rider-assignments` | Auth | Rider-horse assignments |
-| GET/POST | `/api/feeding-plans` | Auth | Feeding plans |
-| GET/POST | `/api/medication-records` | Auth | Medication records |
-| GET/POST | `/api/attachments` | Auth | File upload (multipart) |
-| GET | `/api/attachments/[id]/download` | Auth | File download |
-| GET/POST | `/api/tack/items` | Auth | Tack inventory |
-| GET/POST | `/api/tack/allocations` | Auth | Tack allocations |
-| GET/POST | `/api/inspections` | Auth | Inspections |
-| GET/POST | `/api/inspections/schedules` | Auth | Inspection schedules |
-| GET/POST | `/api/admin/users` | Admin | User management |
-| PATCH | `/api/admin/users/[id]` | Admin | Update user |
-| GET | `/api/admin/audit-logs` | Admin | Audit log viewer |
-| GET | `/api/locations` | Auth | Location list |
+All endpoints sit behind authentication and the same permission checks as the
+interface, except `/api/health` (unauthenticated healthcheck) and
+`/api/contact` (marketing mode only, rate-limited).
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/health` | Database connectivity and latency |
+| POST | `/api/contact` | Marketing enquiries |
+| GET/POST | `/api/horses` | List and create horses |
+| GET/PATCH/DELETE | `/api/horses/[id]` | Horse record |
+| GET | `/api/horses/export` | Spreadsheet export |
+| GET/POST | `/api/injuries` | Injury reports |
+| GET/POST | `/api/health-events` | Health scheduling |
+| GET/POST | `/api/horse-moves` | Movements |
+| GET/POST | `/api/exercise-assignments` | Exercise board |
+| GET/POST | `/api/farrier-records` | Farriery |
+| GET/POST | `/api/feeding-plans` | Feeding plans |
+| GET/POST | `/api/medication-records` | Medication |
+| GET/POST | `/api/tack/items`, `/api/tack/allocations` | Tack |
+| GET/POST | `/api/inspections`, `/api/inspections/schedules` | Inspections |
+| GET/POST | `/api/attachments` | File upload and download |
+| GET/POST | `/api/admin/users` | User management |
+| GET | `/api/admin/audit-logs` | Audit log |
+| GET | `/api/locations` | Locations |
 
 ---
 
-## Backup & Restore
-
-The database is PostgreSQL hosted on Neon. To back up:
+## Backup and restore
 
 ```bash
-# Export full database
 pg_dump "$DATABASE_URL" > backup_$(date +%Y%m%d).sql
-
-# Restore from backup
-psql "$DATABASE_URL" < backup_20260321.sql
-```
-
-For a fresh start with demo data:
-
-```bash
-npx prisma migrate reset    # WARNING: drops all data
-npm run prisma:seed
+psql "$DATABASE_URL" < backup_20260921.sql
 ```

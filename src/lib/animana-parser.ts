@@ -2,7 +2,7 @@
  * Parses Animana "Patient Information" / vet consult PDFs into structured records.
  *
  * Animana consult format:
- *   Header: "A3 HCMR" | "Horse [Name] Rmt XXXX, [breed], [sex]"
+ *   Header: practice/clinic line | "Horse [Name] Rmt XXXX, [breed], [sex]"
  *   Date blocks: "DD-MM-YYYY" followed by entry lines
  *   Entry types: "general - history :", "findings :", "diagnosis :", "plan / therapy :"
  *   Medications: "X.X [unit] [medication name] :"
@@ -12,6 +12,13 @@
  *   Weight: "weight - X.X kg"
  *   Signature block at end
  */
+
+/**
+ * Animana prints the practice's own account line above the patient block
+ * (an account code followed by the practice name, e.g. "A3 Oakfield Equine").
+ * It carries no clinical content, so it is skipped.
+ */
+const CLINIC_HEADER_PATTERN = /^A\d+\s+\S/;
 
 export interface AnimanaConsultEntry {
   date: string; // ISO date
@@ -179,7 +186,7 @@ export function parseAnimanaConsult(text: string): AnimanaConsultData {
     // Skip empty lines and header content
     if (!line) continue;
     if (line === "PATIENT INFORMATION") continue;
-    if (line.startsWith("A3 HCMR")) continue;
+    if (CLINIC_HEADER_PATTERN.test(line)) continue;
     if (line.startsWith("Horse ")) continue;
     if (line.startsWith("Born on")) continue;
     if (line.startsWith("Life number")) continue;

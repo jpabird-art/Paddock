@@ -1,7 +1,9 @@
 import * as OTPAuth from "otpauth";
 import crypto from "crypto";
 
-const ISSUER = "Paddock HCMR";
+const ISSUER = process.env.PADDOCK_ORG_NAME?.trim()
+  ? `Paddock (${process.env.PADDOCK_ORG_NAME.trim()})`
+  : "Paddock";
 
 /**
  * Generate a new TOTP secret for a user.

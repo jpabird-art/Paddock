@@ -8,6 +8,7 @@ import { LogOut, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { navItems, ROLE_LABELS, ROLE_BADGE_COLOURS } from "@/lib/nav-config";
+import { PaddockLogo } from "@/components/marketing/PaddockLogo";
 
 interface MobileNavProps {
   user: {
@@ -15,9 +16,11 @@ interface MobileNavProps {
     role?: string | null;
     serviceNumber?: string | null;
   };
+  /** Name of the organisation this deployment belongs to. */
+  orgName?: string | null;
 }
 
-export function MobileNav({ user }: MobileNavProps) {
+export function MobileNav({ user, orgName }: MobileNavProps) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const role = user.role ?? "TROOPER";
@@ -35,10 +38,10 @@ export function MobileNav({ user }: MobileNavProps) {
           {/* Logo */}
           <div className="px-6 py-5 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <img src="/hcmr-logo.webp" alt="HCMR" className="h-9 w-auto shrink-0" />
+              <PaddockLogo className="h-9 w-9 shrink-0 text-white" />
               <div>
                 <div className="text-white font-bold text-sm tracking-wide">Paddock</div>
-                <div className="text-blue-300 text-xs">HCMR&apos;s Paddock</div>
+                <div className="text-blue-300 text-xs">{orgName ?? "Equine operations"}</div>
               </div>
             </div>
           </div>
@@ -109,7 +112,7 @@ export function MobileNav({ user }: MobileNavProps) {
 
       {/* Centre title */}
       <div className="flex items-center gap-2">
-        <img src="/hcmr-logo.webp" alt="HCMR" className="h-7 w-auto shrink-0" />
+        <PaddockLogo className="h-7 w-7 shrink-0 text-white" />
         <span className="text-white font-bold text-sm tracking-wide">Paddock</span>
       </div>
 

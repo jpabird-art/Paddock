@@ -13,8 +13,9 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Paddock — HCMR",
-  description: "HCMR's Paddock — Horse Management System",
+  title: "Paddock",
+  description: "Paddock — equine operations software. One record for every horse in your care.",
+  icons: { icon: "/paddock-mark.svg" },
 };
 
 export default function RootLayout({

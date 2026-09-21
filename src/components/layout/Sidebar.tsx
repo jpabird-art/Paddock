@@ -6,6 +6,7 @@ import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navItems, ROLE_LABELS, ROLE_BADGE_COLOURS } from "@/lib/nav-config";
+import { PaddockLogo } from "@/components/marketing/PaddockLogo";
 
 interface SidebarProps {
   user: {
@@ -13,9 +14,11 @@ interface SidebarProps {
     role?: string | null;
     serviceNumber?: string | null;
   };
+  /** Name of the organisation this deployment belongs to. */
+  orgName?: string | null;
 }
 
-export function Sidebar({ user }: SidebarProps) {
+export function Sidebar({ user, orgName }: SidebarProps) {
   const pathname = usePathname();
   const role = user.role ?? "TROOPER";
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
@@ -25,10 +28,10 @@ export function Sidebar({ user }: SidebarProps) {
       {/* Logo */}
       <div className="px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <img src="/hcmr-logo.webp" alt="HCMR" className="h-9 w-auto shrink-0" />
+          <PaddockLogo className="h-9 w-9 shrink-0 text-white" />
           <div>
             <div className="text-white font-bold text-sm tracking-wide">Paddock</div>
-            <div className="text-blue-300 text-xs">HCMR&apos;s Paddock</div>
+            <div className="text-blue-300 text-xs">{orgName ?? "Equine operations"}</div>
           </div>
         </div>
       </div>
