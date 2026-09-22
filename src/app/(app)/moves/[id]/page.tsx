@@ -68,7 +68,7 @@ export default async function MoveDetailPage({
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/moves" className="hover:text-[#1a2744] hover:underline">
+        <Link href="/moves" className="hover:text-[#0F3D2E] hover:underline">
           Horse Moves
         </Link>
         <span>/</span>
@@ -81,14 +81,14 @@ export default async function MoveDetailPage({
             {move.name ? (
               <>
                 {move.name} —{" "}
-                <Link href={`/horses/${move.horse.id}`} className="text-[#1a2744] hover:underline">
+                <Link href={`/horses/${move.horse.id}`} className="text-[#0F3D2E] hover:underline">
                   {move.horse.name}
                 </Link>
               </>
             ) : (
               <>
                 Move —{" "}
-                <Link href={`/horses/${move.horse.id}`} className="text-[#1a2744] hover:underline">
+                <Link href={`/horses/${move.horse.id}`} className="text-[#0F3D2E] hover:underline">
                   {move.horse.name}
                 </Link>
               </>
@@ -257,7 +257,7 @@ export default async function MoveDetailPage({
               <div key={s.id} className="flex items-center gap-3 py-2">
                 <Link
                   href={`/moves/${s.id}`}
-                  className="font-medium text-[#1a2744] hover:underline text-sm"
+                  className="font-medium text-[#0F3D2E] hover:underline text-sm"
                 >
                   {s.horse.name}
                 </Link>

@@ -112,7 +112,7 @@ export function LocationForm({ mode, location, onSuccess, trigger }: LocationFor
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         {trigger ?? (
-          <Button className="bg-[#1a2744] hover:bg-[#243560]">
+          <Button className="bg-[#0F3D2E] hover:bg-[#156046]">
             <MapPin className="h-4 w-4 mr-2" />
             Add Location
           </Button>
@@ -184,7 +184,7 @@ export function LocationForm({ mode, location, onSuccess, trigger }: LocationFor
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#1a2744] hover:bg-[#243560]"
+              className="bg-[#0F3D2E] hover:bg-[#156046]"
             >
               {loading ? "Saving..." : mode === "create" ? "Create Location" : "Save Changes"}
             </Button>

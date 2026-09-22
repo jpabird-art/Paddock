@@ -116,7 +116,7 @@ export function HorseHealthNotes({
             <Button
               type="submit"
               disabled={loading || !content.trim()}
-              className="bg-[#1a2744] hover:bg-[#243560]"
+              className="bg-[#0F3D2E] hover:bg-[#156046]"
               size="sm"
             >
               {loading ? "Saving..." : "Add Note"}

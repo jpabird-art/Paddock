@@ -101,7 +101,7 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate, userSqu
   const isToday = date === format(new Date(), "yyyy-MM-dd");
 
   const selectClass =
-    "border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]";
+    "border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0F3D2E]/30 focus:border-[#0F3D2E]";
 
   return (
     <div className="space-y-5">
@@ -129,7 +129,7 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate, userSqu
             onClick={() => setSquadron(key)}
             className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               squadron === key
-                ? "border-[#1a2744] text-[#1a2744]"
+                ? "border-[#0F3D2E] text-[#0F3D2E]"
                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
             }`}
           >
@@ -151,7 +151,7 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate, userSqu
           {!isToday && (
             <button
               onClick={goToToday}
-              className="px-3 py-1.5 text-xs font-medium text-[#1a2744] bg-[#1a2744]/5 rounded-md hover:bg-[#1a2744]/10 transition-colors"
+              className="px-3 py-1.5 text-xs font-medium text-[#0F3D2E] bg-[#0F3D2E]/5 rounded-md hover:bg-[#0F3D2E]/10 transition-colors"
             >
               Today
             </button>

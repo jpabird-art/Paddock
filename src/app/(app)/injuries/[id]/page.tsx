@@ -67,7 +67,7 @@ export default async function InjuryDetailPage({
     <div className="max-w-4xl space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/injuries" className="hover:text-[#1a2744] hover:underline">
+        <Link href="/injuries" className="hover:text-[#0F3D2E] hover:underline">
           Injury Reports
         </Link>
         <span>/</span>
@@ -81,7 +81,7 @@ export default async function InjuryDetailPage({
             Injury Report —{" "}
             <Link
               href={`/horses/${injury.horse.id}`}
-              className="text-[#1a2744] hover:underline"
+              className="text-[#0F3D2E] hover:underline"
             >
               {injury.horse.name}
             </Link>

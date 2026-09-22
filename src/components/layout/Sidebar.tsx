@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import { LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { navItems, ROLE_LABELS, ROLE_BADGE_COLOURS } from "@/lib/nav-config";
-import { PaddockLogo } from "@/components/marketing/PaddockLogo";
+import { PaddockMark } from "@/components/brand/PaddockMark";
 
 interface SidebarProps {
   user: {
@@ -24,14 +24,14 @@ export function Sidebar({ user, orgName }: SidebarProps) {
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
 
   return (
-    <aside className="hidden lg:flex w-64 bg-[#1a2744] flex-col shrink-0 h-full">
+    <aside className="hidden lg:flex w-64 bg-[#0F3D2E] flex-col shrink-0 h-full">
       {/* Logo */}
       <div className="px-6 py-5 border-b border-white/10">
         <div className="flex items-center gap-3">
-          <PaddockLogo className="h-9 w-9 shrink-0 text-white" />
+          <PaddockMark tone="inverse" className="h-9 w-auto shrink-0" />
           <div>
-            <div className="text-white font-bold text-sm tracking-wide">Paddock</div>
-            <div className="text-blue-300 text-xs">{orgName ?? "Equine operations"}</div>
+            <div className="text-white font-display font-bold text-base tracking-tight">Paddock</div>
+            <div className="text-sage-200 text-xs">{orgName ?? "Equine operations"}</div>
           </div>
         </div>
       </div>

@@ -52,18 +52,38 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
-        navy: {
-          50: "#f0f4ff",
-          100: "#dde7ff",
-          200: "#c0d0ff",
-          300: "#94b0ff",
-          400: "#6080ff",
-          500: "#3d54f5",
-          600: "#2a37e8",
-          700: "#2229cc",
-          800: "#2025a4",
-          900: "#1e2481",
-          950: "#1a2744",
+        // Brand palette — Paddock, Equine Operations Software
+        forest: {
+          DEFAULT: "#0F3D2E", // trust / stability
+          50: "#F1F6F3",
+          100: "#DCE9E2",
+          200: "#B6D2C3",
+          300: "#8CB8A2",
+          400: "#4E8468",
+          500: "#2A6349",
+          600: "#156046",
+          700: "#0F3D2E",
+          800: "#0B2E23",
+          900: "#071E17",
+        },
+        sage: {
+          DEFAULT: "#7FB28A", // health / wellbeing
+          50: "#F3F8F4",
+          100: "#E3EFE6",
+          200: "#C7DFCD",
+          300: "#A4CBAE",
+          400: "#7FB28A",
+          500: "#5F9670",
+          600: "#487659",
+        },
+        midnight: {
+          DEFAULT: "#0F172A", // professional clarity
+          600: "#334155",
+          500: "#64748B",
+        },
+        mist: {
+          DEFAULT: "#F8F7F2", // calm / space
+          200: "#EFEDE4",
         },
       },
       borderRadius: {
@@ -73,6 +93,7 @@ const config: Config = {
       },
       fontFamily: {
         sans: ["var(--font-sans)", ...fontFamily.sans],
+        display: ["var(--font-display)", "var(--font-sans)", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {

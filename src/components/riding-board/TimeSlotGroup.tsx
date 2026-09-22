@@ -21,7 +21,7 @@ export function TimeSlotGroup({ timeSlot, assignments, canEdit, onAdd, onEdit, o
   return (
     <div>
       <div className="flex items-center gap-3 mb-3">
-        <div className="bg-[#1a2744] text-white text-sm font-semibold px-3 py-1 rounded-md">
+        <div className="bg-[#0F3D2E] text-white text-sm font-semibold px-3 py-1 rounded-md">
           {formatTimeSlot(timeSlot)}
         </div>
         <div className="h-px bg-gray-200 flex-1" />
@@ -40,7 +40,7 @@ export function TimeSlotGroup({ timeSlot, assignments, canEdit, onAdd, onEdit, o
         {canEdit && (
           <button
             onClick={() => onAdd?.(timeSlot)}
-            className="border border-dashed border-gray-300 rounded-lg p-3 flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-[#1a2744] hover:border-[#1a2744] transition-colors min-h-[80px]"
+            className="border border-dashed border-gray-300 rounded-lg p-3 flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-[#0F3D2E] hover:border-[#0F3D2E] transition-colors min-h-[80px]"
           >
             <Plus className="h-3.5 w-3.5" />
             Add

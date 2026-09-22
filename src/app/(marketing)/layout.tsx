@@ -8,11 +8,11 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: {
-    default: "Paddock — equine operations software",
+    default: "Paddock — Equine Operations Software",
     template: "%s — Paddock",
   },
   description:
-    "Paddock keeps health, injuries, movements, exercise, tack and inspections for every horse on one auditable record.",
+    "A smarter way to care for every horse. Paddock keeps health, injuries, movements, exercise, tack and inspections on one auditable record.",
 };
 
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
@@ -24,7 +24,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-white text-midnight">
       <MarketingHeader />
       <main className="flex-1">{children}</main>
       <MarketingFooter config={config} />

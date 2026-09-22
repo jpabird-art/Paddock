@@ -72,7 +72,7 @@ export function GroupStatusUpdate({ groupId, currentStatus, horseCount }: GroupS
         size="sm"
         disabled={loading || status === currentStatus}
         onClick={handleUpdate}
-        className="bg-[#1a2744] hover:bg-[#243560]"
+        className="bg-[#0F3D2E] hover:bg-[#156046]"
       >
         {loading ? "Updating..." : "Apply to All"}
       </Button>

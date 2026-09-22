@@ -436,7 +436,7 @@ export default async function HorseDetailPage({
                         <td className="px-4 py-3">
                           <Link
                             href={`/injuries/${injury.id}`}
-                            className="text-[#1a2744] hover:underline text-xs font-medium"
+                            className="text-[#0F3D2E] hover:underline text-xs font-medium"
                           >
                             View
                           </Link>

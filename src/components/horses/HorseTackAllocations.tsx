@@ -173,7 +173,7 @@ export function HorseTackAllocations({
         <div className="flex justify-end">
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#1a2744] hover:bg-[#243560]" size="sm">
+              <Button className="bg-[#0F3D2E] hover:bg-[#156046]" size="sm">
                 Allocate Tack
               </Button>
             </DialogTrigger>
@@ -236,7 +236,7 @@ export function HorseTackAllocations({
                   <Button
                     type="submit"
                     disabled={loading || !tackItemId || !startDate}
-                    className="bg-[#1a2744] hover:bg-[#243560]"
+                    className="bg-[#0F3D2E] hover:bg-[#156046]"
                     size="sm"
                   >
                     {loading ? "Saving..." : "Allocate"}
@@ -276,12 +276,12 @@ export function HorseTackAllocations({
                   return (
                     <tr
                       key={alloc.id}
-                      className={isCurrent ? "bg-[#1a2744]/5" : ""}
+                      className={isCurrent ? "bg-[#0F3D2E]/5" : ""}
                     >
                       <td className="px-4 py-3 text-gray-800">
                         {alloc.tackItem.type}
                         {isCurrent && (
-                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-[#1a2744] text-white">
+                          <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-[#0F3D2E] text-white">
                             Current
                           </span>
                         )}

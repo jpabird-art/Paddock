@@ -83,14 +83,14 @@ export function DailyBoardView({ assignments, date, canEdit, horses, users }: Pr
               setDefaultTimeSlot(undefined);
               setSingleDialogOpen(true);
             }}
-            className="flex items-center gap-1.5 bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#1a2744]/90 transition-colors"
+            className="flex items-center gap-1.5 bg-[#0F3D2E] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#0F3D2E]/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Assignment
           </button>
           <button
             onClick={() => setBulkDialogOpen(true)}
-            className="flex items-center gap-1.5 bg-white border border-[#1a2744] text-[#1a2744] px-4 py-2 rounded-md text-sm font-medium hover:bg-[#1a2744]/5 transition-colors"
+            className="flex items-center gap-1.5 bg-white border border-[#0F3D2E] text-[#0F3D2E] px-4 py-2 rounded-md text-sm font-medium hover:bg-[#0F3D2E]/5 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Full Ride
@@ -109,7 +109,7 @@ export function DailyBoardView({ assignments, date, canEdit, horses, users }: Pr
                   setDefaultTimeSlot("0630");
                   setSingleDialogOpen(true);
                 }}
-                className="text-[#1a2744] hover:underline font-medium"
+                className="text-[#0F3D2E] hover:underline font-medium"
               >
                 Create the first assignment
               </button>

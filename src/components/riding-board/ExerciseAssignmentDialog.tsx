@@ -122,7 +122,7 @@ export function ExerciseAssignmentDialog({
   }
 
   const inputClass =
-    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]";
+    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0F3D2E]/30 focus:border-[#0F3D2E]";
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -226,7 +226,7 @@ export function ExerciseAssignmentDialog({
             <button
               type="submit"
               disabled={submitting}
-              className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#1a2744]/90 disabled:opacity-50 transition-colors"
+              className="bg-[#0F3D2E] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#0F3D2E]/90 disabled:opacity-50 transition-colors"
             >
               {submitting ? "Saving..." : editing ? "Update" : "Create"}
             </button>

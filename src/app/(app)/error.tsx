@@ -25,7 +25,7 @@ export default function Error({
       {error.digest && (
         <p className="text-xs text-gray-400 font-mono">Error ID: {error.digest}</p>
       )}
-      <Button onClick={reset} className="bg-[#1a2744] hover:bg-[#243560]">
+      <Button onClick={reset} className="bg-[#0F3D2E] hover:bg-[#156046]">
         Try again
       </Button>
     </div>

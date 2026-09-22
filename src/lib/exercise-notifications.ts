@@ -57,7 +57,7 @@ export async function notifyRider(exerciseAssignmentId: string): Promise<void> {
 
   const html = `
     <div style="font-family: -apple-system, Arial, sans-serif; max-width: 600px;">
-      <div style="background: #1a2744; color: white; padding: 16px 20px; border-radius: 8px 8px 0 0;">
+      <div style="background: #0F3D2E; color: white; padding: 16px 20px; border-radius: 8px 8px 0 0;">
         <h2 style="margin: 0; font-size: 18px;">Riding Assignment — ${assignment.horse.name}</h2>
         <p style="margin: 4px 0 0; opacity: 0.8; font-size: 14px;">${assignment.horse.regimentalNumber}</p>
       </div>
@@ -83,7 +83,7 @@ export async function notifyRider(exerciseAssignmentId: string): Promise<void> {
           ${assignment.notes ? `<tr><td style="padding: 8px 0; color: #6b7280;">Notes</td><td style="padding: 8px 0;">${assignment.notes}</td></tr>` : ""}
         </table>
         <div style="margin-top: 20px;">
-          <a href="${boardUrl}" style="display: inline-block; background: #1a2744; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
+          <a href="${boardUrl}" style="display: inline-block; background: #0F3D2E; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-size: 14px; font-weight: 500;">
             View Riding Board
           </a>
         </div>

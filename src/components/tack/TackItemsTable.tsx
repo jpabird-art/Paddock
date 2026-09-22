@@ -227,7 +227,7 @@ export function TackItemsTable({
         <div className="flex justify-end">
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#1a2744] hover:bg-[#243560]" size="sm">
+              <Button className="bg-[#0F3D2E] hover:bg-[#156046]" size="sm">
                 + Add Item
               </Button>
             </DialogTrigger>
@@ -290,7 +290,7 @@ export function TackItemsTable({
                 </div>
                 <DialogFooter>
                   <Button type="button" variant="outline" size="sm" onClick={() => setAddOpen(false)}>Cancel</Button>
-                  <Button type="submit" disabled={addLoading || !addForm.identifier.trim()} className="bg-[#1a2744] hover:bg-[#243560]" size="sm">
+                  <Button type="submit" disabled={addLoading || !addForm.identifier.trim()} className="bg-[#0F3D2E] hover:bg-[#156046]" size="sm">
                     {addLoading ? "Saving..." : "Add Item"}
                   </Button>
                 </DialogFooter>
@@ -342,7 +342,7 @@ export function TackItemsTable({
                       {allocation ? (
                         <Link
                           href={`/horses/${allocation.horse.id}`}
-                          className="text-[#1a2744] hover:underline font-medium text-xs"
+                          className="text-[#0F3D2E] hover:underline font-medium text-xs"
                         >
                           {allocation.horse.name}
                           <span className="text-gray-400 font-mono ml-1">{allocation.horse.regimentalNumber}</span>
@@ -357,7 +357,7 @@ export function TackItemsTable({
                           {canEdit && (
                             <button
                               onClick={() => openEdit(item)}
-                              className="text-xs text-[#1a2744] hover:underline font-medium"
+                              className="text-xs text-[#0F3D2E] hover:underline font-medium"
                             >
                               Edit
                             </button>
@@ -439,7 +439,7 @@ export function TackItemsTable({
             </div>
             <DialogFooter>
               <Button type="button" variant="outline" size="sm" onClick={() => setEditOpen(false)}>Cancel</Button>
-              <Button type="submit" disabled={editLoading || !editForm.identifier.trim()} className="bg-[#1a2744] hover:bg-[#243560]" size="sm">
+              <Button type="submit" disabled={editLoading || !editForm.identifier.trim()} className="bg-[#0F3D2E] hover:bg-[#156046]" size="sm">
                 {editLoading ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>

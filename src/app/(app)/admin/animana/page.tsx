@@ -130,7 +130,7 @@ export default function AnimanaImportPage() {
   return (
     <div className="max-w-4xl space-y-6">
       <div className="flex items-center gap-2 text-sm text-gray-500">
-        <Link href="/admin" className="hover:text-[#1a2744] hover:underline">
+        <Link href="/admin" className="hover:text-[#0F3D2E] hover:underline">
           Administration
         </Link>
         <span>/</span>
@@ -149,7 +149,7 @@ export default function AnimanaImportPage() {
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base font-semibold flex items-center gap-2">
-              <Upload className="h-4 w-4 text-[#1a2744]" />
+              <Upload className="h-4 w-4 text-[#0F3D2E]" />
               Upload PDF
             </CardTitle>
           </CardHeader>
@@ -157,12 +157,12 @@ export default function AnimanaImportPage() {
             <div className="space-y-4">
               <div
                 className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
-                  file ? "border-[#1a2744]/30 bg-[#1a2744]/5" : "border-gray-200 hover:border-gray-300"
+                  file ? "border-[#0F3D2E]/30 bg-[#0F3D2E]/5" : "border-gray-200 hover:border-gray-300"
                 }`}
               >
                 {file ? (
                   <div className="space-y-2">
-                    <FileText className="h-8 w-8 text-[#1a2744] mx-auto" />
+                    <FileText className="h-8 w-8 text-[#0F3D2E] mx-auto" />
                     <p className="text-sm font-medium text-gray-900">{file.name}</p>
                     <p className="text-xs text-gray-500">{(file.size / 1024).toFixed(1)} KB</p>
                     <button
@@ -176,7 +176,7 @@ export default function AnimanaImportPage() {
                   <label className="cursor-pointer space-y-2 block">
                     <Upload className="h-8 w-8 text-gray-400 mx-auto" />
                     <p className="text-sm text-gray-600">
-                      Drop an Animana PDF here or <span className="text-[#1a2744] underline">browse</span>
+                      Drop an Animana PDF here or <span className="text-[#0F3D2E] underline">browse</span>
                     </p>
                     <p className="text-xs text-gray-400">
                       Supports: Patient Information, Vet Consult exports
@@ -198,7 +198,7 @@ export default function AnimanaImportPage() {
                 <Button
                   onClick={handleParse}
                   disabled={parsing}
-                  className="bg-[#1a2744] hover:bg-[#243560]"
+                  className="bg-[#0F3D2E] hover:bg-[#156046]"
                 >
                   {parsing ? (
                     <>
@@ -232,7 +232,7 @@ export default function AnimanaImportPage() {
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-base font-semibold flex items-center gap-2">
-                <FileText className="h-4 w-4 text-[#1a2744]" />
+                <FileText className="h-4 w-4 text-[#0F3D2E]" />
                 Parsed — {parseResult.preview.length} records found
               </CardTitle>
             </CardHeader>
@@ -307,7 +307,7 @@ export default function AnimanaImportPage() {
             <Button
               onClick={handleImport}
               disabled={importing}
-              className="bg-[#1a2744] hover:bg-[#243560]"
+              className="bg-[#0F3D2E] hover:bg-[#156046]"
             >
               {importing ? (
                 <>
@@ -340,7 +340,7 @@ export default function AnimanaImportPage() {
                     Records imported for{" "}
                     <Link
                       href={`/horses/${importResult.horse.id}`}
-                      className="text-[#1a2744] hover:underline font-medium"
+                      className="text-[#0F3D2E] hover:underline font-medium"
                     >
                       {importResult.horse.name}
                     </Link>
@@ -375,7 +375,7 @@ export default function AnimanaImportPage() {
                 <div className="flex gap-3 pt-2">
                   <Link
                     href={`/horses/${importResult.horse.id}`}
-                    className="text-sm text-[#1a2744] hover:underline font-medium"
+                    className="text-sm text-[#0F3D2E] hover:underline font-medium"
                   >
                     View Horse Profile →
                   </Link>

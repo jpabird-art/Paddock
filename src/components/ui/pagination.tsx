@@ -77,7 +77,7 @@ function PageLink({
       href={href}
       className={`px-2.5 py-1 rounded text-xs font-medium transition-colors ${
         isActive
-          ? "bg-[#1a2744] text-white"
+          ? "bg-[#0F3D2E] text-white"
           : "text-gray-600 hover:bg-gray-200"
       }`}
     >

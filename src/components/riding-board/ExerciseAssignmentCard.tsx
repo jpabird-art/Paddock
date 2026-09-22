@@ -47,7 +47,7 @@ export function ExerciseAssignmentCard({ assignment, canEdit, onEdit, onDelete }
         <div className="flex items-center gap-2 mb-1">
           <Link
             href={`/horses/${assignment.horse.id}`}
-            className="text-sm font-semibold text-gray-900 hover:text-[#1a2744] hover:underline truncate"
+            className="text-sm font-semibold text-gray-900 hover:text-[#0F3D2E] hover:underline truncate"
           >
             {assignment.horse.name}
           </Link>
@@ -67,7 +67,7 @@ export function ExerciseAssignmentCard({ assignment, canEdit, onEdit, onDelete }
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => onEdit?.(assignment)}
-            className="p-1 text-gray-400 hover:text-[#1a2744] rounded transition-colors"
+            className="p-1 text-gray-400 hover:text-[#0F3D2E] rounded transition-colors"
             title="Edit"
           >
             <Pencil className="h-3.5 w-3.5" />

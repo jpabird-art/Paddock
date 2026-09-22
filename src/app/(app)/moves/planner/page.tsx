@@ -160,7 +160,7 @@ export default function LocationPlannerPage() {
 
   const today = new Date().toISOString().substring(0, 10);
   const isPast = date < today;
-  const selectClass = "border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]";
+  const selectClass = "border border-gray-300 rounded-md px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#0F3D2E]/30 focus:border-[#0F3D2E]";
 
   return (
     <div className="space-y-5">
@@ -213,8 +213,8 @@ export default function LocationPlannerPage() {
       {/* Summary bar */}
       {filtered && (
         <div className="flex gap-3 flex-wrap items-center">
-          <div className="bg-[#1a2744]/5 border border-[#1a2744]/10 px-4 py-2 rounded-lg">
-            <span className="text-[#1a2744] font-semibold text-sm">{filtered.summary.total}</span>
+          <div className="bg-[#0F3D2E]/5 border border-[#0F3D2E]/10 px-4 py-2 rounded-lg">
+            <span className="text-[#0F3D2E] font-semibold text-sm">{filtered.summary.total}</span>
             <span className="text-gray-600 text-sm ml-1.5">horses</span>
           </div>
           {filtered.summary.moving > 0 && (
@@ -259,7 +259,7 @@ export default function LocationPlannerPage() {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-base font-semibold flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-[#1a2744]" />
+                      <MapPin className="h-4 w-4 text-[#0F3D2E]" />
                       {loc.name}
                     </div>
                     <div className="flex items-center gap-2">
@@ -286,7 +286,7 @@ export default function LocationPlannerPage() {
                         <div className="min-w-0">
                           <Link
                             href={`/horses/${horse.id}`}
-                            className="text-sm font-medium text-gray-900 hover:text-[#1a2744] hover:underline"
+                            className="text-sm font-medium text-gray-900 hover:text-[#0F3D2E] hover:underline"
                           >
                             {horse.name}
                           </Link>
@@ -308,7 +308,7 @@ export default function LocationPlannerPage() {
                   {shouldCollapse && (
                     <button
                       onClick={() => toggleExpand(loc.id)}
-                      className="text-xs text-[#1a2744] hover:underline font-medium mt-2 w-full text-center py-1"
+                      className="text-xs text-[#0F3D2E] hover:underline font-medium mt-2 w-full text-center py-1"
                     >
                       {isExpanded
                         ? "Show less"
@@ -340,7 +340,7 @@ export default function LocationPlannerPage() {
                     <div key={horse.id} className="py-2">
                       <Link
                         href={`/horses/${horse.id}`}
-                        className="text-sm font-medium text-gray-600 hover:text-[#1a2744] hover:underline"
+                        className="text-sm font-medium text-gray-600 hover:text-[#0F3D2E] hover:underline"
                       >
                         {horse.name}
                       </Link>

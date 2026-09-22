@@ -8,7 +8,7 @@ import { LogOut, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { navItems, ROLE_LABELS, ROLE_BADGE_COLOURS } from "@/lib/nav-config";
-import { PaddockLogo } from "@/components/marketing/PaddockLogo";
+import { PaddockMark } from "@/components/brand/PaddockMark";
 
 interface MobileNavProps {
   user: {
@@ -27,21 +27,21 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
 
   return (
-    <div className="flex lg:hidden items-center justify-between bg-[#1a2744] px-4 py-3">
+    <div className="flex lg:hidden items-center justify-between bg-[#0F3D2E] px-4 py-3">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <button className="text-white p-1 -ml-1" aria-label="Open menu">
             <Menu className="h-6 w-6" />
           </button>
         </SheetTrigger>
-        <SheetContent className="bg-[#1a2744] border-r-white/10 p-0 w-72">
+        <SheetContent className="bg-[#0F3D2E] border-r-white/10 p-0 w-72">
           {/* Logo */}
           <div className="px-6 py-5 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <PaddockLogo className="h-9 w-9 shrink-0 text-white" />
+              <PaddockMark tone="inverse" className="h-9 w-auto shrink-0" />
               <div>
-                <div className="text-white font-bold text-sm tracking-wide">Paddock</div>
-                <div className="text-blue-300 text-xs">{orgName ?? "Equine operations"}</div>
+                <div className="text-white font-display font-bold text-base tracking-tight">Paddock</div>
+                <div className="text-sage-200 text-xs">{orgName ?? "Equine operations"}</div>
               </div>
             </div>
           </div>
@@ -112,8 +112,8 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
 
       {/* Centre title */}
       <div className="flex items-center gap-2">
-        <PaddockLogo className="h-7 w-7 shrink-0 text-white" />
-        <span className="text-white font-bold text-sm tracking-wide">Paddock</span>
+        <PaddockMark tone="inverse" className="h-7 w-auto shrink-0" />
+        <span className="text-white font-display font-bold text-base tracking-tight">Paddock</span>
       </div>
 
       {/* Spacer to balance hamburger */}

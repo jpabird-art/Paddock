@@ -285,7 +285,7 @@ export function HorseAttachments({
         <div className="flex justify-end">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="bg-[#1a2744] hover:bg-[#243560]">
+              <Button size="sm" className="bg-[#0F3D2E] hover:bg-[#156046]">
                 <Paperclip className="h-4 w-4 mr-2" />
                 Upload File
               </Button>
@@ -304,7 +304,7 @@ export function HorseAttachments({
                     type="file"
                     accept="image/*,.pdf,.doc,.docx"
                     onChange={(e) => setSelectedFile(e.target.files?.[0] ?? null)}
-                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#1a2744] file:text-white hover:file:bg-[#243560]"
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-[#0F3D2E] file:text-white hover:file:bg-[#156046]"
                   />
                   {selectedFile && (
                     <p className="text-xs text-gray-500">
@@ -355,7 +355,7 @@ export function HorseAttachments({
                   <Button
                     type="submit"
                     disabled={loading || !selectedFile}
-                    className="bg-[#1a2744] hover:bg-[#243560]"
+                    className="bg-[#0F3D2E] hover:bg-[#156046]"
                   >
                     {loading ? "Uploading..." : "Upload"}
                   </Button>

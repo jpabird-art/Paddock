@@ -122,7 +122,7 @@ export default async function InjuriesPage({
                   <td className="px-4 py-3">
                     <Link
                       href={`/horses/${injury.horse.id}`}
-                      className="font-medium text-[#1a2744] hover:underline"
+                      className="font-medium text-[#0F3D2E] hover:underline"
                     >
                       {injury.horse.name}
                     </Link>
@@ -146,7 +146,7 @@ export default async function InjuriesPage({
                   <td className="px-4 py-3">
                     <Link
                       href={`/injuries/${injury.id}`}
-                      className="text-[#1a2744] hover:underline text-xs font-medium"
+                      className="text-[#0F3D2E] hover:underline text-xs font-medium"
                     >
                       View →
                     </Link>
@@ -210,7 +210,7 @@ function FilterLink({
       href={href}
       className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
         isActive
-          ? "bg-[#1a2744] text-white"
+          ? "bg-[#0F3D2E] text-white"
           : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
       }`}
     >
