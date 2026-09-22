@@ -37,11 +37,11 @@ export function MarketingFooter({ config }: { config: SiteConfig }) {
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-wider text-white">Get in touch</h2>
           <ul className="mt-3 space-y-2 text-sm">
-            <li>
+            {config.contact.email && <li>
               <a href={`mailto:${config.contact.email}`} className="hover:text-white">
                 {config.contact.email}
               </a>
-            </li>
+            </li>}
             {config.contact.phone && <li>{config.contact.phone}</li>}
             <li>{config.contact.address}</li>
           </ul>

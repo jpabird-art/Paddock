@@ -1,12 +1,12 @@
 # ── Build stage ──────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 RUN apk add --no-cache openssl
 
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --legacy-peer-deps
+RUN npm ci
 
 COPY prisma ./prisma
 RUN npx prisma generate
@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # ── Production stage ─────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:24-alpine AS runner
 
 RUN apk add --no-cache openssl
 

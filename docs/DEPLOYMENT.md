@@ -4,8 +4,8 @@ Paddock runs as one codebase in two roles, chosen by `PADDOCK_SITE_MODE`:
 
 | Mode | What it serves | Typical domain |
 |---|---|---|
-| `marketing` | Public site: home, capabilities, contact, portal | `paddock.app` |
-| `tenant` | A single customer's application, behind sign-in | `<customer>.paddock.app` |
+| `marketing` | Public site: home, capabilities, contact, portal | `www.paddock-ltd.com` |
+| `tenant` | A single customer's application, behind sign-in | `<customer>.paddock-ltd.com` |
 
 A marketing deployment never exposes the application; a tenant deployment
 redirects the public routes straight to `/dashboard`. One repository, one
@@ -22,21 +22,27 @@ marketing pages read nothing, and the container skips migrations when
 
 ```
 PADDOCK_SITE_MODE=marketing
-PADDOCK_PORTAL_DOMAIN=paddock.app
-PADDOCK_CONTACT_EMAIL=hello@paddock.app
+PADDOCK_PORTAL_DOMAIN=paddock-ltd.com
+# Use an existing, verified enquiry mailbox.
+PADDOCK_CONTACT_EMAIL=
 PADDOCK_CONTACT_PHONE=+44 20 7946 0000
 PADDOCK_CONTACT_ADDRESS=London, United Kingdom
 NEXTAUTH_SECRET=<openssl rand -base64 32>
-NEXTAUTH_URL=https://paddock.app
+NEXTAUTH_URL=https://www.paddock-ltd.com
 ```
 
 Set `PADDOCK_SITE_MODE` before the first deploy. Without it the service boots
 in tenant mode, tries `prisma migrate deploy`, and crash-loops on a missing
 `DATABASE_URL`.
 
-To send contact enquiries by email rather than returning a "please email us"
-message, also set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` and
-`SMTP_FROM`.
+The contact form is available when an existing enquiry mailbox and SMTP delivery
+are configured. Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` and
+`SMTP_FROM` through the provider's secure settings. Without SMTP, the page can
+offer the configured mailbox directly; without a mailbox, it shows an availability
+message. No placeholder email address is published.
+
+The domain is owned through GoDaddy. Keep `PADDOCK_PORTAL_DOMAIN=paddock-ltd.com`
+for customer addresses, with the public website at `www.paddock-ltd.com`.
 
 Optionally publish a directory of customers on the portal page:
 
@@ -47,11 +53,11 @@ PADDOCK_TENANT_DIRECTORY=greenacre:Greenacre Stud,oakfield:Oakfield Equine
 Or, for full control of each URL:
 
 ```
-PADDOCK_TENANT_DIRECTORY=[{"slug":"greenacre","name":"Greenacre Stud","url":"https://greenacre.paddock.app/login"}]
+PADDOCK_TENANT_DIRECTORY=[{"slug":"greenacre","name":"Greenacre Stud","url":"https://greenacre.paddock-ltd.com/login"}]
 ```
 
 Leave it empty and the portal still works: a customer types their short name
-and is sent to `https://<slug>.paddock.app/login`.
+and is sent to `https://<slug>.paddock-ltd.com/login`.
 
 ---
 
@@ -69,14 +75,14 @@ For each customer, in a Railway project of their own:
    PADDOCK_SITE_MODE=tenant
    PADDOCK_ORG_NAME=Greenacre Stud
    NEXTAUTH_SECRET=<a fresh openssl rand -base64 32 per customer>
-   NEXTAUTH_URL=https://greenacre.paddock.app
+   NEXTAUTH_URL=https://greenacre.paddock-ltd.com
    DATABASE_URL=${{Postgres.DATABASE_URL}}
    ```
 
 4. **Persist files.** Attach a dedicated upload volume at `/app/uploads` and set
    `UPLOAD_DIR=/app/uploads`. Back up it and PostgreSQL together.
 
-5. **Add the domain.** In Railway, add `greenacre.paddock.app` to the service
+5. **Add the domain.** In Railway, add `greenacre.paddock-ltd.com` to the service
    and point a CNAME at the target Railway gives you. Also add the domain-verification TXT record shown by Railway.
    Register each customer domain against its own service; wildcard DNS alone
    does not provision or route separate customer deployments.

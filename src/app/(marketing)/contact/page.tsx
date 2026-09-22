@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { ContactForm } from "@/components/marketing/ContactForm";
 import { getSiteConfig } from "@/lib/site-config";
+import { emailEnabled } from "@/lib/email";
 
 export const dynamic = "force-dynamic";
 
@@ -23,7 +24,13 @@ export default function ContactPage() {
       </p>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[1fr_340px]">
-        <ContactForm fallbackEmail={contact.email} />
+        {emailEnabled && contact.email ? (
+          <ContactForm fallbackEmail={contact.email} />
+        ) : (
+          <p className="text-gray-600">
+            {contact.email ? <>Please email <a className="font-semibold text-brand-forest hover:underline" href={`mailto:${contact.email}`}>{contact.email}</a> to arrange a demonstration.</> : "Online enquiries will be available soon. Existing customers can contact their Paddock administrator."}
+          </p>
+        )}
 
         <aside className="space-y-6 rounded-xl border border-brand-forest/10 bg-brand-soft p-6">
           <div>
@@ -31,12 +38,12 @@ export default function ContactPage() {
               Direct
             </h2>
             <ul className="mt-3 space-y-3 text-sm text-gray-700">
-              <li className="flex gap-3">
+              {contact.email && <li className="flex gap-3">
                 <Mail className="mt-0.5 h-4 w-4 shrink-0 text-brand-forest" aria-hidden />
                 <a href={`mailto:${contact.email}`} className="hover:underline">
                   {contact.email}
                 </a>
-              </li>
+              </li>}
               {contact.phone && (
                 <li className="flex gap-3">
                   <Phone className="mt-0.5 h-4 w-4 shrink-0 text-brand-forest" aria-hidden />
@@ -49,10 +56,10 @@ export default function ContactPage() {
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0 text-brand-forest" aria-hidden />
                 <span>{contact.address}</span>
               </li>
-              <li className="flex gap-3">
+              {contact.email && <li className="flex gap-3">
                 <Clock className="mt-0.5 h-4 w-4 shrink-0 text-brand-forest" aria-hidden />
                 <span>We reply {contact.responseTime}.</span>
-              </li>
+              </li>}
             </ul>
           </div>
 

@@ -3,7 +3,7 @@
  *
  * One codebase serves two deployment roles on Railway:
  *
- *   PADDOCK_SITE_MODE=marketing  — the public product site (paddock.app)
+ *   PADDOCK_SITE_MODE=marketing  — the public product site (paddock-ltd.com)
  *   PADDOCK_SITE_MODE=tenant     — a single customer's own paddock (default)
  *
  * Everything here is read at request time rather than build time, so the same
@@ -36,7 +36,7 @@ export interface SiteConfig {
   orgName: string | null;
   contact: ContactDetails;
   portal: {
-    /** Domain tenant deployments sit under, e.g. "paddock.app". */
+    /** Domain tenant deployments sit under, e.g. "paddock-ltd.com". */
     baseDomain: string;
     /** Optional published directory of tenants. */
     tenants: TenantEntry[];
@@ -96,7 +96,7 @@ function tenantUrlFor(slug: string, baseDomain: string): string {
 }
 
 export function getSiteConfig(): SiteConfig {
-  const baseDomain = trimmed("PADDOCK_PORTAL_DOMAIN") ?? "paddock.app";
+  const baseDomain = trimmed("PADDOCK_PORTAL_DOMAIN") ?? "paddock-ltd.com";
 
   return {
     mode: process.env.PADDOCK_SITE_MODE === "marketing" ? "marketing" : "tenant",
@@ -104,7 +104,7 @@ export function getSiteConfig(): SiteConfig {
     tagline: "One record for every horse in your care.",
     orgName: trimmed("PADDOCK_ORG_NAME"),
     contact: {
-      email: trimmed("PADDOCK_CONTACT_EMAIL") ?? "hello@paddock.app",
+      email: trimmed("PADDOCK_CONTACT_EMAIL") ?? "",
       phone: trimmed("PADDOCK_CONTACT_PHONE") ?? "",
       address: trimmed("PADDOCK_CONTACT_ADDRESS") ?? "United Kingdom",
       responseTime: trimmed("PADDOCK_CONTACT_RESPONSE_TIME") ?? "within two working days",

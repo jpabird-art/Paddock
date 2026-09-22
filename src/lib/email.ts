@@ -14,6 +14,8 @@ const transporter = emailEnabled
       host: smtpHost,
       port: smtpPort,
       secure: smtpPort === 465,
+      disableFileAccess: true,
+      disableUrlAccess: true,
       auth: { user: smtpUser, pass: smtpPass },
     })
   : null;
