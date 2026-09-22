@@ -109,7 +109,7 @@ export function HorseFarrierRecords({ horseId, initialRecords, canManage, canDel
   }
 
   const inputClass =
-    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]";
+    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 focus:border-brand-forest";
 
   return (
     <div className="space-y-4">
@@ -117,7 +117,7 @@ export function HorseFarrierRecords({ horseId, initialRecords, canManage, canDel
         <div>
           <button
             onClick={() => setDialogOpen(true)}
-            className="flex items-center gap-1.5 bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#1a2744]/90 transition-colors"
+            className="flex items-center gap-1.5 bg-brand-forest text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-forest/90 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Farrier Record
@@ -245,7 +245,7 @@ export function HorseFarrierRecords({ horseId, initialRecords, canManage, canDel
               <button
                 type="submit"
                 disabled={submitting}
-                className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#1a2744]/90 disabled:opacity-50 transition-colors"
+                className="bg-brand-forest text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-forest/90 disabled:opacity-50 transition-colors"
               >
                 {submitting ? "Saving..." : "Add Record"}
               </button>

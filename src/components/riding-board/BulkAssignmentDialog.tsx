@@ -124,7 +124,7 @@ export function BulkAssignmentDialog({ open, onClose, horses, users, date }: Pro
   const usedHorseIds = new Set(pairs.map((p) => p.horseId).filter(Boolean));
 
   const inputClass =
-    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30 focus:border-[#1a2744]";
+    "w-full border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest/30 focus:border-brand-forest";
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
@@ -236,7 +236,7 @@ export function BulkAssignmentDialog({ open, onClose, horses, users, date }: Pro
             <button
               type="button"
               onClick={addRow}
-              className="mt-2 flex items-center gap-1 text-xs text-[#1a2744] hover:underline font-medium"
+              className="mt-2 flex items-center gap-1 text-xs text-brand-forest hover:underline font-medium"
             >
               <Plus className="h-3.5 w-3.5" />
               Add another pair
@@ -254,7 +254,7 @@ export function BulkAssignmentDialog({ open, onClose, horses, users, date }: Pro
             <button
               type="submit"
               disabled={submitting || pairs.filter((p) => p.horseId && p.riderId).length === 0}
-              className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#1a2744]/90 disabled:opacity-50 transition-colors"
+              className="bg-brand-forest text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-forest/90 disabled:opacity-50 transition-colors"
             >
               {submitting ? "Creating..." : "Create Ride"}
             </button>

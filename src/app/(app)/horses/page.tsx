@@ -104,7 +104,7 @@ export default async function HorsesPage({
           {canCreate && (
             <Link
               href="/horses/new"
-              className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#243560] transition-colors"
+              className="bg-brand-forest text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-hover transition-colors"
             >
               + Add Horse
             </Link>
@@ -148,7 +148,7 @@ export default async function HorsesPage({
                   <TableCell>
                     <Link
                       href={`/horses/${horse.id}`}
-                      className="font-semibold text-[#1a2744] hover:underline"
+                      className="font-semibold text-brand-forest hover:underline"
                     >
                       {horse.name}
                     </Link>

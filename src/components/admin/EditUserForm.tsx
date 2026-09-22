@@ -271,7 +271,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#1a2744] hover:bg-[#243560]"
+              className="bg-brand-forest hover:bg-brand-hover"
             >
               {loading ? "Saving..." : "Save Changes"}
             </Button>

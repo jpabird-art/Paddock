@@ -24,7 +24,7 @@ export default function MarketingLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen flex-col bg-white">
+    <div className="flex min-h-screen flex-col bg-brand-mist">
       <MarketingHeader />
       <main className="flex-1">{children}</main>
       <MarketingFooter config={config} />

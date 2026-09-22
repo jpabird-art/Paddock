@@ -27,21 +27,21 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
   const visibleItems = navItems.filter((item) => item.roles.includes(role));
 
   return (
-    <div className="flex lg:hidden items-center justify-between bg-[#1a2744] px-4 py-3">
+    <div className="flex lg:hidden items-center justify-between bg-brand-forest px-4 py-3">
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger asChild>
           <button className="text-white p-1 -ml-1" aria-label="Open menu">
             <Menu className="h-6 w-6" />
           </button>
         </SheetTrigger>
-        <SheetContent className="bg-[#1a2744] border-r-white/10 p-0 w-72">
+        <SheetContent className="bg-brand-forest border-r-white/10 p-0 w-72">
           {/* Logo */}
           <div className="px-6 py-5 border-b border-white/10">
             <div className="flex items-center gap-3">
-              <PaddockLogo className="h-9 w-9 shrink-0 text-white" />
+              <PaddockLogo className="h-11 w-9 shrink-0" reversed decorative />
               <div>
-                <div className="text-white font-bold text-sm tracking-wide">Paddock</div>
-                <div className="text-blue-300 text-xs">{orgName ?? "Equine operations"}</div>
+                <div className="text-brand-mist font-bold text-xl tracking-tight">Paddock</div>
+                <div className="text-brand-sage text-xs">{orgName ?? "Equine operations"}</div>
               </div>
             </div>
           </div>
@@ -61,15 +61,10 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
                     "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm transition-colors",
                     isActive
                       ? "bg-white/15 text-white font-medium"
-                      : "text-blue-200 hover:bg-white/10 hover:text-white"
+                      : "text-brand-mist/80 hover:bg-white/10 hover:text-white"
                   )}
                 >
-                  <Icon
-                    className={cn(
-                      "h-4 w-4 shrink-0",
-                      isActive ? "text-amber-400" : "text-blue-300"
-                    )}
-                  />
+                  <Icon className="h-4 w-4 shrink-0 text-brand-sage" />
                   {item.label}
                 </Link>
               );
@@ -86,7 +81,7 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-white text-sm font-medium truncate">{user.name}</div>
-                <div className="text-blue-300 text-xs font-mono">{user.serviceNumber ?? ""}</div>
+                <div className="text-brand-sage text-xs font-mono">{user.serviceNumber ?? ""}</div>
               </div>
             </div>
             <div className="flex items-center justify-between">
@@ -100,7 +95,7 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
               </span>
               <button
                 onClick={() => signOut({ callbackUrl: "/login" })}
-                className="flex items-center gap-1.5 text-blue-300 hover:text-white transition-colors text-xs"
+                className="flex items-center gap-1.5 text-brand-sage hover:text-white transition-colors text-xs"
               >
                 <LogOut className="h-3.5 w-3.5" />
                 Sign out
@@ -112,8 +107,8 @@ export function MobileNav({ user, orgName }: MobileNavProps) {
 
       {/* Centre title */}
       <div className="flex items-center gap-2">
-        <PaddockLogo className="h-7 w-7 shrink-0 text-white" />
-        <span className="text-white font-bold text-sm tracking-wide">Paddock</span>
+        <PaddockLogo className="h-9 w-7 shrink-0" reversed decorative />
+        <span className="text-brand-mist font-bold text-xl tracking-tight">Paddock</span>
       </div>
 
       {/* Spacer to balance hamburger */}

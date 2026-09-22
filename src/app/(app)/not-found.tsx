@@ -11,7 +11,7 @@ export default function NotFound() {
         The page you are looking for does not exist or has been moved.
       </p>
       <Link href="/dashboard">
-        <Button className="bg-[#1a2744] hover:bg-[#243560]">
+        <Button className="bg-brand-forest hover:bg-brand-hover">
           Back to Dashboard
         </Button>
       </Link>

@@ -135,7 +135,7 @@ function SingleMoveRow({
       <td className="px-4 py-3">
         <Link
           href={`/horses/${move.horse.id}`}
-          className="font-medium text-[#1a2744] hover:underline"
+          className="font-medium text-brand-forest hover:underline"
         >
           {move.horse.name}
         </Link>
@@ -155,7 +155,7 @@ function SingleMoveRow({
       <td className="px-4 py-3">
         <Link
           href={`/moves/${move.id}`}
-          className="text-[#1a2744] hover:underline text-xs font-medium"
+          className="text-brand-forest hover:underline text-xs font-medium"
         >
           View →
         </Link>
@@ -216,7 +216,7 @@ function GroupMoveRows({
         <td className="px-4 py-3">
           <Link
             href={`/moves/${representative.id}`}
-            className="text-[#1a2744] hover:underline text-xs font-medium"
+            className="text-brand-forest hover:underline text-xs font-medium"
             onClick={(e) => e.stopPropagation()}
           >
             View →
@@ -232,7 +232,7 @@ function GroupMoveRows({
             <td className="px-4 py-2 pl-10">
               <Link
                 href={`/horses/${move.horse.id}`}
-                className="text-sm font-medium text-[#1a2744] hover:underline"
+                className="text-sm font-medium text-brand-forest hover:underline"
               >
                 {move.horse.name}
               </Link>
@@ -245,7 +245,7 @@ function GroupMoveRows({
             <td className="px-4 py-2">
               <Link
                 href={`/moves/${move.id}`}
-                className="text-[#1a2744] hover:underline text-xs font-medium"
+                className="text-brand-forest hover:underline text-xs font-medium"
               >
                 View →
               </Link>

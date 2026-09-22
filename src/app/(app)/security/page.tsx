@@ -159,7 +159,7 @@ export default function SecurityPage() {
           <button
             onClick={handleSetup}
             disabled={loading}
-            className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#243560] transition-colors disabled:opacity-60"
+            className="bg-brand-forest text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-hover transition-colors disabled:opacity-60"
           >
             {loading ? "Setting up..." : "Set up MFA"}
           </button>
@@ -224,13 +224,13 @@ export default function SecurityPage() {
                 placeholder="000000"
                 maxLength={6}
                 required
-                className="w-40 border border-gray-300 rounded-md px-3 py-2 text-sm font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-[#1a2744] focus:border-transparent"
+                className="w-40 border border-gray-300 rounded-md px-3 py-2 text-sm font-mono tracking-widest text-center focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-transparent"
               />
               <div>
                 <button
                   type="submit"
                   disabled={loading || verifyCode.length !== 6}
-                  className="bg-[#1a2744] text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-[#243560] transition-colors disabled:opacity-60"
+                  className="bg-brand-forest text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-brand-hover transition-colors disabled:opacity-60"
                 >
                   {loading ? "Verifying..." : "Enable MFA"}
                 </button>
@@ -252,7 +252,7 @@ export default function SecurityPage() {
                 onChange={(e) => setDisablePassword(e.target.value)}
                 placeholder="Enter password"
                 required
-                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744] focus:border-transparent"
+                className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-transparent"
               />
               <button
                 type="submit"

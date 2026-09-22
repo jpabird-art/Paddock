@@ -144,7 +144,7 @@ export function HorseInspections({
         <div className="flex justify-end">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button size="sm" className="bg-[#1a2744] hover:bg-[#243560]">
+              <Button size="sm" className="bg-brand-forest hover:bg-brand-hover">
                 <ClipboardCheck className="h-4 w-4 mr-2" />
                 Record Inspection
               </Button>
@@ -226,7 +226,7 @@ export function HorseInspections({
                   <Button
                     type="submit"
                     disabled={loading}
-                    className="bg-[#1a2744] hover:bg-[#243560]"
+                    className="bg-brand-forest hover:bg-brand-hover"
                   >
                     {loading ? "Saving..." : "Save Inspection"}
                   </Button>

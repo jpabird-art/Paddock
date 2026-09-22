@@ -428,7 +428,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
       </div>
 
       <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={loading} className="bg-[#1a2744] hover:bg-[#243560]">
+        <Button type="submit" disabled={loading} className="bg-brand-forest hover:bg-brand-hover">
           {loading
             ? mode === "create"
               ? "Adding..."

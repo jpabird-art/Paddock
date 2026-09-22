@@ -168,7 +168,7 @@ export function HorseMedicationRecords({
         <div className="flex justify-end">
           <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-[#1a2744] hover:bg-[#243560]" size="sm">
+              <Button className="bg-brand-forest hover:bg-brand-hover" size="sm">
                 Add Record
               </Button>
             </DialogTrigger>
@@ -261,7 +261,7 @@ export function HorseMedicationRecords({
                   <Button
                     type="submit"
                     disabled={loading || !medicationName.trim() || !dosage.trim() || !route}
-                    className="bg-[#1a2744] hover:bg-[#243560]"
+                    className="bg-brand-forest hover:bg-brand-hover"
                     size="sm"
                   >
                     {loading ? "Saving..." : "Save Record"}

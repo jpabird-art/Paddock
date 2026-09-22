@@ -18,7 +18,7 @@ export default async function AppLayout({
   }
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen bg-gray-50 overflow-hidden">
+    <div className="flex flex-col lg:flex-row h-screen bg-brand-mist overflow-hidden">
       <MobileNav user={session.user} orgName={orgName} />
       <Sidebar user={session.user} orgName={orgName} />
       <main className="flex-1 overflow-y-auto">
