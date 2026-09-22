@@ -10,6 +10,31 @@ jobs:
   ci:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: local-test
+          POSTGRES_DB: paddock_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+      other-postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: local-test
+          POSTGRES_DB: paddock_other
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      DATABASE_URL: postgresql://postgres:local-test@127.0.0.1:5432/paddock_test
+      TEST_DATABASE_URL: postgresql://postgres:local-test@127.0.0.1:5432/paddock_test
+      TEST_OTHER_DATABASE_URL: postgresql://postgres:local-test@127.0.0.1:5433/paddock_other
+      NEXTAUTH_SECRET: ci-only-not-a-deployment-secret-at-least-32-characters
+
     steps:
       - uses: actions/checkout@v4
 
@@ -25,6 +50,11 @@ jobs:
 
       - name: Typecheck
         run: npm run typecheck
+
+      - name: Apply migrations to both isolated test databases
+        run: |
+          npx prisma migrate deploy
+          DATABASE_URL="$TEST_OTHER_DATABASE_URL" npx prisma migrate deploy
 
       - name: Tests
         run: npm test

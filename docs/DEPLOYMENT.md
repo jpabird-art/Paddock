@@ -73,10 +73,14 @@ For each customer, in a Railway project of their own:
    DATABASE_URL=${{Postgres.DATABASE_URL}}
    ```
 
-4. **Add the domain.** In Railway, add `greenacre.paddock.app` to the service
-   and point a CNAME at the target Railway gives you. A wildcard
-   `*.paddock.app` CNAME at the DNS level saves a step per customer.
-5. **Create the first administrator:**
+4. **Persist files.** Attach a dedicated upload volume at `/app/uploads` and set
+   `UPLOAD_DIR=/app/uploads`. Back up it and PostgreSQL together.
+
+5. **Add the domain.** In Railway, add `greenacre.paddock.app` to the service
+   and point a CNAME at the target Railway gives you. Also add the domain-verification TXT record shown by Railway.
+   Register each customer domain against its own service; wildcard DNS alone
+   does not provision or route separate customer deployments.
+6. **Create the first administrator:**
 
    ```
    BOOTSTRAP_ADMIN_NAME="Jane Smith" \
@@ -138,3 +142,5 @@ PURGE_CONFIRM="DELETE ALL HORSE DATA" PURGE_USERS=1 KEEP_SERVICE_NUMBER=ADMIN001
 ```
 
 There is no undo. Take a dump first.
+
+See [CUSTOMER-DEMOS.md](CUSTOMER-DEMOS.md) for Cairnhead Racing Yard and Canswell Farm, account recovery, validation and release limitations.

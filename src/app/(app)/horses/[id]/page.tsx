@@ -219,7 +219,7 @@ export default async function HorseDetailPage({
         <TabsContent value="profile">
           <div className="bg-white rounded-lg border shadow-sm p-6 mt-3">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-              <InfoField label="Regimental Number" value={
+              <InfoField label="Horse ID" value={
                 <span className="font-mono font-semibold text-gray-900">{horse.regimentalNumber}</span>
               } />
               <InfoField label="Squadron Number" value={

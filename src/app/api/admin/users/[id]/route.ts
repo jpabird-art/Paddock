@@ -1,3 +1,4 @@
+import { passwordSchema } from "@/lib/account-security";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/permissions";
@@ -13,7 +14,7 @@ const patchSchema = z.object({
   squadron: z.nativeEnum(Squadron).nullable().optional(),
   rank: z.string().nullable().optional(),
   isActive: z.boolean().optional(),
-  password: z.string().min(8).optional(),
+  password: passwordSchema.optional(),
 });
 
 export async function PATCH(
@@ -43,32 +44,31 @@ export async function PATCH(
   if (parse.data.rank !== undefined) data.rank = parse.data.rank;
   if (parse.data.isActive !== undefined) data.isActive = parse.data.isActive;
 
-  // Enforce squadron requirement: if changing role away from VET, squadron must be set
-  const effectiveRole = (data.role as string) ?? user.role;
-  const effectiveSquadron = data.squadron !== undefined ? data.squadron : user.squadron;
-  if (effectiveRole !== "VET" && !effectiveSquadron) {
-    return NextResponse.json(
-      { error: "Squadron is required for non-VET roles" },
-      { status: 400 }
-    );
-  }
   if (parse.data.password) {
     data.passwordHash = await bcrypt.hash(parse.data.password, 12);
   }
 
-  const updated = await prisma.user.update({
-    where: { id },
-    data,
-    select: {
-      id: true,
-      name: true,
-      serviceNumber: true,
-      email: true,
-      role: true,
-      squadron: true,
-      isActive: true,
-      createdAt: true,
-    },
+  // Password changes and activation changes invalidate previously issued sessions.
+  if (parse.data.password || parse.data.isActive !== undefined || parse.data.email !== undefined) data.sessionVersion = { increment: 1 };
+  if (id === session!.user.id && (parse.data.isActive === false || (parse.data.role && parse.data.role !== "ADMIN"))) {
+    return NextResponse.json({ error: "Another administrator must change your administrator access." }, { status: 400 });
+  }
+  const updated = await prisma.$transaction(async tx => {
+    if (parse.data.password || parse.data.email || parse.data.isActive !== undefined) await tx.accountToken.deleteMany({ where: { userId: id } });
+    return tx.user.update({
+      where: { id },
+      data,
+      select: {
+        id: true,
+        name: true,
+        serviceNumber: true,
+        email: true,
+        role: true,
+        squadron: true,
+        isActive: true,
+        createdAt: true,
+      },
+    });
   });
 
   await audit({

@@ -49,9 +49,16 @@ const authMiddleware = withAuth({
 });
 
 export default function middleware(request: NextRequest) {
+  if (process.env.PADDOCK_SITE_MODE === "marketing") {
+    return request.nextUrl.pathname.startsWith("/api/")
+      ? NextResponse.json({ error: "Not available" }, { status: 404 })
+      : NextResponse.redirect(new URL("/portal", request.url));
+  }
   // Rate limit check runs before auth
   const rateLimitResponse = handleRateLimit(request);
   if (rateLimitResponse) return rateLimitResponse;
+
+  if (RATE_LIMITED_PATHS.some(p => request.nextUrl.pathname.startsWith(p))) return NextResponse.next();
 
   // Auth check for protected routes
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -60,6 +67,10 @@ export default function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/api/auth/callback/:path*",
+    "/api/auth/csrf",
+    "/api/auth/mfa/check",
+    "/riding-board/:path*",
     "/dashboard/:path*",
     "/horses/:path*",
     "/health/:path*",

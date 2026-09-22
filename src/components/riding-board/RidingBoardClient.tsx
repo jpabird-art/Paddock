@@ -1,5 +1,6 @@
 "use client";
 
+import { LegacyFields, useMilitaryProfile } from "@/components/layout/OrganisationProfile";
 import { useEffect, useState, useCallback } from "react";
 import { format, addDays, subDays, startOfWeek, addWeeks, subWeeks } from "date-fns";
 import { ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
@@ -21,9 +22,10 @@ interface UserOption {
   rank: string | null;
 }
 
-type SquadronFilter = "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS";
+type SquadronFilter = "ALL" | "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS";
 
 const SQUADRON_LABELS: Record<SquadronFilter, string> = {
+  ALL: "All horses",
   THE_LIFE_GUARDS: "Life Guards",
   THE_BLUES_AND_ROYALS: "Blues & Royals",
 };
@@ -39,9 +41,10 @@ interface Props {
 type ViewMode = "daily" | "weekly";
 
 export function RidingBoardClient({ horses, users, canEdit, initialDate, userSquadron }: Props) {
+  const military = useMilitaryProfile();
   const defaultSquadron = (userSquadron === "THE_LIFE_GUARDS" || userSquadron === "THE_BLUES_AND_ROYALS")
     ? userSquadron as SquadronFilter
-    : "THE_LIFE_GUARDS";
+    : "ALL";
 
   const [date, setDate] = useState(initialDate ?? format(new Date(), "yyyy-MM-dd"));
   const [view, setView] = useState<ViewMode>("daily");
@@ -50,20 +53,21 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate, userSqu
   const [loading, setLoading] = useState(true);
 
   // Filter horses to selected squadron
-  const filteredHorses = horses.filter((h) => h.squadron === squadron);
+  const selectedSquadron = military ? squadron : "ALL";
+  const filteredHorses = selectedSquadron === "ALL" ? horses : horses.filter((h) => h.squadron === selectedSquadron);
 
   const fetchAssignments = useCallback(async () => {
     setLoading(true);
     try {
       const param = view === "daily" ? `date=${date}` : `weekOf=${date}`;
-      const res = await fetch(`/api/exercise-assignments?${param}&squadron=${squadron}`);
+      const res = await fetch(`/api/exercise-assignments?${param}${selectedSquadron === "ALL" ? "" : `&squadron=${selectedSquadron}`}`);
       if (res.ok) {
         setAssignments(await res.json());
       }
     } finally {
       setLoading(false);
     }
-  }, [date, view, squadron]);
+  }, [date, view, selectedSquadron]);
 
   useEffect(() => {
     fetchAssignments();
@@ -121,6 +125,7 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate, userSqu
         </div>
       </div>
 
+      <LegacyFields>
       {/* Squadron tabs */}
       <div className="flex items-center gap-1 border-b border-gray-200">
         {(Object.entries(SQUADRON_LABELS) as [SquadronFilter, string][]).map(([key, label]) => (
@@ -138,6 +143,7 @@ export function RidingBoardClient({ horses, users, canEdit, initialDate, userSqu
         ))}
       </div>
 
+      </LegacyFields>
       {/* Controls */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="flex items-center gap-1">

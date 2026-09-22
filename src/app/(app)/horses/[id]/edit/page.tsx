@@ -33,7 +33,7 @@ export default async function EditHorsePage({
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">Edit Horse — {horse.name}</h1>
         <p className="text-sm text-gray-500 mt-0.5">
-          Update regimental details for {horse.regimentalNumber}
+          Update horse details for {horse.regimentalNumber}
         </p>
       </div>
       <div className="bg-white rounded-lg border shadow-sm p-6">
@@ -42,6 +42,10 @@ export default async function EditHorsePage({
           locations={locations}
           initialData={{
             id: horse.id,
+            updatedAt: horse.updatedAt.toISOString(),
+            sex: horse.sex ?? undefined,
+            role: horse.role ?? undefined,
+            division: horse.division ?? undefined,
             name: horse.name,
             regimentalNumber: horse.regimentalNumber,
             squadronNumber: horse.squadronNumber ?? "",

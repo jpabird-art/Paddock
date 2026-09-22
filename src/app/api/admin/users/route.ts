@@ -1,3 +1,4 @@
+import { passwordSchema } from "@/lib/account-security";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requirePermission } from "@/lib/permissions";
@@ -10,14 +11,11 @@ const createSchema = z.object({
   name: z.string().min(1),
   serviceNumber: z.string().min(1),
   email: z.string().email(),
-  password: z.string().min(8),
+  password: passwordSchema,
   role: z.enum(["ADMIN", "VET", "FARRIER", "OFFICER", "TROOPER"]),
   squadron: z.nativeEnum(Squadron).nullable().optional(),
   rank: z.string().optional(),
-}).refine(
-  (data) => data.role === "VET" || data.squadron,
-  { message: "Squadron is required for non-VET roles", path: ["squadron"] }
-);
+});
 
 export async function GET() {
   const { error } = await requirePermission("user", "view");

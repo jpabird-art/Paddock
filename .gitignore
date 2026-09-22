@@ -39,3 +39,6 @@ prisma/dev.db-journal
 
 # uploads
 /uploads/
+
+/work/
+/demo-credentials*.json

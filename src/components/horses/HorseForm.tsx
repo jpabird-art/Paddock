@@ -1,5 +1,6 @@
 "use client";
 
+import { LegacyFields } from "@/components/layout/OrganisationProfile";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -18,16 +19,16 @@ import { useToast } from "@/components/ui/use-toast";
 
 const horseSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  regimentalNumber: z.string().min(1, "Regimental number is required"),
+  regimentalNumber: z.string().min(1, "Horse ID is required"),
   squadronNumber: z.string().optional(),
   breed: z.string().min(1, "Breed is required"),
   colour: z.string().min(1, "Colour is required"),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
-  serviceEntryDate: z.string().min(1, "Service entry date is required"),
+  serviceEntryDate: z.string().min(1, "Arrival date is required"),
   heightHands: z.coerce.number().min(10).max(20),
   weightKg: z.coerce.number().min(200).max(1000),
   maxRiderWeightKg: z.coerce.number().min(50).max(150),
-  squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"], { required_error: "Squadron is required" }),
+  squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"]).optional(),
   taskReadiness: z.enum(["FULL_EXERCISE", "LIMITED_ROLE", "NON_TASKWORTHY"]),
   sex: z.enum(["GELDING", "MARE"]).optional(),
   role: z.enum(["CHARGER", "CAV_BLACK", "GREY", "STANDARD", "COMP", "RMT"]).optional(),
@@ -38,7 +39,7 @@ const horseSchema = z.object({
 type HorseFormData = z.infer<typeof horseSchema>;
 
 interface HorseFormProps {
-  initialData?: Partial<HorseFormData> & { id?: string; ancillaries?: string; sex?: string; role?: string; division?: number; currentLocationId?: string };
+  initialData?: Partial<HorseFormData> & { id?: string; updatedAt?: string; ancillaries?: string; sex?: string; role?: string; division?: number; currentLocationId?: string };
   mode: "create" | "edit";
   locations?: { id: string; name: string; code: string }[];
 }
@@ -65,7 +66,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
     heightHands: initialData?.heightHands ?? 16.0,
     weightKg: initialData?.weightKg ?? 550,
     maxRiderWeightKg: initialData?.maxRiderWeightKg ?? 90,
-    squadron: initialData?.squadron ?? ("" as "THE_LIFE_GUARDS" | "THE_BLUES_AND_ROYALS"),
+    squadron: initialData?.squadron,
     taskReadiness: initialData?.taskReadiness ?? "FULL_EXERCISE",
     sex: initialData?.sex as "GELDING" | "MARE" | undefined,
     role: initialData?.role as "CHARGER" | "CAV_BLACK" | "GREY" | "STANDARD" | "COMP" | "RMT" | undefined,
@@ -113,6 +114,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...parse.data,
+          expectedUpdatedAt: initialData?.updatedAt,
           ancillaries: ancillaries.trim() || null,
         }),
       });
@@ -161,9 +163,9 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
         </div>
 
-        {/* Regimental Number */}
+        {/* Horse ID */}
         <div className="space-y-2">
-          <Label htmlFor="regimentalNumber">Regimental Number</Label>
+          <Label htmlFor="regimentalNumber">Horse ID</Label>
           <Input
             id="regimentalNumber"
             name="regimentalNumber"
@@ -177,6 +179,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           )}
         </div>
 
+        <LegacyFields>
         {/* Squadron Number */}
         <div className="space-y-2">
           <Label htmlFor="squadronNumber">Squadron Number</Label>
@@ -193,6 +196,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           )}
         </div>
 
+        </LegacyFields>
         {/* Breed */}
         <div className="space-y-2">
           <Label htmlFor="breed">Breed</Label>
@@ -234,9 +238,9 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           )}
         </div>
 
-        {/* Service Entry Date */}
+        {/* Arrival Date */}
         <div className="space-y-2">
-          <Label htmlFor="serviceEntryDate">Service Entry Date</Label>
+          <Label htmlFor="serviceEntryDate">Arrival Date</Label>
           <Input
             id="serviceEntryDate"
             name="serviceEntryDate"
@@ -295,6 +299,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           )}
         </div>
 
+        <LegacyFields>
         {/* Squadron */}
         <div className="space-y-2">
           <Label htmlFor="squadron">Squadron</Label>
@@ -315,6 +320,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           )}
         </div>
 
+        </LegacyFields>
         {/* Task Readiness */}
         <div className="space-y-2">
           <Label htmlFor="taskReadiness">Task Readiness</Label>
@@ -353,6 +359,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           </Select>
         </div>
 
+        <LegacyFields>
         {/* Role */}
         <div className="space-y-2">
           <Label htmlFor="role">Role</Label>
@@ -391,6 +398,7 @@ export function HorseForm({ initialData, mode, locations = [] }: HorseFormProps)
           </Select>
         </div>
 
+        </LegacyFields>
         {/* Current Location */}
         {locations.length > 0 && (
           <div className="space-y-2">

@@ -43,7 +43,7 @@ export async function POST(request: Request) {
 
   await prisma.user.update({
     where: { id: session!.user.id },
-    data: { mfaEnabled: false, totpSecret: null, backupCodes: [] },
+    data: { sessionVersion: { increment: 1 }, mfaEnabled: false, totpSecret: null, backupCodes: [] },
   });
 
   await audit({

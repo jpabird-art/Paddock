@@ -80,7 +80,7 @@ async function main() {
       email,
       passwordHash,
       role: "ADMIN",
-      squadron: parseSquadron(process.env.BOOTSTRAP_ADMIN_SQUADRON) ?? Squadron.THE_LIFE_GUARDS,
+      squadron: parseSquadron(process.env.BOOTSTRAP_ADMIN_SQUADRON),
       rank: process.env.BOOTSTRAP_ADMIN_RANK?.trim() || null,
     },
   });

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -39,7 +40,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
         } else if (result.error.includes("MFA_INVALID")) {
           setError("Invalid MFA code. Try again.");
         } else {
-          setError("Invalid service number or password.");
+          setError("Invalid username or password.");
         }
       } else {
         router.push("/dashboard");
@@ -84,7 +85,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
                       htmlFor="serviceNumber"
                       className="block text-sm font-semibold text-gray-700 mb-1.5 tracking-wide uppercase"
                     >
-                      Service Number
+                      Email or username
                     </label>
                     <input
                       id="serviceNumber"
@@ -166,6 +167,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
               )}
             </form>
 
+            <Link href="/account/forgot-password" className="mt-5 block text-center text-sm text-brand-forest underline">Forgot your password?</Link>
             <p className="text-center text-xs text-gray-400 mt-6">
               Authorised users only. Activity on this system is recorded.
             </p>

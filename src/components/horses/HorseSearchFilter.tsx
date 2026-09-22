@@ -1,4 +1,5 @@
 "use client";
+import { LegacyFields } from "@/components/layout/OrganisationProfile";
 
 import { useRouter, usePathname } from "next/navigation";
 import { Input } from "@/components/ui/input";
@@ -80,11 +81,13 @@ export function HorseSearchFilter({
           className="pl-9"
         />
       </form>
+      <LegacyFields>
       <select value={currentSquadron} onChange={handleSquadron} className={selectClass}>
         {SQUADRONS.map((s) => (
           <option key={s.value} value={s.value}>{s.label}</option>
         ))}
       </select>
+      </LegacyFields>
       {locations.length > 0 && (
         <select value={currentLocation} onChange={handleLocation} className={selectClass}>
           <option value="ALL">All Locations</option>

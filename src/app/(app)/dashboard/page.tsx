@@ -1,3 +1,4 @@
+import { LegacyFields } from "@/components/layout/OrganisationProfile";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { can } from "@/lib/permissions";
@@ -154,6 +155,7 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
+      <LegacyFields>
       {/* Parade Readiness */}
       <Card>
         <CardHeader className="pb-3">
@@ -173,6 +175,7 @@ export default async function DashboardPage() {
         </CardContent>
       </Card>
 
+      </LegacyFields>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Overdue health events */}
         {canSeeOverdue && (
