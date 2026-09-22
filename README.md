@@ -6,7 +6,7 @@ organisation's care on a single auditable record.
 
 The repository serves two roles from one codebase:
 
-- **Marketing site** — the public product site at `paddock.app`: home,
+- **Marketing site** — the public product site at `www.paddock-ltd.com`: home,
   capabilities, contact and a portal that sends each customer to their own
   instance.
 - **Tenant application** — a single customer's paddock, behind sign-in, at
@@ -21,7 +21,7 @@ for the Railway setup.
 
 ### Prerequisites
 
-- Node.js 20+
+- Node.js 24 LTS
 - npm
 - PostgreSQL (local, or hosted on Railway or Neon)
 

@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ok: true });
   }
 
-  if (!emailEnabled) {
-    console.warn("[contact] SMTP is not configured — enquiry could not be delivered.");
+  if (!emailEnabled || !config.contact.email) {
+    console.warn("[contact] Email delivery is not configured — enquiry could not be delivered.");
     return NextResponse.json(
-      { error: `Our contact form is unavailable. Please email ${config.contact.email} directly.` },
+      { error: config.contact.email ? `Our contact form is unavailable. Please email ${config.contact.email} directly.` : "Our contact form is currently unavailable. Please try again later." },
       { status: 503 }
     );
   }

@@ -1,5 +1,9 @@
 # Customer demo implementation
 
+For the current hosted state, domain decisions and remaining launch checks, see
+[LAUNCH-READINESS.md](LAUNCH-READINESS.md). The inspection and validation sections
+below record the original foundation change before the live rollout.
+
 Two separate tenant deployments: Cairnhead Racing Yard (`cairnhead`) and Canswell Farm (`canswell`). One repository; each deployment has its own PostgreSQL database, upload volume and authentication secret. These are fictional demonstration datasets, not customer records.
 
 ## Work checklist
@@ -14,7 +18,7 @@ Two separate tenant deployments: Cairnhead Racing Yard (`cairnhead`) and Canswel
 
 Deployment, spending, DNS changes and real invitations require owner approval. No automatic provisioning or deployment is part of this change.
 
-## Railway inspection (22 September 2026)
+## Initial Railway inspection (before rollout, 22 September 2026)
 
 The connected workspace currently contains `Paddock Marketing`, with one service named `Paddock Demo`. Its latest deployment is CRASHED. Runtime logs show migrations attempting to connect to `localhost:5432`; no PostgreSQL service or upload volume appears in the project status. The service has no `PADDOCK_SITE_MODE` variable and therefore starts as a tenant. No live variables, services or deployments were changed during implementation.
 
@@ -70,7 +74,7 @@ After restoring the matching files and database, check record/file counts, sampl
 - Recovery does not disable MFA. MFA recovery for a lost authenticator still needs an operator procedure; use the existing backup codes where possible.
 - Horse edit forms detect stale updates using updatedAt. Other existing editing screens still use their current update behaviour; a full concurrent-edit audit is needed before a wider production launch.
 - Rate limits are per process, reset on restart, and assume Railway supplies trustworthy proxy IP headers. Shared/edge rate limiting is required before adding replicas or exposing a high-volume public signup flow.
-- npm audit identifies pre-existing high/critical advisories, including Next.js, NextAuth and email dependencies. Their upgrades and any required migrations need a dedicated compatibility review before real customer launch. This change does not claim production security certification.
+- The original foundation change identified dependency advisories. The subsequent launch-readiness update upgrades/removes the affected packages and adds an audit check to CI; see LAUNCH-READINESS.md for current validation. This is not production security certification.
 - Railway backup restoration, real SMTP deliverability, DNS verification and live volume persistence require the approved hosted environment. Local checks cannot establish those properties of a future deployment.
 
 ## Validation completed for this change
