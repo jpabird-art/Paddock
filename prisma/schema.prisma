@@ -144,6 +144,8 @@ model User {
   name          String
   serviceNumber String   @unique
   email         String   @unique
+  sessionVersion Int      @default(0)
+  accountTokens AccountToken[]
   passwordHash  String
   role          Role      @default(TROOPER)
   squadron      Squadron?
@@ -563,4 +565,16 @@ model AuditLog {
   @@index([userId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model AccountToken {
+  id String @id @default(cuid())
+  userId String
+  tokenHash String @unique
+  purpose String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId, purpose])
+  @@map("account_tokens")
 }

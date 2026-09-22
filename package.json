@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run typecheck && vitest run"
+    "check": "npm run typecheck && vitest run",
+    "demo:seed": "node scripts/seed-demo.mjs"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^1.6.0",

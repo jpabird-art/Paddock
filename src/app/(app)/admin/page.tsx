@@ -1,3 +1,5 @@
+import { InviteUserForm, SendPasswordLink } from "@/components/admin/InviteUserForm";
+import { LegacyFields } from "@/components/layout/OrganisationProfile";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -13,8 +15,9 @@ import { Pagination } from "@/components/ui/pagination";
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
   VET: "Veterinary",
-  OFFICER: "Officer",
-  TROOPER: "Trooper",
+  FARRIER: "Farrier",
+  OFFICER: "Yard manager",
+  TROOPER: "Yard staff",
 };
 
 const ROLE_COLOURS: Record<string, string> = {
@@ -68,7 +71,7 @@ export default async function AdminPage({
             User management — {totalItems} user{totalItems !== 1 ? "s" : ""}
           </p>
         </div>
-        <CreateUserForm />
+        <div className="flex flex-wrap gap-2"><InviteUserForm /><CreateUserForm /></div>
       </div>
 
       <div className="bg-white rounded-lg border shadow-sm overflow-x-auto">
@@ -76,8 +79,8 @@ export default async function AdminPage({
           <thead>
             <tr className="border-b bg-gray-50">
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Name</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Rank</th>
-              <th className="text-left px-4 py-3 font-semibold text-gray-600">Service No.</th>
+              <LegacyFields><th className="text-left px-4 py-3 font-semibold text-gray-600">Rank</th></LegacyFields>
+              <th className="text-left px-4 py-3 font-semibold text-gray-600">Username</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Email</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">System Role</th>
               <th className="text-left px-4 py-3 font-semibold text-gray-600">Status</th>
@@ -89,7 +92,7 @@ export default async function AdminPage({
             {users.map((user) => (
               <tr key={user.id} className={user.isActive ? "" : "opacity-50 bg-gray-50"}>
                 <td className="px-4 py-3 font-medium text-gray-900">{user.name}</td>
-                <td className="px-4 py-3">
+                <LegacyFields><td className="px-4 py-3">
                   {user.rank ? (
                     <span className="text-xs font-mono font-semibold text-brand-forest bg-brand-forest/8 px-2 py-0.5 rounded">
                       {rankAbbreviation(user.rank)}
@@ -98,7 +101,7 @@ export default async function AdminPage({
                     <span className="text-xs text-gray-400">—</span>
                   )}
                 </td>
-                <td className="px-4 py-3 font-mono text-sm text-gray-600">
+                </LegacyFields><td className="px-4 py-3 font-mono text-sm text-gray-600">
                   {user.serviceNumber}
                 </td>
                 <td className="px-4 py-3 text-gray-600 text-xs">{user.email}</td>
@@ -137,6 +140,7 @@ export default async function AdminPage({
                         squadron: user.squadron,
                       }}
                     />
+                    {user.isActive && <SendPasswordLink userId={user.id} />}
                     <UserToggleActive
                       userId={user.id}
                       isActive={user.isActive}

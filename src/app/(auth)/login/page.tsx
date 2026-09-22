@@ -1,3 +1,4 @@
+import { redirect } from "next/navigation";
 import type { Metadata } from "next";
 import { LoginForm } from "./LoginForm";
 import { getSiteConfig } from "@/lib/site-config";
@@ -9,7 +10,8 @@ export const metadata: Metadata = {
 };
 
 export default function LoginPage() {
-  const { orgName } = getSiteConfig();
+  const { orgName, mode } = getSiteConfig();
+  if (mode === "marketing") redirect("/portal");
 
   return <LoginForm orgName={orgName} />;
 }

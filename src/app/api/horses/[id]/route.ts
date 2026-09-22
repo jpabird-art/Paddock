@@ -7,6 +7,7 @@ import { Squadron, TaskReadiness, Sex, HorseRole } from "@prisma/client";
 import { deactivateHorse } from "@/lib/horse-services";
 
 const updateSchema = z.object({
+  expectedUpdatedAt: z.string().datetime().optional(),
   name: z.string().min(1).optional(),
   squadronNumber: z.string().nullable().optional(),
   breed: z.string().min(1).optional(),
@@ -80,10 +81,10 @@ export async function PATCH(
     return NextResponse.json({ error: "Invalid data", details: parse.error.errors }, { status: 400 });
   }
 
-  const data = parse.data;
+  const { expectedUpdatedAt, ...data } = parse.data;
 
-  const updated = await prisma.horse.update({
-    where: { id },
+  const result = await prisma.horse.updateMany({
+    where: { id, ...(expectedUpdatedAt ? { updatedAt: new Date(expectedUpdatedAt) } : {}) },
     data: {
       ...data,
       dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : undefined,
@@ -92,6 +93,9 @@ export async function PATCH(
         : undefined,
     },
   });
+
+  if (result.count !== 1) return NextResponse.json({ error: "This horse was updated by someone else. Reload the page before saving your changes." }, { status: 409 });
+  const updated = await prisma.horse.findUniqueOrThrow({ where: { id } });
 
   await audit({
     userId: session?.user.id,

@@ -18,30 +18,36 @@ export interface StorageBackend {
   remove(storagePath: string): Promise<void>;
 }
 
-const UPLOAD_DIR = path.join(process.cwd(), "uploads");
+function uploadDir() { return path.resolve(process.env.UPLOAD_DIR ?? path.join(process.cwd(), "uploads")); }
+function filePath(storagePath: string) {
+  if (!/^uploads\/[a-zA-Z0-9_-]+(?:\.[a-zA-Z0-9]+)?$/.test(storagePath)) throw new Error("Invalid storage path");
+  return path.join(uploadDir(), storagePath.slice("uploads/".length));
+}
 
 const localBackend: StorageBackend = {
   async write(fileName: string, buffer: Buffer): Promise<string> {
-    await mkdir(UPLOAD_DIR, { recursive: true });
-    const ext = path.extname(fileName) || "";
+    await mkdir(uploadDir(), { recursive: true });
+    const rawExt = path.extname(fileName);
+    const ext = /^\.[a-zA-Z0-9]+$/.test(rawExt) ? rawExt : "";
     const safeFileName = `${randomUUID()}${ext}`;
-    await writeFile(path.join(UPLOAD_DIR, safeFileName), buffer);
+    await writeFile(path.join(uploadDir(), safeFileName), buffer);
     return `uploads/${safeFileName}`;
   },
 
   async read(storagePath: string): Promise<Buffer | null> {
     try {
-      return await readFile(path.join(process.cwd(), storagePath));
+      return await readFile(filePath(storagePath));
     } catch {
       return null;
     }
   },
 
   async remove(storagePath: string): Promise<void> {
+    const target = filePath(storagePath);
     try {
-      await unlink(path.join(process.cwd(), storagePath));
-    } catch {
-      // File already gone — fine
+      await unlink(target);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
     }
   },
 };

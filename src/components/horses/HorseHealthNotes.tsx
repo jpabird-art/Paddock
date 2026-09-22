@@ -25,8 +25,8 @@ interface HorseHealthNotesProps {
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
   VET: "Veterinary",
-  OFFICER: "Officer",
-  TROOPER: "Trooper",
+  OFFICER: "Yard manager",
+  TROOPER: "Yard staff",
 };
 
 export function HorseHealthNotes({

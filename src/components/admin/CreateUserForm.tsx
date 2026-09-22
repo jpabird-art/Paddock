@@ -1,5 +1,6 @@
 "use client";
 
+import { LegacyFields } from "@/components/layout/OrganisationProfile";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
@@ -27,16 +28,13 @@ import { HC_RANKS } from "@/lib/ranks";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
-  serviceNumber: z.string().min(1, "Service number is required"),
+  serviceNumber: z.string().min(1, "Username is required"),
   email: z.string().email("Valid email required"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: z.string().min(12, "Password must be at least 12 characters"),
   role: z.enum(["ADMIN", "VET", "FARRIER", "OFFICER", "TROOPER"]),
   squadron: z.enum(["THE_LIFE_GUARDS", "THE_BLUES_AND_ROYALS"]).nullable().optional(),
   rank: z.string().optional(),
-}).refine(
-  (data) => data.role === "VET" || data.squadron,
-  { message: "Squadron is required for non-VET roles", path: ["squadron"] }
-);
+});
 
 export function CreateUserForm() {
   const router = useRouter();
@@ -151,7 +149,7 @@ export function CreateUserForm() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="serviceNumber">Service Number</Label>
+            <Label htmlFor="serviceNumber">Username</Label>
             <Input
               id="serviceNumber"
               name="serviceNumber"
@@ -191,7 +189,7 @@ export function CreateUserForm() {
               type="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Minimum 8 characters"
+              placeholder="Minimum 12 characters"
             />
             {errors.password && (
               <p className="text-sm text-red-600">{errors.password}</p>
@@ -199,7 +197,7 @@ export function CreateUserForm() {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <LegacyFields><div className="space-y-2">
               <Label>Rank</Label>
               <Select
                 value={formData.rank}
@@ -218,7 +216,7 @@ export function CreateUserForm() {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            </LegacyFields><div className="space-y-2">
               <Label>
                 System Role
                 {formData.rank ? (
@@ -230,10 +228,10 @@ export function CreateUserForm() {
               {formData.rank ? (
                 <div className="flex h-9 items-center rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-600">
                   {{
-                    OFFICER: "Officer",
+                    OFFICER: "Yard manager",
                     VET: "Veterinary",
                     FARRIER: "Farrier",
-                    TROOPER: "Trooper",
+                    TROOPER: "Yard staff",
                     ADMIN: "Admin",
                   }[formData.role]}
                 </div>
@@ -251,8 +249,8 @@ export function CreateUserForm() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TROOPER">Trooper</SelectItem>
-                    <SelectItem value="OFFICER">Officer</SelectItem>
+                    <SelectItem value="TROOPER">Yard staff</SelectItem>
+                    <SelectItem value="OFFICER">Yard manager</SelectItem>
                     <SelectItem value="VET">Veterinary</SelectItem>
                     <SelectItem value="FARRIER">Farrier</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
@@ -262,7 +260,7 @@ export function CreateUserForm() {
             </div>
           </div>
 
-          {formData.role !== "VET" && (
+          <LegacyFields>{formData.role !== "VET" && (
             <div className="space-y-2">
               <Label>Squadron</Label>
               <Select
@@ -284,7 +282,7 @@ export function CreateUserForm() {
               </Select>
               {errors.squadron && <p className="text-sm text-red-600">{errors.squadron}</p>}
             </div>
-          )}
+          )}</LegacyFields>
 
           <DialogFooter>
             <Button

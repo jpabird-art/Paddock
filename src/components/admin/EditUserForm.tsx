@@ -1,5 +1,6 @@
 "use client";
 
+import { LegacyFields } from "@/components/layout/OrganisationProfile";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -171,7 +172,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
+            <LegacyFields><div className="space-y-2">
               <Label>Rank</Label>
               <Select value={formData.rank} onValueChange={handleRankChange}>
                 <SelectTrigger>
@@ -187,7 +188,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
               </Select>
             </div>
 
-            <div className="space-y-2">
+            </LegacyFields><div className="space-y-2">
               <Label>
                 System Role
                 {formData.rank && (
@@ -196,7 +197,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
               </Label>
               {formData.rank ? (
                 <div className="flex h-9 items-center rounded-md border border-gray-200 bg-gray-50 px-3 text-sm text-gray-600">
-                  {{ OFFICER: "Officer", VET: "Veterinary", FARRIER: "Farrier", TROOPER: "Trooper", ADMIN: "Admin" }[formData.role]}
+                  {{ OFFICER: "Yard manager", VET: "Veterinary", FARRIER: "Farrier", TROOPER: "Yard staff", ADMIN: "Admin" }[formData.role]}
                 </div>
               ) : (
                 <Select
@@ -212,8 +213,8 @@ export function EditUserForm({ user }: EditUserFormProps) {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="TROOPER">Trooper</SelectItem>
-                    <SelectItem value="OFFICER">Officer</SelectItem>
+                    <SelectItem value="TROOPER">Yard staff</SelectItem>
+                    <SelectItem value="OFFICER">Yard manager</SelectItem>
                     <SelectItem value="VET">Veterinary</SelectItem>
                     <SelectItem value="FARRIER">Farrier</SelectItem>
                     <SelectItem value="ADMIN">Admin</SelectItem>
@@ -223,7 +224,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
             </div>
           </div>
 
-          {formData.role !== "VET" && (
+          <LegacyFields>{formData.role !== "VET" && (
             <div className="space-y-2">
               <Label>Squadron</Label>
               <Select
@@ -244,7 +245,7 @@ export function EditUserForm({ user }: EditUserFormProps) {
                 </SelectContent>
               </Select>
             </div>
-          )}
+          )}</LegacyFields>
 
           <div className="space-y-2">
             <Label htmlFor={`password-${user.id}`}>New Password</Label>

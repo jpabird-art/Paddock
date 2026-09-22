@@ -34,6 +34,7 @@ COPY --from=builder /app/scripts ./scripts
 # Copy standalone build + static assets
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
+COPY --from=builder /app/public ./public
 
 # Create uploads directory
 RUN mkdir -p /app/uploads

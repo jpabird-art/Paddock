@@ -1,3 +1,4 @@
+import { OrganisationProfile } from "@/components/layout/OrganisationProfile";
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -30,7 +31,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.variable + " font-sans antialiased"}>
         <Providers>
-          {children}
+          <OrganisationProfile military={process.env.PADDOCK_ORG_PROFILE === "military"}>{children}</OrganisationProfile>
           <Toaster />
         </Providers>
       </body>

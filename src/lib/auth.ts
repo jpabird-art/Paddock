@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { verifyTotp, consumeBackupCode } from "@/lib/totp";
+import { assertCurrentSession } from "@/lib/account-security";
 import { audit } from "@/lib/audit";
 
 export const authOptions: NextAuthOptions = {
@@ -19,8 +20,10 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { serviceNumber: credentials.serviceNumber.toUpperCase() },
+        if (process.env.PADDOCK_SITE_MODE === "marketing") return null;
+        const login = credentials.serviceNumber.trim();
+        const user = await prisma.user.findFirst({
+          where: login.includes("@") ? { email: login.toLowerCase() } : { serviceNumber: login.toUpperCase() },
         });
 
         if (!user || !user.isActive) {
@@ -96,6 +99,7 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           squadron: user.squadron,
           serviceNumber: user.serviceNumber,
+          sessionVersion: user.sessionVersion,
         };
       },
     }),
@@ -111,6 +115,15 @@ export const authOptions: NextAuthOptions = {
         token.serviceNumber = (user as { serviceNumber: string }).serviceNumber;
         token.id = user.id;
       }
+      if (user) token.sessionVersion = (user as { sessionVersion: number }).sessionVersion;
+      const current = await prisma.user.findUnique({ where: { id: token.id },
+        select: { isActive: true, sessionVersion: true, role: true, squadron: true, serviceNumber: true, name: true, email: true } });
+      assertCurrentSession(current, token.sessionVersion);
+      token.role = current!.role;
+      token.squadron = current!.squadron;
+      token.name = current!.name;
+      token.email = current!.email;
+      token.serviceNumber = current!.serviceNumber;
       return token;
     },
     async session({ session, token }) {

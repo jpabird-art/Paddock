@@ -12,6 +12,7 @@ declare module "next-auth" {
   }
 
   interface User extends DefaultUser {
+    sessionVersion: number;
     role: string;
     squadron: string | null;
     serviceNumber: string;
@@ -20,6 +21,7 @@ declare module "next-auth" {
 
 declare module "next-auth/jwt" {
   interface JWT extends DefaultJWT {
+    sessionVersion?: number;
     role: string;
     squadron: string | null;
     serviceNumber: string;

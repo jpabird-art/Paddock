@@ -17,7 +17,7 @@ const createSchema = z.object({
   heightHands: z.coerce.number().positive(),
   weightKg: z.coerce.number().positive(),
   maxRiderWeightKg: z.coerce.number().positive(),
-  squadron: z.nativeEnum(Squadron),
+  squadron: z.nativeEnum(Squadron).optional(),
   taskReadiness: z.nativeEnum(TaskReadiness).optional(),
   sex: z.nativeEnum(Sex).optional(),
   role: z.nativeEnum(HorseRole).optional(),

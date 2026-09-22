@@ -178,3 +178,7 @@ interface, except `/api/health` (unauthenticated healthcheck) and
 pg_dump "$DATABASE_URL" > backup_$(date +%Y%m%d).sql
 psql "$DATABASE_URL" < backup_20260921.sql
 ```
+
+## Customer demonstrations
+
+See [docs/CUSTOMER-DEMOS.md](docs/CUSTOMER-DEMOS.md) for the two isolated demo environments, secure account invitations/recovery, persistent uploads and deployment acceptance checks.

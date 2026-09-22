@@ -519,7 +519,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
                     onChange={(e) => updateCrewMember(index, "name", e.target.value)}
                   />
                   <Input
-                    placeholder="Service No. (optional)"
+                    placeholder="Username (optional)"
                     value={member.serviceNumber}
                     onChange={(e) => updateCrewMember(index, "serviceNumber", e.target.value)}
                     className="font-mono"

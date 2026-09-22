@@ -17,7 +17,7 @@ function required(name: string): string {
 }
 
 export const env = {
-  DATABASE_URL: required("DATABASE_URL"),
+  DATABASE_URL: process.env.PADDOCK_SITE_MODE === "marketing" ? (process.env.DATABASE_URL ?? "") : required("DATABASE_URL"),
   NEXTAUTH_SECRET: required("NEXTAUTH_SECRET"),
   NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? "http://localhost:3000",
   NODE_ENV: process.env.NODE_ENV ?? "development",

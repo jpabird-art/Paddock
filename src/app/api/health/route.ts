@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET() {
   const start = Date.now();
+  if (process.env.PADDOCK_SITE_MODE === "marketing") return NextResponse.json({ status: "ok", mode: "marketing" });
 
   try {
     await prisma.$queryRaw`SELECT 1`;
