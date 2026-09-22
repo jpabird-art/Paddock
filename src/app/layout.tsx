@@ -9,13 +9,16 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
+  themeColor: "#0F3D2E",
 };
 
 export const metadata: Metadata = {
   title: "Paddock",
   description: "Paddock — equine operations software. One record for every horse in your care.",
-  icons: { icon: "/paddock-mark.svg" },
+  icons: {
+    icon: { url: "/paddock-mark.svg", type: "image/svg+xml" },
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+  },
 };
 
 export default function RootLayout({

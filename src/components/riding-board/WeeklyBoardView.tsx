@@ -106,7 +106,7 @@ export function WeeklyBoardView({ assignments, weekStart, onDayClick }: Props) {
                 <th
                   key={i}
                   className={`text-center px-2 py-3 font-semibold min-w-[100px] cursor-pointer hover:bg-gray-100 transition-colors ${
-                    isToday ? "text-[#1a2744] bg-blue-50/50" : "text-gray-600"
+                    isToday ? "text-brand-forest bg-blue-50/50" : "text-gray-600"
                   }`}
                   onClick={() => onDayClick(dateStr)}
                 >
@@ -132,7 +132,7 @@ export function WeeklyBoardView({ assignments, weekStart, onDayClick }: Props) {
                 <td className="px-4 py-2.5 sticky left-0 bg-white border-r">
                   <Link
                     href={`/horses/${entry.horse.id}`}
-                    className="font-medium text-gray-900 hover:text-[#1a2744] hover:underline"
+                    className="font-medium text-gray-900 hover:text-brand-forest hover:underline"
                   >
                     {entry.horse.name}
                   </Link>

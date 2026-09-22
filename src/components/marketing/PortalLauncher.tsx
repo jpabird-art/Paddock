@@ -33,7 +33,7 @@ export function PortalLauncher({ baseDomain }: PortalLauncherProps) {
         Your paddock&apos;s short name
       </label>
       <div className="mt-2 flex flex-col gap-3 sm:flex-row">
-        <div className="flex flex-1 items-center rounded-md border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-[#1a2744]">
+        <div className="flex flex-1 items-center rounded-md border border-gray-300 bg-white focus-within:ring-2 focus-within:ring-brand-forest">
           <input
             id="slug"
             name="slug"
@@ -48,7 +48,7 @@ export function PortalLauncher({ baseDomain }: PortalLauncherProps) {
         </div>
         <button
           type="submit"
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-[#1a2744] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#243560]"
+          className="inline-flex items-center justify-center gap-2 rounded-md bg-brand-forest px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
         >
           Continue
           <ArrowRight className="h-4 w-4" />

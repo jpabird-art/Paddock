@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { PaddockLogo } from "./PaddockLogo";
+import { PaddockWordmark } from "./PaddockWordmark";
 
 const links = [
   { href: "/capabilities", label: "Capabilities" },
@@ -8,26 +8,25 @@ const links = [
 
 export function MarketingHeader() {
   return (
-    <header className="bg-[#1a2744] text-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <Link href="/" className="flex items-center gap-3 self-start">
-          <PaddockLogo className="h-9 w-9 text-white" />
-          <span className="text-lg font-bold tracking-wide">Paddock</span>
+    <header className="border-b border-brand-forest/10 bg-brand-mist text-brand-midnight">
+      <div className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+        <Link href="/" aria-label="Paddock home" className="self-start rounded-sm">
+          <PaddockWordmark />
         </Link>
 
-        <nav aria-label="Primary" className="flex items-center gap-6 text-sm">
+        <nav aria-label="Primary" className="flex flex-wrap items-center gap-x-6 gap-y-3 text-sm font-medium">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="text-blue-100 transition-colors hover:text-white"
+              className="text-brand-forest transition-colors hover:underline underline-offset-4"
             >
               {link.label}
             </Link>
           ))}
           <Link
             href="/portal"
-            className="rounded-md bg-white px-4 py-2 font-semibold text-[#1a2744] transition-colors hover:bg-blue-50"
+            className="rounded-md bg-brand-forest px-5 py-2.5 font-semibold text-brand-mist transition-colors hover:bg-brand-hover"
           >
             Portal
           </Link>

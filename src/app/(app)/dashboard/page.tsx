@@ -105,11 +105,11 @@ export default async function DashboardPage() {
 
       {/* Summary stats */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="border-l-4 border-l-[#1a2744]">
+        <Card className="border-l-4 border-l-brand-forest">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="bg-[#1a2744]/10 rounded-full p-2">
-                <Shield className="h-5 w-5 text-[#1a2744]" />
+              <div className="bg-brand-forest/10 rounded-full p-2">
+                <Shield className="h-5 w-5 text-brand-forest" />
               </div>
               <div>
                 <div className="text-2xl font-bold text-gray-900">{totalHorses}</div>
@@ -140,7 +140,7 @@ export default async function DashboardPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Shield className="h-4 w-4 text-[#1a2744]" />
+            <Shield className="h-4 w-4 text-brand-forest" />
             Task Readiness
           </CardTitle>
         </CardHeader>
@@ -158,7 +158,7 @@ export default async function DashboardPage() {
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base font-semibold flex items-center gap-2">
-            <Shield className="h-4 w-4 text-[#1a2744]" />
+            <Shield className="h-4 w-4 text-brand-forest" />
             Parade Readiness
           </CardTitle>
         </CardHeader>
@@ -201,7 +201,7 @@ export default async function DashboardPage() {
                         <div className="flex items-center gap-2">
                           <Link
                             href={`/horses/${event.horse.id}`}
-                            className="text-sm font-medium text-gray-900 hover:text-[#1a2744] hover:underline"
+                            className="text-sm font-medium text-gray-900 hover:text-brand-forest hover:underline"
                           >
                             {event.horse.name}
                           </Link>
@@ -226,7 +226,7 @@ export default async function DashboardPage() {
               <div className="pt-3 border-t mt-2">
                 <Link
                   href="/health"
-                  className="text-xs text-[#1a2744] hover:underline font-medium"
+                  className="text-xs text-brand-forest hover:underline font-medium"
                 >
                   View all health events →
                 </Link>
@@ -263,7 +263,7 @@ export default async function DashboardPage() {
                           {canSeeFullInjuries ? (
                             <Link
                               href={`/injuries/${injury.id}`}
-                              className="text-sm font-medium text-gray-900 hover:text-[#1a2744] hover:underline"
+                              className="text-sm font-medium text-gray-900 hover:text-brand-forest hover:underline"
                             >
                               {injury.horse.name}
                             </Link>
@@ -308,7 +308,7 @@ export default async function DashboardPage() {
               <div className="pt-3 border-t mt-2">
                 <Link
                   href="/injuries"
-                  className="text-xs text-[#1a2744] hover:underline font-medium"
+                  className="text-xs text-brand-forest hover:underline font-medium"
                 >
                   View all injury reports →
                 </Link>
@@ -337,7 +337,7 @@ export default async function DashboardPage() {
                       <div className="flex items-center gap-2">
                         <Link
                           href={`/horses/${med.horse.id}`}
-                          className="text-sm font-medium text-gray-900 hover:text-[#1a2744] hover:underline"
+                          className="text-sm font-medium text-gray-900 hover:text-brand-forest hover:underline"
                         >
                           {med.horse.name}
                         </Link>

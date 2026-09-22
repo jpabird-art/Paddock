@@ -30,7 +30,7 @@ function FilterLink({
       href={href}
       className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${
         isActive
-          ? "bg-[#1a2744] text-white"
+          ? "bg-brand-forest text-white"
           : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
       }`}
     >
@@ -138,7 +138,7 @@ export default async function MovesPage({
         {canEdit && (
           <Link
             href="/moves/new"
-            className="bg-[#1a2744] hover:bg-[#243560] text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+            className="bg-brand-forest hover:bg-brand-hover text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
           >
             New Move
           </Link>
@@ -164,7 +164,7 @@ export default async function MovesPage({
             name="q"
             defaultValue={q ?? ""}
             placeholder="Search horse name..."
-            className="border border-gray-200 rounded-md px-3 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#1a2744]/30"
+            className="border border-gray-200 rounded-md px-3 py-1 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-forest/30"
           />
         </form>
       </div>

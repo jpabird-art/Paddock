@@ -319,7 +319,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
               {selectedHorses.map((h) => (
                 <span
                   key={h.id}
-                  className="inline-flex items-center gap-1 bg-[#1a2744] text-white text-xs px-2 py-1 rounded-md"
+                  className="inline-flex items-center gap-1 bg-brand-forest text-white text-xs px-2 py-1 rounded-md"
                 >
                   {h.name}
                   <button
@@ -565,7 +565,7 @@ export function HorseMoveForm({ horses, locations, initialData, mode, moveId }: 
       </div>
 
       <div className="flex gap-3 pt-2">
-        <Button type="submit" disabled={loading} className="bg-[#1a2744] hover:bg-[#243560]">
+        <Button type="submit" disabled={loading} className="bg-brand-forest hover:bg-brand-hover">
           {loading
             ? mode === "create"
               ? "Creating..."

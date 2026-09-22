@@ -121,7 +121,7 @@ export default async function HealthPage({
                   <td className="px-4 py-3">
                     <Link
                       href={`/horses/${event.horse.id}`}
-                      className="font-medium text-[#1a2744] hover:underline"
+                      className="font-medium text-brand-forest hover:underline"
                     >
                       {event.horse.name}
                     </Link>
@@ -185,7 +185,7 @@ function FilterLink({
       href={href}
       className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
         isActive
-          ? "bg-[#1a2744] text-white"
+          ? "bg-brand-forest text-white"
           : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
       }`}
     >

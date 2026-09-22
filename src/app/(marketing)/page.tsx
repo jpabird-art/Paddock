@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { capabilities } from "@/components/marketing/capabilities";
+import { PaddockLogo } from "@/components/marketing/PaddockLogo";
 import { getSiteConfig } from "@/lib/site-config";
 
 export const dynamic = "force-dynamic";
@@ -25,42 +26,47 @@ export default function HomePage() {
 
   return (
     <>
-      <section className="bg-[#1a2744] text-white">
-        <div className="mx-auto max-w-6xl px-6 py-20 sm:py-28">
-          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-blue-300">
-            Equine operations software
-          </p>
-          <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight sm:text-5xl">
-            {config.tagline}
-          </h1>
-          <p className="mt-6 max-w-2xl text-lg text-blue-100">
-            Paddock replaces the spreadsheets, paper diaries and group chats that most yards run on.
-            It tracks the health, movement, work and equipment of every horse in your care, and it
-            keeps a record of who changed what.
-          </p>
-          <div className="mt-10 flex flex-wrap gap-4">
-            <Link
-              href="/portal"
-              className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 font-semibold text-[#1a2744] transition-colors hover:bg-blue-50"
-            >
-              Sign in to your paddock
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-            <Link
-              href="/capabilities"
-              className="inline-flex items-center gap-2 rounded-md border border-white/30 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10"
-            >
-              See what it does
-            </Link>
+      <section className="bg-brand-forest text-white">
+        <div className="mx-auto grid max-w-6xl items-center gap-14 px-6 py-16 sm:py-24 lg:grid-cols-[1fr_280px]">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-brand-sage">
+              Equine operations software
+            </p>
+            <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-tight tracking-tight text-brand-mist sm:text-5xl">
+              {config.tagline}
+            </h1>
+            <p className="mt-6 max-w-2xl text-lg text-brand-mist/85">
+              Paddock replaces the spreadsheets, paper diaries and group chats that most yards run on.
+              It tracks the health, movement, work and equipment of every horse in your care, and it
+              keeps a record of who changed what.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-4">
+              <Link
+                href="/portal"
+                className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 font-semibold text-brand-forest transition-colors hover:bg-brand-soft"
+              >
+                Sign in to your paddock
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <Link
+                href="/capabilities"
+                className="inline-flex items-center gap-2 rounded-md border border-white/30 px-6 py-3 font-semibold text-white transition-colors hover:bg-white/10"
+              >
+                See what it does
+              </Link>
+            </div>
+          </div>
+          <div className="hidden aspect-square items-center justify-center rounded-[2rem] bg-brand-mist p-12 lg:flex" aria-hidden="true">
+            <PaddockLogo className="h-full w-full" decorative />
           </div>
         </div>
       </section>
 
-      <section className="border-b border-gray-200">
+      <section className="border-b border-brand-forest/10 bg-white">
         <div className="mx-auto grid max-w-6xl gap-8 px-6 py-16 sm:grid-cols-3">
           {outcomes.map((item) => (
             <div key={item.stat}>
-              <p className="text-xl font-bold text-[#1a2744]">{item.stat}</p>
+              <p className="text-xl font-bold text-brand-forest">{item.stat}</p>
               <p className="mt-2 text-sm leading-relaxed text-gray-600">{item.body}</p>
             </div>
           ))}
@@ -79,10 +85,10 @@ export default function HomePage() {
             return (
               <div
                 key={capability.title}
-                className="rounded-lg border border-gray-200 p-6 transition-shadow hover:shadow-md"
+                className="rounded-xl border border-brand-forest/10 bg-white p-6 transition-shadow hover:shadow-md"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1a2744]/10">
-                  <Icon className="h-5 w-5 text-[#1a2744]" aria-hidden />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-soft">
+                  <Icon className="h-5 w-5 text-brand-forest" aria-hidden />
                 </div>
                 <h3 className="mt-4 font-semibold text-gray-900">{capability.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">{capability.summary}</p>
@@ -93,14 +99,14 @@ export default function HomePage() {
 
         <Link
           href="/capabilities"
-          className="mt-10 inline-flex items-center gap-2 font-semibold text-[#1a2744] hover:underline"
+          className="mt-10 inline-flex items-center gap-2 font-semibold text-brand-forest hover:underline"
         >
           Read the detail
           <ArrowRight className="h-4 w-4" />
         </Link>
       </section>
 
-      <section className="bg-gray-50">
+      <section className="bg-brand-soft">
         <div className="mx-auto grid max-w-6xl gap-10 px-6 py-16 lg:grid-cols-2">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Your own paddock</h2>
@@ -118,7 +124,7 @@ export default function HomePage() {
                 "Multi-factor authentication available on every account.",
               ].map((line) => (
                 <li key={line} className="flex gap-3">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-[#1a2744]" aria-hidden />
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-forest" aria-hidden />
                   <span>{line}</span>
                 </li>
               ))}
@@ -147,7 +153,7 @@ export default function HomePage() {
             </ol>
             <Link
               href="/contact"
-              className="mt-6 inline-flex items-center gap-2 rounded-md bg-[#1a2744] px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#243560]"
+              className="mt-6 inline-flex items-center gap-2 rounded-md bg-brand-forest px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover"
             >
               Arrange a demonstration
               <ArrowRight className="h-4 w-4" />

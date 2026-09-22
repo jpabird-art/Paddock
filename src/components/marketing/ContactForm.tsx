@@ -6,7 +6,7 @@ import { Send } from "lucide-react";
 type Status = "idle" | "sending" | "sent" | "error";
 
 const fieldClass =
-  "w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-transparent focus:ring-2 focus:ring-[#1a2744]";
+  "w-full rounded-md border border-gray-300 px-3 py-2.5 text-sm outline-none focus:border-transparent focus:ring-2 focus:ring-brand-forest";
 
 export function ContactForm({ fallbackEmail }: { fallbackEmail: string }) {
   const [status, setStatus] = useState<Status>("idle");
@@ -137,7 +137,7 @@ export function ContactForm({ fallbackEmail }: { fallbackEmail: string }) {
       <button
         type="submit"
         disabled={status === "sending"}
-        className="inline-flex items-center gap-2 rounded-md bg-[#1a2744] px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#243560] disabled:cursor-not-allowed disabled:opacity-60"
+        className="inline-flex items-center gap-2 rounded-md bg-brand-forest px-6 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-brand-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         {status === "sending" ? "Sending..." : "Send message"}
         <Send className="h-4 w-4" />

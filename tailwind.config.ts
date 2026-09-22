@@ -19,6 +19,14 @@ const config: Config = {
     },
     extend: {
       colors: {
+        brand: {
+          forest: "#0F3D2E",
+          sage: "#7FB28A",
+          midnight: "#0F172A",
+          mist: "#F8F7F2",
+          hover: "#1B513E",
+          soft: "#EAF2E9",
+        },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

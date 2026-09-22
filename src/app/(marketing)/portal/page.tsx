@@ -18,8 +18,8 @@ export default function PortalPage() {
   return (
     <section className="mx-auto max-w-3xl px-6 py-16">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1a2744]/10">
-          <LockKeyhole className="h-5 w-5 text-[#1a2744]" aria-hidden />
+        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-forest/10">
+          <LockKeyhole className="h-5 w-5 text-brand-forest" aria-hidden />
         </div>
         <h1 className="text-3xl font-bold text-gray-900">Portal</h1>
       </div>
@@ -29,7 +29,7 @@ export default function PortalPage() {
         and you will be taken to your sign-in page.
       </p>
 
-      <div className="mt-8 rounded-lg border border-gray-200 bg-gray-50 p-6">
+      <div className="mt-8 rounded-xl border border-brand-forest/10 bg-brand-soft p-6">
         <PortalLauncher baseDomain={baseDomain} />
       </div>
 
@@ -71,7 +71,7 @@ export default function PortalPage() {
           </li>
           <li>
             No instance yet:{" "}
-            <Link href="/contact" className="font-semibold text-[#1a2744] hover:underline">
+            <Link href="/contact" className="font-semibold text-brand-forest hover:underline">
               contact us
             </Link>{" "}
             and we will provision one.

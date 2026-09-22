@@ -91,7 +91,7 @@ export default async function AdminPage({
                 <td className="px-4 py-3 font-medium text-gray-900">{user.name}</td>
                 <td className="px-4 py-3">
                   {user.rank ? (
-                    <span className="text-xs font-mono font-semibold text-[#1a2744] bg-[#1a2744]/8 px-2 py-0.5 rounded">
+                    <span className="text-xs font-mono font-semibold text-brand-forest bg-brand-forest/8 px-2 py-0.5 rounded">
                       {rankAbbreviation(user.rank)}
                     </span>
                   ) : (

@@ -59,19 +59,19 @@ export function LoginForm({ orgName }: LoginFormProps) {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a2744] flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-brand-forest flex items-center justify-center px-4">
+      <div className="w-full max-w-md py-10">
         <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
           {/* Header */}
-          <div className="bg-[#1a2744] px-8 py-8 text-center">
+          <div className="bg-brand-forest px-8 py-8 text-center">
             <div className="flex justify-center mb-4">
-              <PaddockLogo className="h-16 w-16 text-white" />
+              <PaddockLogo className="h-20 w-16" reversed decorative />
             </div>
-            <h1 className="text-white text-2xl font-bold tracking-wide">Paddock</h1>
+            <h1 className="text-brand-mist text-4xl font-bold tracking-tight">Paddock</h1>
             {orgName && (
-              <p className="text-blue-200 text-sm mt-1 tracking-wider uppercase">{orgName}</p>
+              <p className="text-brand-mist/80 text-sm mt-1 tracking-wider uppercase">{orgName}</p>
             )}
-            <p className="text-blue-300 text-xs mt-1">Equine operations</p>
+            <p className="text-brand-sage text-sm mt-2 tracking-wide">Equine Operations Software</p>
           </div>
 
           {/* Form */}
@@ -93,7 +93,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
                       onChange={(e) => setServiceNumber(e.target.value.toUpperCase())}
                       placeholder="e.g. ADMIN001"
                       required
-                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744] focus:border-transparent font-mono tracking-wider"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-transparent font-mono tracking-wider"
                     />
                   </div>
 
@@ -111,7 +111,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="Enter password"
                       required
-                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744] focus:border-transparent"
+                      className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-transparent"
                     />
                   </div>
                 </>
@@ -136,7 +136,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
                     placeholder="000000"
                     required
                     maxLength={8}
-                    className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#1a2744] focus:border-transparent font-mono tracking-widest text-center text-lg"
+                    className="w-full border border-gray-300 rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-forest focus:border-transparent font-mono tracking-widest text-center text-lg"
                   />
                 </div>
               )}
@@ -150,7 +150,7 @@ export function LoginForm({ orgName }: LoginFormProps) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-[#1a2744] text-white py-2.5 rounded-md text-sm font-semibold tracking-wide hover:bg-[#243560] transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full bg-brand-forest text-white py-2.5 rounded-md text-sm font-semibold tracking-wide hover:bg-brand-hover transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loading ? "Authenticating..." : mfaStep ? "Verify" : "Sign In"}
               </button>

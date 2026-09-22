@@ -110,7 +110,7 @@ export default async function InspectionsPage({
                   <td className="px-4 py-3">
                     <Link
                       href={`/horses/${insp.horse.id}`}
-                      className="font-medium text-[#1a2744] hover:underline"
+                      className="font-medium text-brand-forest hover:underline"
                     >
                       {insp.horse.name}
                     </Link>

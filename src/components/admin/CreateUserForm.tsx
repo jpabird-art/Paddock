@@ -128,7 +128,7 @@ export function CreateUserForm() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-[#1a2744] hover:bg-[#243560]">
+        <Button className="bg-brand-forest hover:bg-brand-hover">
           <UserPlus className="h-4 w-4 mr-2" />
           Add User
         </Button>
@@ -298,7 +298,7 @@ export function CreateUserForm() {
             <Button
               type="submit"
               disabled={loading}
-              className="bg-[#1a2744] hover:bg-[#243560]"
+              className="bg-brand-forest hover:bg-brand-hover"
             >
               {loading ? "Creating..." : "Create User"}
             </Button>
