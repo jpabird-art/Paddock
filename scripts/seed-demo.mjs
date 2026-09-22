@@ -29,8 +29,12 @@ let fileCreated = false;
 try {
   await prisma.$transaction(async tx => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(72844903)`;
-    const models = Object.values(tx).filter(value => value && typeof value.count === 'function');
-    for (const model of models) if (await model.count() !== 0) throw new Error('Refusing to seed a non-empty database');
+    const models = Object.entries(tx).filter(([name, value]) => name !== 'auditLog' && value && typeof value.count === 'function');
+    for (const [, model] of models) if (await model.count() !== 0) throw new Error('Refusing to seed a non-empty database');
+    // Visiting a fresh demo and trying to sign in can create anonymous failure
+    // audits before accounts exist. Preserve these; all other history blocks seeding.
+    const existingHistory = await tx.auditLog.count({ where: { NOT: { entityType: 'auth', action: 'login_failed', userId: null } } });
+    if (existingHistory !== 0) throw new Error('Refusing to seed a database with existing application history');
     // Exclusive creation: never overwrite a credential file or print credentials in logs.
     await writeFile(destination, JSON.stringify({ organisation: demo.name, accounts: credentials.map(({ passwordHash, ...account }) => account) }, null, 2), { flag: 'wx', mode: 0o600 });
     fileCreated = true;

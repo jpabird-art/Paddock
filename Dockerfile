@@ -28,6 +28,9 @@ ENV PORT=3000
 COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
+# Standalone tracing bundles bcrypt into the web app, but the operator seed
+# imports the package directly. Keep it available to scripts as well.
+COPY --from=builder /app/node_modules/bcryptjs ./node_modules/bcryptjs
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/scripts ./scripts
 
