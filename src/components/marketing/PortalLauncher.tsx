@@ -2,21 +2,21 @@
 
 import { useState } from "react";
 import { ArrowRight } from "lucide-react";
-import { TENANT_SLUG_PATTERN } from "@/lib/site-config";
+import { resolveTenantUrl, type SiteConfig } from "@/lib/site-config";
 
 interface PortalLauncherProps {
-  baseDomain: string;
+  portal: SiteConfig["portal"];
 }
 
-export function PortalLauncher({ baseDomain }: PortalLauncherProps) {
+export function PortalLauncher({ portal }: PortalLauncherProps) {
   const [slug, setSlug] = useState("");
   const [error, setError] = useState("");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const clean = slug.trim().toLowerCase();
+    const destination = resolveTenantUrl(slug, { portal });
 
-    if (!TENANT_SLUG_PATTERN.test(clean)) {
+    if (!destination) {
       setError(
         "Use the short name given to you: lowercase letters, numbers and hyphens, at least two characters."
       );
@@ -24,7 +24,7 @@ export function PortalLauncher({ baseDomain }: PortalLauncherProps) {
     }
 
     setError("");
-    window.location.href = `https://${clean}.${baseDomain}/login`;
+    window.location.href = destination;
   }
 
   return (
@@ -44,7 +44,6 @@ export function PortalLauncher({ baseDomain }: PortalLauncherProps) {
             aria-describedby={error ? "slug-error" : "slug-hint"}
             className="w-full bg-transparent px-3 py-2.5 font-mono text-sm outline-none"
           />
-          <span className="whitespace-nowrap px-3 text-sm text-gray-400">.{baseDomain}</span>
         </div>
         <button
           type="submit"
@@ -61,7 +60,7 @@ export function PortalLauncher({ baseDomain }: PortalLauncherProps) {
         </p>
       ) : (
         <p id="slug-hint" className="mt-2 text-sm text-gray-500">
-          Your administrator was given this when your instance was provisioned.
+          Enter the short name supplied by your administrator, for example cairnhead.
         </p>
       )}
     </form>
