@@ -117,7 +117,7 @@ export function getSiteConfig(): SiteConfig {
 }
 
 /** Sign-in URL for a tenant slug, preferring a directory entry when one exists. */
-export function resolveTenantUrl(slug: string, config: SiteConfig): string | null {
+export function resolveTenantUrl(slug: string, config: Pick<SiteConfig, "portal">): string | null {
   const cleanSlug = slug.trim().toLowerCase();
   if (!TENANT_SLUG_PATTERN.test(cleanSlug)) return null;
 

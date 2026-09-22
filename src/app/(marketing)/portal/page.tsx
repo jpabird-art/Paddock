@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function PortalPage() {
   const config = getSiteConfig();
-  const { tenants, baseDomain } = config.portal;
+  const { tenants } = config.portal;
 
   return (
     <section className="mx-auto max-w-3xl px-6 py-16">
@@ -25,12 +25,11 @@ export default function PortalPage() {
       </div>
 
       <p className="mt-4 text-gray-600">
-        Each organisation runs its own Paddock instance on its own subdomain. Enter your short name
-        and you will be taken to your sign-in page.
+        Enter your organisation's short name to open its Paddock sign-in page.
       </p>
 
       <div className="mt-8 rounded-xl border border-brand-forest/10 bg-brand-soft p-6">
-        <PortalLauncher baseDomain={baseDomain} />
+        <PortalLauncher portal={config.portal} />
       </div>
 
       {tenants.length > 0 && (
@@ -48,7 +47,7 @@ export default function PortalPage() {
                   <span>
                     <span className="block font-semibold text-gray-900">{tenant.name}</span>
                     <span className="block font-mono text-xs text-gray-500">
-                      {tenant.slug}.{baseDomain}
+                      Short name: {tenant.slug}
                     </span>
                   </span>
                   <ArrowRight className="h-4 w-4 text-gray-400" aria-hidden />
